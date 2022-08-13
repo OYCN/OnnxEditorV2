@@ -1,0 +1,5 @@
+.DS_Store
+.vscode
+build_qt
+build_self
+3rd_party/qtbase-release
