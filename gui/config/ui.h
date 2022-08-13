@@ -25,40 +25,53 @@ struct Ui {
   // https://www.w3.org/TR/SVG11/types.html#ColorKeywords
 
   // for view
-  QColor mViewBackgroundColor = {53, 53, 53};
-  QColor mViewBackgroundFineGridColor = {60, 60, 60};
-  QColor mViewBackgroundCoarseGridColor = {25, 25, 25};
+  struct View {
+    QColor mBackgroundColor = {53, 53, 53};
+    QColor mBackgroundFineGridColor = {60, 60, 60};
+    QColor mBackgroundCoarseGridColor = {25, 25, 25};
+  } view;
 
   // for node
-  qreal mNodePadWL = 7;
-  qreal mNodePadWR = 7;
-  qreal mNodePadHT = 3;
-  qreal mNodePadHB = 3;
-  qreal mNodePadNameAttrs = 1;
-  qreal mNodePadAttrs = 0.5;
-  QColor mNodeNormalBoundarColor = {255, 255, 255};
-  QColor mNodeSelectedBoundarColor = {255, 165, 0};
-  QColor mNodeGradientColor0 = {128, 128, 128};  // gray
-  QColor mNodeGradientColor1 = {80, 80, 80};
-  QColor mNodeGradientColor2 = {64, 64, 64};
-  QColor mNodeGradientColor3 = {58, 58, 58};
-  qreal mNodePenWidth = 1;
-  qreal mNodeHoveredPenWidth = 1.5;
-  QString mNodeFont = "Monospace";
-  QColor mNodeFontColor = {255, 255, 255};  // white
+  struct Node {
+    qreal mPadOutsideT = 7;
+    qreal mPadOutsideB = 7;
+    qreal mPadOutsideL = 3;
+    qreal mPadOutsideR = 3;
+    qreal mPadTitleT = 1;
+    qreal mPadTitleB = 1;
+    qreal mPadTitleL = 1;
+    qreal mPadTitleR = 1;
+    qreal mPadAttrsT = 0.5;
+    qreal mPadAttrsB = 0.5;
+    qreal mPadAttrsL = 0.5;
+    qreal mPadAttrsR = 0.5;
+    QString mSpan = ": ";
+    QColor mNormalBoundarColor = {255, 255, 255};
+    QColor mSelectedBoundarColor = {255, 165, 0};
+    QColor mGradientColor0 = {128, 128, 128};  // gray
+    QColor mGradientColor1 = {80, 80, 80};
+    QColor mGradientColor2 = {64, 64, 64};
+    QColor mGradientColor3 = {58, 58, 58};
+    qreal mPenWidth = 1;
+    qreal mHoveredPenWidth = 1.5;
+    QString mFont = "Monospace";
+    QColor mFontColor = {255, 255, 255};  // white
+  } node;
 
   // for edge
-  qreal mEdgeLineWidth = 3.0;
-  QColor mEdgeSelectedHaloColor = {255, 165, 0};  // orange
-  QColor mEdgeHoveredColor = {224, 255, 255};     // lightcyan
-  QColor mEdgeNormalColor = {0, 139, 139};        // darkcyan
-  QColor mEdgeSelectedColor = {100, 100, 100};
-  qreal mEdgeStartPointRadius = 3;
-  QColor mEdgeStartPointColor = {128, 128, 128};  // gray
-  qreal mEdgeStopPointRadius = 5;
-  QColor mEdgeStopPointColor = {128, 128, 128};  // gray
-  QString mEdgeFont = "Monospace";
-  QColor mEdgeFontColor = {255, 255, 255};  // white
+  struct {
+    qreal mEdgeLineWidth = 3.0;
+    QColor mEdgeSelectedHaloColor = {255, 165, 0};  // orange
+    QColor mEdgeHoveredColor = {224, 255, 255};     // lightcyan
+    QColor mEdgeNormalColor = {0, 139, 139};        // darkcyan
+    QColor mEdgeSelectedColor = {100, 100, 100};
+    qreal mEdgeStartPointRadius = 3;
+    QColor mEdgeStartPointColor = {128, 128, 128};  // gray
+    qreal mEdgeStopPointRadius = 5;
+    QColor mEdgeStopPointColor = {128, 128, 128};  // gray
+    QString mEdgeFont = "Monospace";
+    QColor mEdgeFontColor = {255, 255, 255};  // white
+  } edge;
 };
 
 }  // namespace config

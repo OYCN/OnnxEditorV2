@@ -1,1 +1,2 @@
-add_subdirectory(onnx)
+add_subdirectory(algorithm)
+add_subdirectory(simonnx)

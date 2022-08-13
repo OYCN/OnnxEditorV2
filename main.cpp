@@ -27,15 +27,11 @@ DEFINE_bool(test, false, "test");
 
 int main(int argc, char* argv[]) {
   google::InitGoogleLogging(argv[0]);
+  FLAGS_alsologtostderr = 1;
+  FLAGS_colorlogtostderr = true;
   google::InstallFailureSignalHandler();
   gflags::SetUsageMessage(usage);
   gflags::ParseCommandLineFlags(&argc, &argv, true);
-
-  if (FLAGS_test) {
-    LOG(INFO) << "test on";
-  } else {
-    LOG(INFO) << "test off";
-  }
 
   auto ret = gui::gui_on(argc, argv);
 

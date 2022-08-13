@@ -14,6 +14,9 @@
 
 #include "gui/graph/scene.h"
 
+#include <glog/logging.h>
+
+#include "gui/graph/node.hpp"
 namespace gui {
 namespace graph {
 
@@ -21,6 +24,16 @@ Scene::Scene(config::Ui& cfg, QObject* parent)
     : mCfg(cfg), QGraphicsScene{parent} {}
 
 void Scene::updateCfg() {}
+
+Node* Scene::addNode(const QString& title, const QList<QString>& attr_key,
+                     const QList<QString>& attr_val) {
+  auto n = new Node(mCfg);
+  CHECK_NOTNULL(n);
+  n->init(title, attr_key, attr_val);
+  addItem(n);
+  mNodes.append(n);
+  return n;
+}
 
 }  // namespace graph
 }  // namespace gui

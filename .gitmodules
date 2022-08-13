@@ -22,3 +22,6 @@
 [submodule "3rd_party/protobuf"]
 	path = 3rd_party/protobuf
 	url = https://github.com/protocolbuffers/protobuf.git
+[submodule "3rd_party/ogdf"]
+	path = 3rd_party/ogdf
+	url = https://github.com/ogdf/ogdf.git

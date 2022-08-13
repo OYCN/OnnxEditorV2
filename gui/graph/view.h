@@ -39,6 +39,7 @@ class View : public QGraphicsView {
   void center();
   void setCfg(config::Ui cfg);
   config::Ui getCfg() { return mCfg; }
+  Scene* getScene();
 
  private:
   void updateCfg();

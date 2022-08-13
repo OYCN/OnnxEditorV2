@@ -19,3 +19,5 @@ set(ONNX_GEN_PB_TYPE_STUBS OFF)
 add_definitions(-DONNX_ML=1)
 add_definitions(-DONNX_NAMESPACE=onnx)
 add_subdirectory(onnx EXCLUDE_FROM_ALL)
+
+add_subdirectory(ogdf EXCLUDE_FROM_ALL)

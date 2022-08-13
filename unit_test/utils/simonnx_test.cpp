@@ -14,8 +14,9 @@
 
 #include <gtest/gtest.h>
 
-#include "utils/onnx/parser.h"
+#include "utils/simonnx/onnx_meta.h"
 
-TEST(parser, parse) {
-  utils::onnx::Parser parser;
+TEST(simonnx, genOnnxMeta) {
+  ::ONNX_NAMESPACE::ModelProto empty_model;
+  auto empty_meta = utils::simonnx::genOnnxMeta(empty_model);
 }

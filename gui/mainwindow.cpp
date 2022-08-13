@@ -15,6 +15,7 @@
 #include "gui/mainwindow.h"
 
 #include "gui/graph/view.h"
+#include "gui/test/test.h"
 
 namespace gui {
 
@@ -24,6 +25,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   this->setCentralWidget(v);
   v->expand(5);
   v->center();
+
+  test::add_random_nodes_with_title(v->getScene(), 50);
 }
 
 }  // namespace gui

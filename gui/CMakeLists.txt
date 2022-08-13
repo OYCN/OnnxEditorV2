@@ -1,5 +1,6 @@
 
 add_subdirectory(graph)
+add_subdirectory(test)
 
 add_library(gui
   gui.cpp
@@ -12,4 +13,5 @@ target_link_libraries(gui
   Qt6::Core
 
   graph
+  gui_test
 )

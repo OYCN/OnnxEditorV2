@@ -22,13 +22,22 @@
 namespace gui {
 namespace graph {
 
+class Node;
+
 class Scene : public QGraphicsScene {
   Q_OBJECT
+
  public:
   explicit Scene(config::Ui& cfg, QObject* parent = nullptr);
+
+ public:
   void updateCfg();
+  Node* addNode(const QString& title, const QList<QString>& attr_key,
+                const QList<QString>& attr_val);
+
  private:
   config::Ui& mCfg;
+  QList<Node*> mNodes;
 };
 
 }  // namespace graph

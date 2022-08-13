@@ -14,6 +14,8 @@
 
 #include "gui/graph/view.h"
 
+#include <glog/logging.h>
+
 #include <QtCore/QDebug>
 #include <QtGui/QWheelEvent>
 #include <QtWidgets/QGraphicsItem>
@@ -42,9 +44,14 @@ View::View(QWidget *parent) : QGraphicsView{parent} {
 }
 
 void View::updateCfg() {
-  setBackgroundBrush(mCfg.mViewBackgroundColor);
+  setBackgroundBrush(mCfg.view.mBackgroundColor);
   update();
   mScene->updateCfg();
+}
+
+Scene *View::getScene() {
+  CHECK_NOTNULL(mScene);
+  return mScene;
 }
 
 void View::drawBackground(QPainter *painter, const QRectF &r) {
@@ -78,12 +85,12 @@ void View::drawBackground(QPainter *painter, const QRectF &r) {
 
   QBrush bBrush = backgroundBrush();
 
-  QPen pfine(mCfg.mViewBackgroundFineGridColor, 1.0);
+  QPen pfine(mCfg.view.mBackgroundFineGridColor, 1.0);
 
   painter->setPen(pfine);
   drawGrid(15);
 
-  QPen p(mCfg.mViewBackgroundCoarseGridColor, 1.0);
+  QPen p(mCfg.view.mBackgroundCoarseGridColor, 1.0);
 
   painter->setPen(p);
   drawGrid(150);
