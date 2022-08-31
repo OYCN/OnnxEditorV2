@@ -66,6 +66,6 @@ TEST(algorithm, topo_sort) {
 
 TEST(algorithm, layout) {
   auto g = genRandomGraph(10, 10);
-  auto ret = Layout::layout(g.get(), LayoutAlgorithm_t::kOGDF);
-  EXPECT_EQ(ret.getLen(), g->getLen());
+  auto ret = Layout::layout(&g, LayoutAlgorithm_t::kOGDF);
+  EXPECT_EQ(ret.getLen(), g.getLen());
 }

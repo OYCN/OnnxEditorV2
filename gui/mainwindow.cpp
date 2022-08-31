@@ -27,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   v->center();
 
   test::add_random_nodes_with_title(v->getScene(), 50);
+
+  v->getScene()->layout();
 }
 
 }  // namespace gui

@@ -3,6 +3,7 @@ add_library(graph
   view.cpp
   scene.cpp
   node.cpp
+  edge.cpp
 )
 
 target_link_libraries(graph
@@ -10,4 +11,6 @@ target_link_libraries(graph
   Qt6::Widgets
   Qt6::Core
   glog::glog
+
+  utils_algorithm
 )

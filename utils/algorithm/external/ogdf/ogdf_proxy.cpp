@@ -121,10 +121,10 @@ std::pair<::ogdf::Graph, ::ogdf::GraphAttributes> cvt(
   return G_GA;
 }
 
-std::unique_ptr<GraphNode2NodeDescTmp> genRandomGraph(size_t n, size_t m) {
+GraphNode2NodeDescTmp genRandomGraph(size_t n, size_t m) {
   ::ogdf::Graph G;
   randomSimpleGraph(G, n, m);
-  return std::make_unique<GraphNode2NodeDescTmp>(cvt(G, {10, 10}));
+  return cvt(G, {10, 10});
 }
 
 void toGml(const GraphNode2NodeDesc* g, std::string path, bool layout) {

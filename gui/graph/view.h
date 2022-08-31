@@ -19,6 +19,7 @@
 #include <QtWidgets/QMenu>
 
 #include "gui/config/ui.h"
+#include "gui/graph/scene.h"
 
 namespace gui {
 namespace graph {

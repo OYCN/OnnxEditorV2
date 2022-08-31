@@ -28,7 +28,7 @@ using GraphNode2NodeDesc = desc::GraphNode2NodeDesc;
 using GraphNode2NodeDescTmp = desc::GraphNode2NodeDescTmp;
 using GraphNode2LayoutDescTmp = desc::GraphNode2LayoutDescTmp;
 
-std::unique_ptr<GraphNode2NodeDescTmp> genRandomGraph(size_t n, size_t m);
+GraphNode2NodeDescTmp genRandomGraph(size_t n, size_t m);
 void toGml(const GraphNode2NodeDesc* g, std::string path, bool layout = false);
 void toSvg(const GraphNode2NodeDesc* g, std::string path, bool layout = false);
 

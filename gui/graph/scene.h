@@ -17,12 +17,15 @@
 
 #include <QtWidgets/QGraphicsScene>
 
+#include <QMap>
+
 #include "gui/config/ui.h"
 
 namespace gui {
 namespace graph {
 
 class Node;
+class Edge;
 
 class Scene : public QGraphicsScene {
   Q_OBJECT
@@ -34,10 +37,19 @@ class Scene : public QGraphicsScene {
   void updateCfg();
   Node* addNode(const QString& title, const QList<QString>& attr_key,
                 const QList<QString>& attr_val);
+  Edge* addEdge(const Node* src, const Node* dst, const QString& label,
+                const QPointF& srcp = {0, 0}, const QPointF& dstp = {0, 0},
+                bool update = false);
+  void updateEdgePoints();
+  void layout();
 
  private:
   config::Ui& mCfg;
   QList<Node*> mNodes;
+  QList<Edge*> mEdges;
+  QMap<const Node*, QList<Edge*>> mNode2Inputs;
+  QMap<const Node*, QList<Edge*>> mNode2Outputs;
+  QMap<const Edge*, QPair<const Node*, const Node*>> mEdge2Nodes;
 };
 
 }  // namespace graph

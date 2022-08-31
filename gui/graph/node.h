@@ -1,5 +1,5 @@
 /**
- * @file node.hpp
+ * @file node.h
  * @brief
  * @author opluss (opluss@qq.com)
  *
@@ -12,8 +12,8 @@
  * </table>
  */
 
-#ifndef GUI_GRAPH_NODE_HPP_
-#define GUI_GRAPH_NODE_HPP_
+#ifndef GUI_GRAPH_NODE_H_
+#define GUI_GRAPH_NODE_H_
 
 #include <QGraphicsItem>
 
@@ -61,4 +61,4 @@ class Node : public QGraphicsItem {
 }  // namespace graph
 }  // namespace gui
 
-#endif  // GUI_GRAPH_NODE_HPP_
+#endif  // GUI_GRAPH_NODE_H_

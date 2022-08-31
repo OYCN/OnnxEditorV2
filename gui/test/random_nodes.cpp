@@ -18,9 +18,12 @@
 #include <sstream>
 #include <string>
 
-#include "gui/graph/node.hpp"
+#include "gui/graph/node.h"
 #include "gui/graph/scene.h"
 #include "gui/test/test.h"
+#include "utils/algorithm/external/ogdf/ogdf_proxy.h"
+
+using namespace utils::algorithm::external::ogdf;  // NOLINT
 
 namespace gui {
 namespace test {
@@ -52,47 +55,28 @@ std::vector<std::string> gen_strs(int num) {
   }
   return out;
 }
+
 void add_random_nodes_with_title(graph::Scene* scene, int num) {
   if (num <= 0) {
     return;
   }
-  auto titles = gen_strs(num);
-  auto hw = std::sqrt(num);
-  std::vector<graph::Node*> nodes;
-  qreal max_h = 0;
-  qreal max_w = 0;
-  for (const auto& title : titles) {
-    auto node = scene->addNode(title.c_str(), {}, {});
-    auto rect = node->boundingRect();
-    if (max_h < rect.height()) {
-      max_h = rect.height();
-    }
-    if (max_w < rect.width()) {
-      max_w = rect.width();
-    }
-    nodes.push_back(node);
+
+  auto g = genRandomGraph(num, num);
+
+  std::vector<graph::Node*> nodes(g.getLen());
+  for (size_t i = 0; i < g.getLen(); i++) {
+    nodes[i] = scene->addNode(QString::number(i), {}, {});
   }
-  max_h *= 1.3;
-  max_w *= 1.3;
-  LOG(INFO) << "Gen " << nodes.size() << " Nodes";
-  LOG(INFO) << "Max rect h is " << max_h;
-  LOG(INFO) << "Max rect w is " << max_w;
-  int w_num = 0;
-  qreal now_x = 0;
-  qreal now_y = 0;
-  for (auto& node : nodes) {
-    node->setPos(now_x, now_y);
-    LOG(INFO) << "Set Random Node to (" << now_x << ", " << now_y << ")";
-    w_num++;
-    if (w_num > hw) {
-      w_num = 0;
-      now_y += max_h;
-      now_x = 0;
-    } else {
-      now_x += max_w;
+
+  for (size_t i = 0; i < g.getLen(); i++) {
+    auto from = nodes[i];
+    for (auto j : g.getOutput(i)) {
+      auto to = nodes[j];
+      scene->addEdge(from, to, QString("%1 to %2").arg(i).arg(j));
     }
   }
 }
+
 }  // namespace test
 
 }  // namespace gui

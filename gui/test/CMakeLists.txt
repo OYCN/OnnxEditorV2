@@ -7,4 +7,6 @@ target_link_libraries(gui_test
   PUBLIC
   Qt6::Widgets
   glog::glog
+
+  external_ogdf
 )

@@ -12,7 +12,7 @@
  * </table>
  */
 
-#include "gui/graph/node.hpp"
+#include "gui/graph/node.h"
 
 #include <glog/logging.h>
 
