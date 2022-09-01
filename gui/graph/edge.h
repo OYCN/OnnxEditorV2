@@ -30,7 +30,9 @@ class Edge : public QGraphicsItem {
 
   void init(const Node* src, const Node* dst, const QString& label,
             const QPointF& srcp, const QPointF& dstp);
-  void updatePoints(const QPointF* srcp = nullptr, const QPointF* dstp = nullptr);
+  void updatePoints(const QPointF* srcp = nullptr,
+                    const QPointF* dstp = nullptr);
+  const std::string getLabel() const { return mLabel.toStdString(); }
 
  protected:
   QRectF boundingRect() const override;

@@ -41,13 +41,27 @@ Node* Scene::addNode(const QString& title, const QList<QString>& attr_key,
 }
 
 Edge* Scene::addEdge(const Node* src, const Node* dst, const QString& label,
-              const QPointF& srcp, const QPointF& dstp, bool update) {
-  CHECK(mNode2Inputs.contains(dst));
-  CHECK(mNode2Outputs.contains(src));
+                     const QPointF& srcp, const QPointF& dstp, bool update) {
+  LOG(INFO) << "add edge: " << label.toStdString();
   auto e = new Edge(mCfg);
   CHECK_NOTNULL(e);
-  mNode2Inputs[dst].append(e);
-  mNode2Outputs[src].append(e);
+
+  if (src != nullptr) {
+    CHECK(mNode2Outputs.contains(src));
+    mNode2Outputs[src].append(e);
+    LOG(INFO) << "\t from: " << src->getTitle().toStdString();
+  } else {
+    LOG(INFO) << "\t from: Point(" << srcp.x() << ", " << dstp.y() << ")";
+  }
+
+  if (dst != nullptr) {
+    CHECK(mNode2Inputs.contains(dst));
+    mNode2Inputs[dst].append(e);
+    LOG(INFO) << "\t from: " << dst->getTitle().toStdString();
+  } else {
+    LOG(INFO) << "\t from: Point(" << dstp.x() << ", " << dstp.y() << ")";
+  }
+
   CHECK(!mEdge2Nodes.contains(e));
   mEdge2Nodes[e] = {src, dst};
   e->init(src, dst, label, srcp, dstp);
@@ -56,6 +70,7 @@ Edge* Scene::addEdge(const Node* src, const Node* dst, const QString& label,
   }
   addItem(e);
   mEdges.append(e);
+
   return e;
 }
 
@@ -81,7 +96,7 @@ void Scene::layout() {
 
   size_t g_len = mNodes.size();
   std::vector<size_t> g_roots;
-  std::vector<std::pair<float, float>> g_whs;
+  std::vector<std::pair<float, float>> g_whs(g_len);
   std::vector<std::vector<size_t>> g_outputs(g_len);
   std::vector<std::vector<size_t>> g_inputs(g_len);
   for (size_t i = 0; i < mNodes.size(); i++) {
@@ -97,17 +112,30 @@ void Scene::layout() {
     g_whs[i] = {rect.width(), rect.height()};
     for (auto input_e : inputs) {
       auto e = mEdge2Nodes[input_e];
-      auto n = e.first == node ?  e.second : e.first;
+      auto n = e.first == node ? e.second : e.first;
       CHECK_EQ(node2idx.count(n), 1);
       g_inputs[i].push_back(node2idx[n]);
     }
     for (auto output_e : outputs) {
       auto e = mEdge2Nodes[output_e];
-      auto n = e.first == node ?  e.second : e.first;
+      auto n = e.first == node ? e.second : e.first;
       CHECK_EQ(node2idx.count(n), 1);
       g_outputs[i].push_back(node2idx[n]);
     }
   }
+
+  // for Summary
+  std::vector<size_t> s_single;
+  for (auto node : g_roots) {
+    if (g_outputs[node].size() == 0) {
+      s_single.push_back(node);
+    }
+  }
+
+  LOG(INFO) << " === Graph Summary Before Layout === ";
+  LOG(INFO) << "\t root num:\t" << g_roots.size();
+  LOG(INFO) << "\t node num:\t" << g_len;
+  LOG(INFO) << "\t single node num:\t" << s_single.size();
 
   GraphNode2NodeDescTmp g(g_len, g_outputs, g_inputs, g_whs, g_roots);
   auto ret = Layout::layout(&g, LayoutAlgorithm_t::kOGDF);
@@ -116,6 +144,7 @@ void Scene::layout() {
     auto pos = ret.getNodePos(i);
     idx2node[i]->setPos(pos.x, pos.y);
   }
+  updateEdgePoints();
 }
 
 }  // namespace graph

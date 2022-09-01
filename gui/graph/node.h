@@ -39,6 +39,7 @@ class Node : public QGraphicsItem {
 
  public:
   QRectF boundingRect() const override;
+  const QString &getTitle() const { return mTitle; }
 
  protected:
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,

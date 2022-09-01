@@ -89,10 +89,12 @@ void Edge::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
 
   // for label
   {
+    painter->save();
     QFont f(mCfg.edge.mEdgeFont);
     painter->setFont(f);
     painter->setPen(mCfg.edge.mEdgeFontColor);
     painter->drawText(mLabelRect, Qt::AlignLeft, mLabel);
+    painter->restore();
   }
 
   painter->restore();
@@ -167,7 +169,7 @@ void Edge::updatePoints(const QPointF* srcp, const QPointF* dstp) {
 
   QFontMetrics fm(QFont(mCfg.edge.mEdgeFont));
   QRectF rect = fm.boundingRect(mLabel);
-  mLabelRect = QRectF(center.x(), center.y(), rect.width(), rect.height());
+  mLabelRect = QRectF(center.x(), center.y(), rect.width() + 1, rect.height());
 
   update();
 }

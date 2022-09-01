@@ -68,11 +68,13 @@ void add_random_nodes_with_title(graph::Scene* scene, int num) {
     nodes[i] = scene->addNode(QString::number(i), {}, {});
   }
 
+  size_t edge_count = 0;
   for (size_t i = 0; i < g.getLen(); i++) {
     auto from = nodes[i];
     for (auto j : g.getOutput(i)) {
       auto to = nodes[j];
-      scene->addEdge(from, to, QString("%1 to %2").arg(i).arg(j));
+      // scene->addEdge(from, to, QString("%1 to %2").arg(i).arg(j));
+      scene->addEdge(from, to, QString::number(edge_count++));
     }
   }
 }
