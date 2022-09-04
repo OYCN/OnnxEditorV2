@@ -139,7 +139,6 @@ void toSvg(const GraphNode2NodeDesc* g, std::string path, bool layout) {
   auto G_GA = cvt(g);
 
   if (layout) {
-    VLOG(1) << "to SVG with layout";
     SugiyamaLayout(G_GA.second);
   }
   ::ogdf::GraphIO::write(G_GA.second, path, ::ogdf::GraphIO::drawSVG);

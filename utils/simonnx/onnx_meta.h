@@ -19,22 +19,35 @@
 
 #include <map>
 #include <string>
+#include <vector>
+#include <set>
+
+#include "utils/algorithm/graph_desc.h"
 
 namespace utils {
 namespace simonnx {
 
+using GraphNode2NodeDescExtTmp =
+    utils::algorithm::desc::GraphNode2NodeDescExtTmp;
+
 struct OnnxMeta {
   using Shape_t = std::vector<int64_t>;
-  std::vector<std::string> inputs;
-  std::vector<std::string> outputs;
+  std::set<std::string> inputs;
+  std::set<std::string> outputs;
+  std::set<std::string> inits;
   std::map<std::string, size_t> name_to_node_idx_;
   std::map<std::string, size_t> name_to_initializer_idx_;
-  std::map<std::string, std::string> name_as_node_input_;
+  std::map<std::string, std::set<std::string>> name_as_node_input_;
   std::map<std::string, std::string> name_as_node_output_;
   std::map<std::string, Shape_t> name_to_shape_;
 };
 
 OnnxMeta genOnnxMeta(const ::ONNX_NAMESPACE::ModelProto& model);
+OnnxMeta genOnnxMeta(const std::string path);
+GraphNode2NodeDescExtTmp onnx2graph(const ::ONNX_NAMESPACE::ModelProto& model,
+                                    OnnxMeta* _meta = nullptr);
+GraphNode2NodeDescExtTmp onnx2graph(const std::string path,
+                                    OnnxMeta* _meta = nullptr);
 
 }  // namespace simonnx
 }  // namespace utils

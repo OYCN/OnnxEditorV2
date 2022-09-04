@@ -15,14 +15,19 @@
 #ifndef GUI_TEST_TEST_H_
 #define GUI_TEST_TEST_H_
 
+#include "utils/algorithm/graph_desc.h"
+
 namespace gui {
 namespace graph {
 class Scene;
 }
 
 namespace test {
-void add_random_nodes_with_title(graph::Scene* scene, int num);
-}
+using GraphNode2NodeDescExtTmp =
+    utils::algorithm::desc::GraphNode2NodeDescExtTmp;
+
+GraphNode2NodeDescExtTmp gen_random_graph(int num);
+}  // namespace test
 }  // namespace gui
 
 #endif  // GUI_TEST_TEST_H_

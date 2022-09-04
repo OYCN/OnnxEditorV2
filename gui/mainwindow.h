@@ -15,11 +15,16 @@
 #ifndef GUI_MAINWINDOW_H_
 #define GUI_MAINWINDOW_H_
 
-#include <QtWidgets/QMainWindow>
+#include <QMainWindow>
+
+#include "gui/actions.h"
 
 namespace gui {
 
+namespace graph {
 class Scene;
+class View;
+}
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -29,7 +34,14 @@ class MainWindow : public QMainWindow {
   ~MainWindow() {}
 
  private:
-  Scene* mScene = nullptr;
+  void InitWindow();
+
+ private:
+  graph::View* view_ = nullptr;
+  graph::Scene* scene_ = nullptr;
+  Actions actions_;
+
+  friend class Actions;
 };
 
 }  // namespace gui

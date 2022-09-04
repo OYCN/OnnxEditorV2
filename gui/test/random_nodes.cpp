@@ -56,27 +56,26 @@ std::vector<std::string> gen_strs(int num) {
   return out;
 }
 
-void add_random_nodes_with_title(graph::Scene* scene, int num) {
-  if (num <= 0) {
-    return;
-  }
-
+GraphNode2NodeDescExtTmp gen_random_graph(int num) {
   auto g = genRandomGraph(num, num);
 
-  std::vector<graph::Node*> nodes(g.getLen());
+  std::vector<std::vector<std::string>> node2name(g.getLen());
+  std::vector<std::vector<std::pair<std::string, std::string>>> node2attrs(
+      g.getLen());
   for (size_t i = 0; i < g.getLen(); i++) {
-    nodes[i] = scene->addNode(QString::number(i), {}, {});
+    node2name[i] = {std::to_string(i), std::to_string(i)};
+    node2attrs[i] = {};
   }
 
   size_t edge_count = 0;
+  std::map<std::pair<size_t, size_t>, std::string> edge2name;
   for (size_t i = 0; i < g.getLen(); i++) {
-    auto from = nodes[i];
     for (auto j : g.getOutput(i)) {
-      auto to = nodes[j];
-      // scene->addEdge(from, to, QString("%1 to %2").arg(i).arg(j));
-      scene->addEdge(from, to, QString::number(edge_count++));
+      edge2name[{i, j}] = std::to_string(edge_count++);
     }
   }
+
+  return GraphNode2NodeDescExtTmp(g, node2name, node2attrs, edge2name);
 }
 
 }  // namespace test

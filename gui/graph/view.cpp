@@ -18,10 +18,10 @@
 
 #include <QtCore/QDebug>
 #include <QtGui/QWheelEvent>
-#include <QtWidgets/QGraphicsItem>
-#include <QtWidgets/QInputDialog>
-#include <QtWidgets/QMessageBox>
-#include <QtWidgets/QScrollBar>
+#include <QGraphicsItem>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QScrollBar>
 
 #include "gui/graph/scene.h"
 
@@ -37,8 +37,8 @@ View::View(QWidget *parent) : QGraphicsView{parent} {
 
   setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 
-  mScene = new Scene(mCfg, this);
-  setScene(mScene);
+  scene_ = new Scene(mCfg, this);
+  setScene(scene_);
 
   updateCfg();
 }
@@ -46,12 +46,12 @@ View::View(QWidget *parent) : QGraphicsView{parent} {
 void View::updateCfg() {
   setBackgroundBrush(mCfg.view.mBackgroundColor);
   update();
-  mScene->updateCfg();
+  scene_->updateCfg();
 }
 
 Scene *View::getScene() {
-  CHECK_NOTNULL(mScene);
-  return mScene;
+  CHECK_NOTNULL(scene_);
+  return scene_;
 }
 
 void View::drawBackground(QPainter *painter, const QRectF &r) {

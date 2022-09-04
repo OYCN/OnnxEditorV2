@@ -20,6 +20,8 @@
 #include "gui/graph/node.h"
 #include "utils/algorithm/layout.h"
 
+// #include "utils/algorithm/external/ogdf/ogdf_proxy.h"
+
 namespace gui {
 namespace graph {
 
@@ -42,24 +44,24 @@ Node* Scene::addNode(const QString& title, const QList<QString>& attr_key,
 
 Edge* Scene::addEdge(const Node* src, const Node* dst, const QString& label,
                      const QPointF& srcp, const QPointF& dstp, bool update) {
-  LOG(INFO) << "add edge: " << label.toStdString();
+  VLOG(1) << "add edge: " << label.toStdString();
   auto e = new Edge(mCfg);
   CHECK_NOTNULL(e);
 
   if (src != nullptr) {
     CHECK(mNode2Outputs.contains(src));
     mNode2Outputs[src].append(e);
-    LOG(INFO) << "\t from: " << src->getTitle().toStdString();
+    VLOG(1) << "\t from: " << src->getTitle().toStdString();
   } else {
-    LOG(INFO) << "\t from: Point(" << srcp.x() << ", " << dstp.y() << ")";
+    VLOG(1) << "\t from: Point(" << srcp.x() << ", " << dstp.y() << ")";
   }
 
   if (dst != nullptr) {
     CHECK(mNode2Inputs.contains(dst));
     mNode2Inputs[dst].append(e);
-    LOG(INFO) << "\t from: " << dst->getTitle().toStdString();
+    VLOG(1) << "\t from: " << dst->getTitle().toStdString();
   } else {
-    LOG(INFO) << "\t from: Point(" << dstp.x() << ", " << dstp.y() << ")";
+    VLOG(1) << "\t from: Point(" << dstp.x() << ", " << dstp.y() << ")";
   }
 
   CHECK(!mEdge2Nodes.contains(e));
@@ -142,9 +144,34 @@ void Scene::layout() {
   CHECK_EQ(ret.getLen(), idx2node.size());
   for (size_t i = 0; i < ret.getLen(); i++) {
     auto pos = ret.getNodePos(i);
-    idx2node[i]->setPos(pos.x, pos.y);
+    auto rect = idx2node[i]->boundingRect();
+    idx2node[i]->setPos(pos.x - rect.width() / 2, pos.y - rect.height() / 2);
   }
   updateEdgePoints();
+
+  // utils::algorithm::external::ogdf::toSvg(&g, "debugs.svg", true);
+}
+
+void Scene::loadGraph(GraphNode2NodeDescExt* g) {
+  std::vector<graph::Node*> nodes(g->getLen());
+  for (size_t i = 0; i < g->getLen(); i++) {
+    QList<QString> attr_key;
+    QList<QString> attr_val;
+    for (const auto& kv : g->getNodeAttrs(i)) {
+      attr_key.append(kv.first.c_str());
+      attr_val.append(kv.second.c_str());
+    }
+    nodes[i] = addNode(g->getNodeName(i)[1].c_str(), attr_key, attr_val);
+  }
+
+  size_t edge_count = 0;
+  for (size_t i = 0; i < g->getLen(); i++) {
+    auto from = nodes[i];
+    for (auto j : g->getOutput(i)) {
+      auto to = nodes[j];
+      addEdge(from, to, g->getEdgeName(i, j).c_str());
+    }
+  }
 }
 
 }  // namespace graph

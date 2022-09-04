@@ -15,11 +15,11 @@
 #ifndef GUI_GRAPH_SCENE_H_
 #define GUI_GRAPH_SCENE_H_
 
-#include <QtWidgets/QGraphicsScene>
-
+#include <QGraphicsScene>
 #include <QMap>
 
 #include "gui/config/ui.h"
+#include "utils/algorithm/graph_desc.h"
 
 namespace gui {
 namespace graph {
@@ -31,6 +31,8 @@ class Scene : public QGraphicsScene {
   Q_OBJECT
 
  public:
+  using GraphNode2NodeDescExt = utils::algorithm::desc::GraphNode2NodeDescExt;
+
   explicit Scene(config::Ui& cfg, QObject* parent = nullptr);
 
  public:
@@ -42,6 +44,8 @@ class Scene : public QGraphicsScene {
                 bool update = false);
   void updateEdgePoints();
   void layout();
+
+  void loadGraph(GraphNode2NodeDescExt* g);
 
  private:
   config::Ui& mCfg;

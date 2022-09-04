@@ -6,4 +6,5 @@ target_link_libraries(simonnx
   PUBLIC
   onnx
   glog::glog
+  magic_enum::magic_enum
 )

@@ -18,6 +18,8 @@
 
 #include <QtGui/QPainter>
 
+#include <QDebug>
+
 namespace gui {
 namespace graph {
 
@@ -84,11 +86,11 @@ void Node::init(const QString &title, const QList<QString> &attr_keys,
   QFontMetrics title_fm(title_font);
   QRectF title_rect = title_fm.boundingRect(mTitle);
   auto base_title_rect = QRectF(0, 0, title_rect.width(), title_rect.height());
-  mTitleRect =
+  title_rect =
       base_title_rect.translated(mCfg.node.mPadOutsideL + mCfg.node.mPadTitleL,
                                  mCfg.node.mPadOutsideT + mCfg.node.mPadTitleT);
   QRectF title_rect_after_padding =
-      mTitleRect.adjusted(-mCfg.node.mPadTitleL, -mCfg.node.mPadTitleT,
+      title_rect.adjusted(-mCfg.node.mPadTitleL, -mCfg.node.mPadTitleT,
                           mCfg.node.mPadTitleR, mCfg.node.mPadTitleB);
 
   // attrs
@@ -102,28 +104,33 @@ void Node::init(const QString &title, const QList<QString> &attr_keys,
 
   // #1 search the max width rect about k+v
   auto search_max_len_rect = [&](decltype(attr_keys) &ins) {
-    QRectF max_len_rect(0, 0, 0, 0);
+    QRectF max_len_rect(0, title_rect_after_padding.bottomLeft().y() + mCfg.node.mPadAttrsT, 0, 0);
     for (const auto &i : ins) {
       auto this_rect = attr_fm.boundingRect(i);
       if (max_len_rect.width() < this_rect.width()) {
-        max_len_rect = this_rect;
+        max_len_rect.setWidth(this_rect.width());
+        max_len_rect.setHeight(this_rect.height());
       }
     }
     return max_len_rect;
   };
   auto max_key_rect = search_max_len_rect(attr_keys);
   auto max_val_rect = search_max_len_rect(attr_vals);
+  // qDebug() << "max_key_rect:" << max_key_rect;
+  // qDebug() << "max_val_rect:" << max_val_rect;
 
   // #2 pad the key/val and caculate the rect
   QRectF key_rect =
-      max_key_rect.translated(mCfg.node.mPadOutsideL + mCfg.node.mPadAttrsL,
-                              mCfg.node.mPadOutsideT + mCfg.node.mPadAttrsT);
+      max_key_rect.translated(mCfg.node.mPadOutsideL + mCfg.node.mPadAttrsL,0);
   QRectF val_rect =
       key_rect.translated(key_rect.width() + span_rect.width(), 0);
   CHECK_EQ(key_rect.height(), val_rect.height());
   qreal h_offset =
       key_rect.height() + mCfg.node.mPadAttrsB + mCfg.node.mPadAttrsT;
   mAttrs.clear();
+  // qDebug() << "key_rect:" << key_rect;
+  // qDebug() << "val_rect:" << val_rect;
+  // qDebug() << "h_offset:" << h_offset;
   for (size_t i = 0; i < attr_keys.size(); i++) {
     NodeAttr_t nad;
     nad.key = attr_keys[i];
@@ -147,6 +154,7 @@ void Node::init(const QString &title, const QList<QString> &attr_keys,
   mAllRect = title_rect_after_padding | attrs_rect_after_padding;
   mAllRect.adjust(-mCfg.node.mPadOutsideL, -mCfg.node.mPadOutsideT,
                   mCfg.node.mPadOutsideR, mCfg.node.mPadOutsideB);
+  mTitleRect = QRectF(mAllRect.width() / 2 - title_rect.width() / 2, title_rect.y(), title_rect.width(), title_rect.height());
   CHECK_NEAR(mAllRect.x(), 0, 1e-4);
   CHECK_NEAR(mAllRect.y(), 0, 1e-4);
   update();

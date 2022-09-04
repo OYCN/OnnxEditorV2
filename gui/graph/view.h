@@ -15,8 +15,8 @@
 #ifndef GUI_GRAPH_VIEW_H_
 #define GUI_GRAPH_VIEW_H_
 
-#include <QtWidgets/QGraphicsView>
-#include <QtWidgets/QMenu>
+#include <QGraphicsView>
+#include <QMenu>
 
 #include "gui/config/ui.h"
 #include "gui/graph/scene.h"
@@ -60,7 +60,7 @@ class View : public QGraphicsView {
  private:
   config::Ui mCfg;
 
-  Scene* mScene = nullptr;
+  Scene* scene_ = nullptr;
   QPointF click_pos_;
 };
 

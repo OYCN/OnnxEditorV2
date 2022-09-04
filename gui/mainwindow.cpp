@@ -15,20 +15,20 @@
 #include "gui/mainwindow.h"
 
 #include "gui/graph/view.h"
-#include "gui/test/test.h"
 
 namespace gui {
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), actions_(this) {
+  view_ = new graph::View(this);
+  scene_ = view_->getScene();
+  this->setCentralWidget(view_);
+  InitWindow();
+}
+
+void MainWindow::InitWindow() {
   this->resize(QSize(800, 600));
-  graph::View *v = new graph::View(this);
-  this->setCentralWidget(v);
-  v->expand(5);
-  v->center();
-
-  test::add_random_nodes_with_title(v->getScene(), 50);
-
-  v->getScene()->layout();
+  setWindowIcon(QIcon(":appicon.ico"));
+  setWindowTitle("OnnxEditor");
 }
 
 }  // namespace gui
