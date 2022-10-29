@@ -20,6 +20,7 @@
 
 #include "gui/config/ui.h"
 #include "utils/algorithm/graph_desc.h"
+#include "utils/simonnx/context.h"
 
 namespace gui {
 namespace graph {
@@ -31,7 +32,10 @@ class Scene : public QGraphicsScene {
   Q_OBJECT
 
  public:
-  using GraphNode2NodeDescExt = utils::algorithm::desc::GraphNode2NodeDescExt;
+  using NodeHandle = utils::simonnx::NodeHandle;
+  using TensorHandle = utils::simonnx::TensorHandle;
+  using GraphNode2NodeDescExt =
+      utils::algorithm::desc::GraphNode2NodeDescExt<NodeHandle, TensorHandle>;
 
   explicit Scene(config::Ui& cfg, QObject* parent = nullptr);
 
@@ -44,6 +48,7 @@ class Scene : public QGraphicsScene {
                 bool update = false);
   void updateEdgePoints();
   void layout();
+  void clear();
 
   void loadGraph(GraphNode2NodeDescExt* g);
 

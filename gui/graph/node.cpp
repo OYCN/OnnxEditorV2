@@ -16,9 +16,8 @@
 
 #include <glog/logging.h>
 
-#include <QtGui/QPainter>
-
 #include <QDebug>
+#include <QtGui/QPainter>
 
 namespace gui {
 namespace graph {
@@ -104,7 +103,9 @@ void Node::init(const QString &title, const QList<QString> &attr_keys,
 
   // #1 search the max width rect about k+v
   auto search_max_len_rect = [&](decltype(attr_keys) &ins) {
-    QRectF max_len_rect(0, title_rect_after_padding.bottomLeft().y() + mCfg.node.mPadAttrsT, 0, 0);
+    QRectF max_len_rect(
+        0, title_rect_after_padding.bottomLeft().y() + mCfg.node.mPadAttrsT, 0,
+        0);
     for (const auto &i : ins) {
       auto this_rect = attr_fm.boundingRect(i);
       if (max_len_rect.width() < this_rect.width()) {
@@ -121,7 +122,7 @@ void Node::init(const QString &title, const QList<QString> &attr_keys,
 
   // #2 pad the key/val and caculate the rect
   QRectF key_rect =
-      max_key_rect.translated(mCfg.node.mPadOutsideL + mCfg.node.mPadAttrsL,0);
+      max_key_rect.translated(mCfg.node.mPadOutsideL + mCfg.node.mPadAttrsL, 0);
   QRectF val_rect =
       key_rect.translated(key_rect.width() + span_rect.width(), 0);
   CHECK_EQ(key_rect.height(), val_rect.height());
@@ -154,7 +155,8 @@ void Node::init(const QString &title, const QList<QString> &attr_keys,
   mAllRect = title_rect_after_padding | attrs_rect_after_padding;
   mAllRect.adjust(-mCfg.node.mPadOutsideL, -mCfg.node.mPadOutsideT,
                   mCfg.node.mPadOutsideR, mCfg.node.mPadOutsideB);
-  mTitleRect = QRectF(mAllRect.width() / 2 - title_rect.width() / 2, title_rect.y(), title_rect.width(), title_rect.height());
+  mTitleRect = QRectF(mAllRect.width() / 2 - title_rect.width() / 2,
+                      title_rect.y(), title_rect.width(), title_rect.height());
   CHECK_NEAR(mAllRect.x(), 0, 1e-4);
   CHECK_NEAR(mAllRect.y(), 0, 1e-4);
   update();

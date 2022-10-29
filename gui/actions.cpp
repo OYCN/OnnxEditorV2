@@ -22,8 +22,6 @@
 
 #include "gui/graph/view.h"
 #include "gui/mainwindow.h"
-#include "gui/test/dialog.h"
-#include "gui/test/test.h"
 #include "utils/simonnx/onnx_meta.h"
 
 namespace gui {
@@ -79,9 +77,7 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
 
 void Actions::act_file_new_callback() {
   LOG(INFO) << "act_file_new_callback";
-  QDialog dialog(parent_);
-  dialog.setWindowTitle("act_file_new_callback");
-  dialog.exec();
+  parent_->scene_->clear();
 }
 
 void Actions::act_file_open_callback() {
@@ -89,6 +85,7 @@ void Actions::act_file_open_callback() {
   QString fileName = QFileDialog::getOpenFileName(parent_, "open onnx file",
                                                   "/", tr("*.onnx"));
   auto g = utils::simonnx::onnx2graph(fileName.toStdString());
+  parent_->scene_->clear();
   parent_->scene_->loadGraph(&g);
   parent_->scene_->layout();
   parent_->view_->expand(5);
@@ -104,20 +101,16 @@ void Actions::act_file_save_a_callback() {
 
 void Actions::act_file_close_callback() {
   LOG(INFO) << "act_file_close_callback";
-  QDialog dialog(parent_);
-  dialog.setWindowTitle("act_file_close_callback");
-  dialog.exec();
+  parent_->scene_->clear();
 }
 
 void Actions::act_show_res_callback() {
   LOG(INFO) << "act_show_res_callback";
-  test::Dialog(parent_, "qrc:///BM2.jpg").exec();
-  test::Dialog(parent_, "qrc:///res/BM2.jpg").exec();
 }
 
 void Actions::act_random_graph_callback() {
   LOG(INFO) << "act_random_graph_callback";
-  auto g = test::gen_random_graph(50);
+  auto g = utils::simonnx::gen_random_graph(50);
   parent_->scene_->loadGraph(&g);
   parent_->scene_->layout();
   parent_->view_->expand(5);

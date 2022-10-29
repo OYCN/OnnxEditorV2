@@ -23,12 +23,17 @@
 #include <set>
 
 #include "utils/algorithm/graph_desc.h"
+#include "utils/simonnx/context.h"
 
 namespace utils {
 namespace simonnx {
 
+using NodeHandle =
+    utils::simonnx::NodeHandle;
+using TensorHandle =
+    utils::simonnx::TensorHandle;
 using GraphNode2NodeDescExtTmp =
-    utils::algorithm::desc::GraphNode2NodeDescExtTmp;
+    utils::algorithm::desc::GraphNode2NodeDescExtTmp<NodeHandle, TensorHandle>;
 
 struct OnnxMeta {
   using Shape_t = std::vector<int64_t>;
@@ -48,7 +53,7 @@ GraphNode2NodeDescExtTmp onnx2graph(const ::ONNX_NAMESPACE::ModelProto& model,
                                     OnnxMeta* _meta = nullptr);
 GraphNode2NodeDescExtTmp onnx2graph(const std::string path,
                                     OnnxMeta* _meta = nullptr);
-
+GraphNode2NodeDescExtTmp gen_random_graph(int num);
 }  // namespace simonnx
 }  // namespace utils
 

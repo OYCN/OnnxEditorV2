@@ -152,16 +152,31 @@ void Scene::layout() {
   // utils::algorithm::external::ogdf::toSvg(&g, "debugs.svg", true);
 }
 
+void Scene::clear() {
+  for (const auto e : mEdges) {
+    removeItem(e);
+    delete e;
+  }
+  mEdges.clear();
+  for (const auto n : mNodes) {
+    removeItem(n);
+    delete n;
+  }
+  mNodes.clear();
+  update();
+}
+
 void Scene::loadGraph(GraphNode2NodeDescExt* g) {
   std::vector<graph::Node*> nodes(g->getLen());
   for (size_t i = 0; i < g->getLen(); i++) {
     QList<QString> attr_key;
     QList<QString> attr_val;
-    for (const auto& kv : g->getNodeAttrs(i)) {
-      attr_key.append(kv.first.c_str());
-      attr_val.append(kv.second.c_str());
-    }
-    nodes[i] = addNode(g->getNodeName(i)[1].c_str(), attr_key, attr_val);
+    auto node_handle = g->getNodeHandle(i);
+    // for (const auto& kv : g->getNodeAttrs(i)) {
+    //   attr_key.append(kv.first.c_str());
+    //   attr_val.append(kv.second.c_str());
+    // }
+    nodes[i] = addNode(node_handle->getOpType().c_str(), attr_key, attr_val);
   }
 
   size_t edge_count = 0;
@@ -169,7 +184,8 @@ void Scene::loadGraph(GraphNode2NodeDescExt* g) {
     auto from = nodes[i];
     for (auto j : g->getOutput(i)) {
       auto to = nodes[j];
-      addEdge(from, to, g->getEdgeName(i, j).c_str());
+      auto tensor_handle = g->getTensorHandle(i, j);
+      addEdge(from, to, tensor_handle->getName().c_str());
     }
   }
 }

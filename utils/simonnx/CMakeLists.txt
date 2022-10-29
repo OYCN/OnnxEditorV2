@@ -7,4 +7,5 @@ target_link_libraries(simonnx
   onnx
   glog::glog
   magic_enum::magic_enum
+  external_ogdf
 )

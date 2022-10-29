@@ -20,6 +20,9 @@
 #include <fstream>
 #include <magic_enum.hpp>
 
+#include "utils/algorithm/external/ogdf/ogdf_proxy.h"
+#include "utils/simonnx/context.h"
+
 #define CHECK_RETURN(cond, def) \
   do {                          \
     bool ret = (cond);          \
@@ -59,7 +62,8 @@ void map_insert(std::map<_K, _V>& map, const _K& key, const _V& val) {
 }
 
 template <typename _K, typename _V>
-void map_set_insert(std::map<_K, std::set<_V>>& mapset, const _K& key, const _V& val) {
+void map_set_insert(std::map<_K, std::set<_V>>& mapset, const _K& key,
+                    const _V& val) {
   // CHECK_EQ(map.count(key), 0) << "Name of " << key << " has been inserted";
   mapset[key].insert(val);
 }
@@ -105,10 +109,10 @@ OnnxMeta genOnnxMeta(const ::ONNX_NAMESPACE::ModelProto& model) {
   // parse inputs
   LOG(INFO) << "parse inputs num: " << inputs.size();
   for (const auto& input : inputs) {
-    if (meta.inits.count(input.name()) == 0 ) {
+    if (meta.inits.count(input.name()) == 0) {
       meta.inputs.insert(input.name());
       map_insert(meta.name_to_shape_, input.name(),
-                      handleValueInfoProtoToShape(input));
+                 handleValueInfoProtoToShape(input));
     }
   }
   // parse outputs
@@ -116,7 +120,7 @@ OnnxMeta genOnnxMeta(const ::ONNX_NAMESPACE::ModelProto& model) {
   for (const auto& output : outputs) {
     meta.outputs.insert(output.name());
     map_insert(meta.name_to_shape_, output.name(),
-                     handleValueInfoProtoToShape(output));
+               handleValueInfoProtoToShape(output));
   }
   // parse node
   LOG(INFO) << "parse node num: " << nodes.size();
@@ -141,8 +145,7 @@ OnnxMeta genOnnxMeta(const ::ONNX_NAMESPACE::ModelProto& model) {
   // parse value_info
   LOG(INFO) << "parse value_info num: " << value_infos.size();
   for (const auto& vi : value_infos) {
-    map_insert(meta.name_to_shape_, vi.name(),
-                     handleValueInfoProtoToShape(vi));
+    map_insert(meta.name_to_shape_, vi.name(), handleValueInfoProtoToShape(vi));
   }
   LOG(INFO) << " === Onnx Summary === ";
   LOG(INFO) << "\t inputs num:\t" << inputs.size();
@@ -156,9 +159,12 @@ OnnxMeta genOnnxMeta(const ::ONNX_NAMESPACE::ModelProto& model) {
   LOG(INFO) << "\t outputs num:\t" << meta.outputs.size();
   LOG(INFO) << "\t inits num:\t" << meta.inits.size();
   LOG(INFO) << "\t name_to_node_idx_ num:\t" << meta.name_to_node_idx_.size();
-  LOG(INFO) << "\t name_to_initializer_idx_ num:\t" << meta.name_to_initializer_idx_.size();
-  LOG(INFO) << "\t name_as_node_input_ num:\t" << meta.name_as_node_input_.size();
-  LOG(INFO) << "\t name_as_node_output_ num:\t" << meta.name_as_node_output_.size();
+  LOG(INFO) << "\t name_to_initializer_idx_ num:\t"
+            << meta.name_to_initializer_idx_.size();
+  LOG(INFO) << "\t name_as_node_input_ num:\t"
+            << meta.name_as_node_input_.size();
+  LOG(INFO) << "\t name_as_node_output_ num:\t"
+            << meta.name_as_node_output_.size();
   LOG(INFO) << "\t name_to_shape_ num:\t" << meta.name_to_shape_.size();
   return meta;
 }
@@ -168,7 +174,8 @@ OnnxMeta genOnnxMeta(const std::string path) {
 }
 
 template <typename _T>
-std::string cvtAttr1DNums(std::function<_T(size_t i)> f, size_t len, bool array, std::string prefix) {
+std::string cvtAttr1DNums(std::function<_T(size_t i)> f, size_t len, bool array,
+                          std::string prefix) {
   if (!array) {
     CHECK_EQ(len, 1);
     return prefix + std::to_string(f(0));
@@ -190,12 +197,14 @@ std::string cvtAttributeProtoValue2Str(
     case ::ONNX_NAMESPACE::AttributeProto_AttributeType::
         AttributeProto_AttributeType_FLOAT: {
       CHECK(attrpo.has_f());
-      return cvtAttr1DNums<float>([&](size_t i){return attrpo.f();}, 1, false, "");
+      return cvtAttr1DNums<float>([&](size_t i) { return attrpo.f(); }, 1,
+                                  false, "");
     }
     case ::ONNX_NAMESPACE::AttributeProto_AttributeType::
         AttributeProto_AttributeType_INT: {
       CHECK(attrpo.has_i());
-      return cvtAttr1DNums<int32_t>([&](size_t i){return attrpo.i();}, 1, false, "");
+      return cvtAttr1DNums<int32_t>([&](size_t i) { return attrpo.i(); }, 1,
+                                    false, "");
     }
     case ::ONNX_NAMESPACE::AttributeProto_AttributeType::
         AttributeProto_AttributeType_STRING: {
@@ -204,11 +213,13 @@ std::string cvtAttributeProtoValue2Str(
     }
     case ::ONNX_NAMESPACE::AttributeProto_AttributeType::
         AttributeProto_AttributeType_FLOATS: {
-      return cvtAttr1DNums<float>([&](size_t i){return attrpo.floats(i);}, attrpo.floats_size(), true, "");
+      return cvtAttr1DNums<float>([&](size_t i) { return attrpo.floats(i); },
+                                  attrpo.floats_size(), true, "");
     }
     case ::ONNX_NAMESPACE::AttributeProto_AttributeType::
         AttributeProto_AttributeType_INTS: {
-      return cvtAttr1DNums<int32_t>([&](size_t i){return attrpo.ints(i);}, attrpo.ints_size(), true, "");
+      return cvtAttr1DNums<int32_t>([&](size_t i) { return attrpo.ints(i); },
+                                    attrpo.ints_size(), true, "");
     }
     default:
       LOG(FATAL) << "Unsupport onnx node attr type: "
@@ -232,13 +243,14 @@ GraphNode2NodeDescExtTmp onnx2graph(const ::ONNX_NAMESPACE::ModelProto& model,
   std::vector<std::pair<float, float>> whs(len, {0, 0});
   std::vector<size_t> roots;
   // ext desc
-  std::vector<std::vector<std::string>> node2name(len);
-  std::vector<std::vector<std::pair<std::string, std::string>>> node2attrs(len);
-  std::map<std::pair<size_t, size_t>, std::string> edge2name;
+  std::vector<NodeHandle> id2node(len);
+  // std::vector<std::vector<std::pair<std::string, std::string>>>
+  // node2attrs(len);
+  std::map<std::pair<size_t, size_t>, TensorHandle> node2tensor;
   for (size_t i = 0; i < len; i++) {
     auto& node = model.graph().node()[i];
     auto& name = node.name();
-    node2name[i] = {name, node.op_type()};
+    id2node[i] = SimOnnxCtx::CreateNodeObj(name, node.op_type());
     for (const auto& input : node.input()) {
       if (meta.name_as_node_output_.count(input) == 1) {
         auto& target_node = meta.name_as_node_output_.at(input);
@@ -246,11 +258,12 @@ GraphNode2NodeDescExtTmp onnx2graph(const ::ONNX_NAMESPACE::ModelProto& model,
         auto& target_idx = meta.name_to_node_idx_.at(target_node);
         inputs[i].push_back(target_idx);
         std::pair<size_t, size_t> nn(target_idx, i);
-        CHECK_EQ(edge2name.count(nn), 0);
+        CHECK_EQ(node2tensor.count(nn), 0);
         VLOG(1) << "add edge: " << target_idx << " -> " << i;
-        edge2name[nn] = input;
+        node2tensor[nn] = SimOnnxCtx::CreateTensorObj(input);
       } else {
-         CHECK_EQ(meta.inputs.count(input) + meta.inits.count(input), 1) << input;
+        CHECK_EQ(meta.inputs.count(input) + meta.inits.count(input), 1)
+            << input;
       }
     }
     if (inputs[i].size() == 0) {
@@ -265,19 +278,40 @@ GraphNode2NodeDescExtTmp onnx2graph(const ::ONNX_NAMESPACE::ModelProto& model,
         }
       }
     }
-    for (const auto& attribute : node.attribute()) {
-      std::string value = cvtAttributeProtoValue2Str(attribute);
-      CHECK(attribute.has_name());
-      std::pair<std::string, std::string> attr(attribute.name(), value);
-      node2attrs[i].push_back(attr);
-    }
+    // for (const auto& attribute : node.attribute()) {
+    //   std::string value = cvtAttributeProtoValue2Str(attribute);
+    //   CHECK(attribute.has_name());
+    //   std::pair<std::string, std::string> attr(attribute.name(), value);
+    //   node2attrs[i].push_back(attr);
+    // }
   }
-  return GraphNode2NodeDescExtTmp({len, outputs, inputs, whs, roots}, node2name,
-                                  node2attrs, edge2name);
+  return GraphNode2NodeDescExtTmp({len, outputs, inputs, whs, roots}, id2node,
+                                  node2tensor);
 }
 
 GraphNode2NodeDescExtTmp onnx2graph(const std::string path, OnnxMeta* _meta) {
   return onnx2graph(open_onnx(path), _meta);
+}
+
+GraphNode2NodeDescExtTmp gen_random_graph(int num) {
+  auto g = utils::algorithm::external::ogdf::genRandomGraph(num, num);
+
+  std::vector<NodeHandle> idx2node(g.getLen());
+  for (size_t i = 0; i < g.getLen(); i++) {
+    idx2node[i] =
+        SimOnnxCtx::CreateNodeObj(std::to_string(i), std::to_string(i));
+  }
+
+  size_t edge_count = 0;
+  std::map<std::pair<size_t, size_t>, TensorHandle> node2tensor;
+  for (size_t i = 0; i < g.getLen(); i++) {
+    for (auto j : g.getOutput(i)) {
+      node2tensor[{i, j}] =
+          SimOnnxCtx::CreateTensorObj(std::to_string(edge_count++));
+    }
+  }
+
+  return GraphNode2NodeDescExtTmp(g, idx2node, node2tensor);
 }
 
 }  // namespace simonnx

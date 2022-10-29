@@ -101,40 +101,34 @@ class GraphNode2NodeDescTmp : virtual public GraphNode2NodeDesc {
   std::vector<size_t> roots_;
 };
 
+template <typename _Node_t, typename _Tensor_t>
 class GraphNode2NodeDescExt : virtual public GraphNode2NodeDesc {
  public:
-  virtual std::vector<std::string> getNodeName(size_t i) const = 0;
-  virtual std::vector<std::pair<std::string, std::string>> getNodeAttrs(
-      size_t i) const = 0;
-  virtual std::string getEdgeName(size_t i, size_t j) const = 0;
+  virtual _Node_t getNodeHandle(size_t i) const = 0;
+  virtual _Tensor_t getTensorHandle(size_t i, size_t j) const = 0;
 };
 
-class GraphNode2NodeDescExtTmp : public GraphNode2NodeDescExt,
-                                 public GraphNode2NodeDescTmp {
+template <typename _Node_t, typename _Tensor_t>
+class GraphNode2NodeDescExtTmp
+    : public GraphNode2NodeDescExt<_Node_t, _Tensor_t>,
+      public GraphNode2NodeDescTmp {
  public:
   GraphNode2NodeDescExtTmp(
-      GraphNode2NodeDescTmp g, std::vector<std::vector<std::string>> node2name,
-      std::vector<std::vector<std::pair<std::string, std::string>>> node2attrs,
-      std::map<std::pair<size_t, size_t>, std::string> edge2name)
+      GraphNode2NodeDescTmp g, std::vector<_Node_t> node_handles,
+      std::map<std::pair<size_t, size_t>, _Tensor_t> edge_handled)
       : GraphNode2NodeDescTmp(g),
-        node2name_(node2name),
-        node2attrs_(node2attrs),
-        edge2name_(edge2name) {}
+        node_handles_(node_handles),
+        edge_handled_(edge_handled) {}
 
  public:
-  std::vector<std::string> getNodeName(size_t i) const override { return node2name_[i]; }
-  std::vector<std::pair<std::string, std::string>> getNodeAttrs(
-      size_t i) const override {
-    return node2attrs_[i];
-  }
-  std::string getEdgeName(size_t i, size_t j) const override {
-    return edge2name_.at(std::pair<size_t, size_t>(i, j));
+  _Node_t getNodeHandle(size_t i) const override { return node_handles_[i]; }
+  _Tensor_t getTensorHandle(size_t i, size_t j) const override {
+    return edge_handled_.at(std::pair<size_t, size_t>(i, j));
   }
 
  public:
-  std::vector<std::vector<std::string>> node2name_;
-  std::vector<std::vector<std::pair<std::string, std::string>>> node2attrs_;
-  std::map<std::pair<size_t, size_t>, std::string> edge2name_;
+  std::vector<_Node_t> node_handles_;
+  std::map<std::pair<size_t, size_t>, _Tensor_t> edge_handled_;
 };
 
 class GraphNode2LayoutDesc {
