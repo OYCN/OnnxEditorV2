@@ -115,8 +115,7 @@ GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx) {
   for (size_t i = 0; i < len; i++) {
     auto& node = proto_nodes[i];
     auto& name = node.name();
-    out_id2node[i] =
-        SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(name, node.op_type());
+    out_id2node[i] = SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(&node);
     for (const auto& input : node.input()) {
       if (graph_output_map_node.count(input) == 1) {
         auto& target_nodes = graph_output_map_node.at(input);
@@ -151,13 +150,16 @@ GraphNode2NodeDescExtTmp onnx2graph(const std::string path) {
   return onnx2graph(open_onnx(path));
 }
 
+using NodeProto = ::ONNX_NAMESPACE::NodeProto;
 GraphNode2NodeDescExtTmp gen_random_graph(int num) {
   auto g = utils::algorithm::external::ogdf::genRandomGraph(num, num);
 
   std::vector<NodeHandle> idx2node(g.getLen());
   for (size_t i = 0; i < g.getLen(); i++) {
-    idx2node[i] = SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(std::to_string(i),
-                                                             std::to_string(i));
+    NodeProto np;
+    np.set_name(std::to_string(i));
+    np.set_op_type(std::to_string(i));
+    idx2node[i] = SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(&np);
   }
 
   size_t edge_count = 0;
