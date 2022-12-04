@@ -27,49 +27,32 @@ class IObject {
  public:
   virtual ~IObject() = default;
   virtual size_t getId() const = 0;
-  virtual void setId(size_t id) = 0;
   virtual bool isDeleted() const = 0;
   virtual void setDeleted(bool deleted) = 0;
   virtual ObjType_t getObjType() const = 0;
+
+ protected:
+  virtual void setId(size_t id) = 0;
 };
 
 template <ObjType_t _OT>
 class Object : public IObject {
  public:
-  Object() {
-    id_ = genNewId();
-    getObjList().push_back(this);
-    iter_ = getObjList().end();
-    --iter_;
-  }
-  virtual ~Object() { getObjList().erase(iter_); }
   size_t getId() const override { return id_; }
-  void setId(size_t id) override { id_ = id; }
   bool isDeleted() const override { return deleted_; }
   void setDeleted(bool deleted) override { deleted_ = deleted; }
   static constexpr ObjType_t ObjType = _OT;
   ObjType_t getObjType() const override { return ObjType; }
-  using ObjList_t = std::list<Object<_OT>*>;
-  ObjList_t& getObjList() {
-    static ObjList_t list;
-    return list;
-  }
-  typename ObjList_t::iterator getObjListIter() { return iter_; }
+
+ protected:
+  Object() = default;
 
  private:
-  size_t genNewId() {
-    static size_t now_idx = 0;
-    return now_idx++;
-  }
-
-  size_t get() {
-    static size_t now_idx = 0;
-    return now_idx++;
-  }
+  friend class SimOnnxCtx;
+  void setId(size_t id) override { id_ = id; }
 
  private:
   size_t id_;
-  typename ObjList_t::iterator iter_;
   bool deleted_ = false;
 };
 

@@ -176,6 +176,7 @@ void Scene::loadGraph(GraphNode2NodeDescExt* g) {
     //   attr_key.append(kv.first.c_str());
     //   attr_val.append(kv.second.c_str());
     // }
+    VLOG(1) << "load Node with id=" << node_handle->getId();
     nodes[i] = addNode(node_handle->getOpType().c_str(), attr_key, attr_val);
   }
 

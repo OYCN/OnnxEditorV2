@@ -1,5 +1,6 @@
 add_library(simonnx
   onnx_help.cpp
+  context.cpp
 )
 
 target_link_libraries(simonnx

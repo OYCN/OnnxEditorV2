@@ -15,6 +15,7 @@
 #include "utils/simonnx/onnx_help.h"
 
 #include <glog/logging.h>
+#include <onnx/onnx_pb.h>
 
 #include <filesystem>
 #include <fstream>
@@ -36,19 +37,20 @@ namespace simonnx {
 
 namespace fs = std::filesystem;
 
-::ONNX_NAMESPACE::ModelProto open_onnx(const std::string path) {
+SimOnnxCtx* open_onnx(const std::string path) {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
   CHECK(fs::exists(path));
   CHECK(!fs::is_directory(path));
-  ::ONNX_NAMESPACE::ModelProto OnnxModel;
+  auto socb = SimOnnxCtx::getSimOnnxCtx();
+  auto omp = socb->getModelProtoPtr();
   std::ifstream fin(path, std::ios::in | std::ios::binary);
   if (!fin.good()) {
     LOG(FATAL) << "Could not open file " << path;
-    return OnnxModel;
+  } else {
+    bool ret = omp->ParseFromIstream(&fin);
+    CHECK(ret);
   }
-  bool ret = OnnxModel.ParseFromIstream(&fin);
-  CHECK(ret);
-  return OnnxModel;
+  return socb;
 }
 
 template <typename _K, typename _V>
@@ -61,7 +63,8 @@ void map_set_unique_insert(std::map<_K, std::set<_V>>& mapset, const _K& key,
   }
 }
 
-GraphNode2NodeDescExtTmp onnx2graph(const ::ONNX_NAMESPACE::ModelProto& model) {
+GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx) {
+  auto& model = *SimOnnxCtx::getSimOnnxCtx()->getModelProtoPtr();
   // base desc
   size_t len = model.graph().node().size();
   std::vector<std::vector<size_t>> out_outputs(len);
@@ -112,7 +115,8 @@ GraphNode2NodeDescExtTmp onnx2graph(const ::ONNX_NAMESPACE::ModelProto& model) {
   for (size_t i = 0; i < len; i++) {
     auto& node = proto_nodes[i];
     auto& name = node.name();
-    out_id2node[i] = SimOnnxCtx::CreateNodeObj(name, node.op_type());
+    out_id2node[i] =
+        SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(name, node.op_type());
     for (const auto& input : node.input()) {
       if (graph_output_map_node.count(input) == 1) {
         auto& target_nodes = graph_output_map_node.at(input);
@@ -122,7 +126,8 @@ GraphNode2NodeDescExtTmp onnx2graph(const ::ONNX_NAMESPACE::ModelProto& model) {
         std::pair<size_t, size_t> nn(target_node_idx, i);
         CHECK_EQ(out_node2tensor.count(nn), 0) << input;
         VLOG(1) << "add edge: " << target_node_idx << " -> " << i;
-        out_node2tensor[nn] = SimOnnxCtx::CreateTensorObj(input);
+        out_node2tensor[nn] =
+            SimOnnxCtx::getSimOnnxCtx()->CreateTensorObj(input);
       } else if (graph_inputs.count(input)) {
         out_roots.emplace_back(i);
       } else {
@@ -151,16 +156,16 @@ GraphNode2NodeDescExtTmp gen_random_graph(int num) {
 
   std::vector<NodeHandle> idx2node(g.getLen());
   for (size_t i = 0; i < g.getLen(); i++) {
-    idx2node[i] =
-        SimOnnxCtx::CreateNodeObj(std::to_string(i), std::to_string(i));
+    idx2node[i] = SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(std::to_string(i),
+                                                             std::to_string(i));
   }
 
   size_t edge_count = 0;
   std::map<std::pair<size_t, size_t>, TensorHandle> node2tensor;
   for (size_t i = 0; i < g.getLen(); i++) {
     for (auto j : g.getOutput(i)) {
-      node2tensor[{i, j}] =
-          SimOnnxCtx::CreateTensorObj(std::to_string(edge_count++));
+      node2tensor[{i, j}] = SimOnnxCtx::getSimOnnxCtx()->CreateTensorObj(
+          std::to_string(edge_count++));
     }
   }
 

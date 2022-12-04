@@ -16,41 +16,66 @@
 #define UTILS_SIMONNX_CONTEXT_H_
 
 #include <list>
+#include <map>
 #include <memory>
 #include <type_traits>
 
 #include "utils/simonnx/node.h"
 #include "utils/simonnx/tensor.h"
 
+namespace ONNX_NAMESPACE {
+class ModelProto;
+};
+
 namespace utils {
 namespace simonnx {
 
+using ModelProtoPtr = ::ONNX_NAMESPACE::ModelProto*;
+
 class SimOnnxCtx {
  public:
-  SimOnnxCtx() = delete;
+  static SimOnnxCtx* createSimOnnxCtx() {
+    static size_t idx = 0;
+    SimOnnxCtx new_ctx;
+    getCtxMap().emplace(idx, std::move(new_ctx));
+    auto ptr = &getCtxMap().at(idx++);
+    return ptr;
+  }
+  static SimOnnxCtx* getSimOnnxCtx(size_t idx = 0) {
+    return &getCtxMap().at(idx);
+  }
 
   template <typename... _Args>
-  static NodeHandle CreateNodeObj(_Args&&... args) {
+  NodeHandle CreateNodeObj(_Args&&... args) {
     return CreateObj<NodeHandle, _Args...>(std::forward<_Args>(args)...);
   }
   template <typename... _Args>
-  static TensorHandle CreateTensorObj(_Args&&... args) {
+  TensorHandle CreateTensorObj(_Args&&... args) {
     return CreateObj<TensorHandle, _Args...>(std::forward<_Args>(args)...);
   }
 
+  ModelProtoPtr getModelProtoPtr() { return mp_; }
+
  private:
-  template <typename _Type>
-  static void savePointer(_Type* ptr) {
-    static std::list<std::unique_ptr<_Type>> list;
-    list.emplace_back(ptr);
-  }
+  SimOnnxCtx();
+
   template <typename _Ret, typename... _Args>
-  static _Ret CreateObj(_Args&&... args) {
+  _Ret CreateObj(_Args&&... args) {
     using ObjType = typename std::remove_pointer<_Ret>::type;
     auto ptr = new ObjType(std::forward<_Args>(args)...);
-    savePointer(ptr);
+    ptr->setId(obj_ctx_[ObjType::ObjType].size());
+    obj_ctx_[ObjType::ObjType].emplace_back(ptr);
     return ptr;
   }
+
+  static std::map<size_t, SimOnnxCtx>& getCtxMap() {
+    static std::map<size_t, SimOnnxCtx> ctxes;
+    return ctxes;
+  }
+
+ private:
+  std::map<ObjType_t, std::list<IObject*>> obj_ctx_;
+  ModelProtoPtr mp_;
 };
 
 }  // namespace simonnx

@@ -17,6 +17,8 @@
 
 #include "gui/gui.h"
 
+#include "utils/simonnx/context.h"
+
 const char* usage = R"(
   xxxx
     xx
@@ -25,13 +27,23 @@ const char* usage = R"(
 
 DEFINE_bool(test, false, "test");
 
-int main(int argc, char* argv[]) {
+void initializer_no_args() {
+  LOG(INFO) << "Create default SimOnnxCtx";
+  utils::simonnx::SimOnnxCtx::createSimOnnxCtx();
+}
+
+void initializer_args(int argc, char* argv[]) {
   google::InitGoogleLogging(argv[0]);
   FLAGS_alsologtostderr = 1;
   FLAGS_colorlogtostderr = true;
   google::InstallFailureSignalHandler();
   gflags::SetUsageMessage(usage);
   gflags::ParseCommandLineFlags(&argc, &argv, true);
+}
+
+int main(int argc, char* argv[]) {
+  initializer_args(argc, argv);
+  initializer_no_args();
 
   auto ret = gui::gui_on(argc, argv);
 
