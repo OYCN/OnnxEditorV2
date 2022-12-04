@@ -33,9 +33,12 @@ namespace simonnx {
 using NodeObjBase = Object<ObjType_t::kNode>;
 using NodeProtoPtr = ::ONNX_NAMESPACE::NodeProto*;
 
+class SimOnnxCtx;
+
 class NodeObj : public NodeObjBase {
  public:
-  explicit NodeObj(const ::ONNX_NAMESPACE::NodeProto* handle);
+  explicit NodeObj(SimOnnxCtx* ctx, ::ONNX_NAMESPACE::NodeProto* handle,
+                   bool own = false);
   ~NodeObj();
 
   std::string getName();
@@ -45,6 +48,7 @@ class NodeObj : public NodeObjBase {
 
  private:
   NodeProtoPtr handle_;
+  bool own_;
 };
 
 using NodeHandle = utils::simonnx::NodeObj*;

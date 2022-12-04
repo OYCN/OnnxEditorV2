@@ -115,7 +115,8 @@ GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx) {
   for (size_t i = 0; i < len; i++) {
     auto& node = proto_nodes[i];
     auto& name = node.name();
-    out_id2node[i] = SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(&node);
+    auto node_ptr = model.mutable_graph()->mutable_node(i);
+    out_id2node[i] = SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(node_ptr);
     for (const auto& input : node.input()) {
       if (graph_output_map_node.count(input) == 1) {
         auto& target_nodes = graph_output_map_node.at(input);
@@ -156,10 +157,10 @@ GraphNode2NodeDescExtTmp gen_random_graph(int num) {
 
   std::vector<NodeHandle> idx2node(g.getLen());
   for (size_t i = 0; i < g.getLen(); i++) {
-    NodeProto np;
-    np.set_name(std::to_string(i));
-    np.set_op_type(std::to_string(i));
-    idx2node[i] = SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(&np);
+    NodeProto* np = new NodeProto();
+    np->set_name(std::to_string(i));
+    np->set_op_type(std::to_string(i));
+    idx2node[i] = SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(np, true);
   }
 
   size_t edge_count = 0;

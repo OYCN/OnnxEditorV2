@@ -22,12 +22,17 @@ namespace simonnx {
 
 using NodeProto = ::ONNX_NAMESPACE::NodeProto;
 
-NodeObj::NodeObj(const ::ONNX_NAMESPACE::NodeProto* handle) {
-  CHECK(handle != nullptr);
-  handle_ = new NodeProto(*handle);
+NodeObj::NodeObj(SimOnnxCtx* ctx, ::ONNX_NAMESPACE::NodeProto* handle,
+                 bool own)
+    : NodeObjBase(ctx), own_(own), handle_(handle) {
+  CHECK(handle_ != nullptr);
 }
 
-NodeObj::~NodeObj() { delete handle_; }
+NodeObj::~NodeObj() {
+  if (own_) {
+    delete handle_;
+  }
+}
 
 std::string NodeObj::getName() { return handle_->name(); }
 

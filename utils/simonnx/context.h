@@ -25,12 +25,14 @@
 
 namespace ONNX_NAMESPACE {
 class ModelProto;
+class GraphProto;
 };
 
 namespace utils {
 namespace simonnx {
 
 using ModelProtoPtr = ::ONNX_NAMESPACE::ModelProto*;
+using GraphProtoPtr = ::ONNX_NAMESPACE::GraphProto*;
 
 class SimOnnxCtx {
  public:
@@ -62,7 +64,7 @@ class SimOnnxCtx {
   template <typename _Ret, typename... _Args>
   _Ret CreateObj(_Args&&... args) {
     using ObjType = typename std::remove_pointer<_Ret>::type;
-    auto ptr = new ObjType(std::forward<_Args>(args)...);
+    auto ptr = new ObjType(this, std::forward<_Args>(args)...);
     ptr->setId(obj_ctx_[ObjType::ObjType].size());
     obj_ctx_[ObjType::ObjType].emplace_back(ptr);
     return ptr;

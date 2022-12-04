@@ -29,7 +29,8 @@ using TensorObjBase = Object<ObjType_t::kTensor>;
 
 class TensorObj : public TensorObjBase {
  public:
-  explicit TensorObj(std::string name = "") : TensorObjBase(), name_(name) {}
+  explicit TensorObj(SimOnnxCtx* ctx, std::string name = "")
+      : TensorObjBase(ctx), name_(name) {}
   ~TensorObj() {}
   std::string getName() { return name_; }
   void setName(std::string name) { name_ = name; }

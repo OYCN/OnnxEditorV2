@@ -21,6 +21,8 @@
 namespace utils {
 namespace simonnx {
 
+class SimOnnxCtx;
+
 enum class ObjType_t { kNode = 0, kTensor, kMax };
 
 class IObject {
@@ -30,6 +32,7 @@ class IObject {
   virtual bool isDeleted() const = 0;
   virtual void setDeleted(bool deleted) = 0;
   virtual ObjType_t getObjType() const = 0;
+  virtual SimOnnxCtx* getCtx() const = 0;
 
  protected:
   virtual void setId(size_t id) = 0;
@@ -43,15 +46,17 @@ class Object : public IObject {
   void setDeleted(bool deleted) override { deleted_ = deleted; }
   static constexpr ObjType_t ObjType = _OT;
   ObjType_t getObjType() const override { return ObjType; }
+  SimOnnxCtx* getCtx() const override { return ctx_; }
 
  protected:
-  Object() = default;
+  Object(SimOnnxCtx* ctx) : ctx_(ctx) {}
 
  private:
   friend class SimOnnxCtx;
   void setId(size_t id) override { id_ = id; }
 
  private:
+  SimOnnxCtx* ctx_ = nullptr;
   size_t id_;
   bool deleted_ = false;
 };
