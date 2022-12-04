@@ -22,7 +22,7 @@
 
 #include "gui/graph/view.h"
 #include "gui/mainwindow.h"
-#include "utils/simonnx/onnx_meta.h"
+#include "utils/simonnx/onnx_help.h"
 
 namespace gui {
 

@@ -14,9 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include "utils/simonnx/onnx_meta.h"
+#include "utils/simonnx/onnx_help.h"
 
-TEST(simonnx, genOnnxMeta) {
-  ::ONNX_NAMESPACE::ModelProto empty_model;
-  auto empty_meta = utils::simonnx::genOnnxMeta(empty_model);
+TEST(simonnx, gen_random_graph) {
+  auto g = utils::simonnx::gen_random_graph(10);
 }
