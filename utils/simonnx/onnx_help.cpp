@@ -42,6 +42,7 @@ SimOnnxCtx* open_onnx(const std::string path) {
   CHECK(fs::exists(path));
   CHECK(!fs::is_directory(path));
   auto socb = SimOnnxCtx::getSimOnnxCtx();
+  socb->reset();
   auto omp = socb->getModelProtoPtr();
   std::ifstream fin(path, std::ios::in | std::ios::binary);
   if (!fin.good()) {
@@ -144,7 +145,7 @@ GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx) {
   }
   return GraphNode2NodeDescExtTmp(
       {len, out_outputs, out_inputs, out_whs, out_roots}, out_id2node,
-      out_node2tensor);
+      out_node2tensor, SimOnnxCtx::getSimOnnxCtx());
 }
 
 GraphNode2NodeDescExtTmp onnx2graph(const std::string path) {
@@ -172,7 +173,8 @@ GraphNode2NodeDescExtTmp gen_random_graph(int num) {
     }
   }
 
-  return GraphNode2NodeDescExtTmp(g, idx2node, node2tensor);
+  return GraphNode2NodeDescExtTmp(g, idx2node, node2tensor,
+                                  SimOnnxCtx::getSimOnnxCtx());
 }
 
 }  // namespace simonnx

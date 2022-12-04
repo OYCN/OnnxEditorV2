@@ -84,8 +84,10 @@ void Actions::act_file_open_callback() {
   LOG(INFO) << "act_file_open_callback";
   QString fileName = QFileDialog::getOpenFileName(parent_, "open onnx file",
                                                   "/", tr("*.onnx"));
-  auto g = utils::simonnx::onnx2graph(fileName.toStdString());
+  // onnx2graph will reset ctx, if not switch ctx obj, we will clear scene
+  // before process it
   parent_->scene_->clear();
+  auto g = utils::simonnx::onnx2graph(fileName.toStdString());
   parent_->scene_->loadGraph(&g);
   parent_->scene_->layout();
   parent_->view_->expand(5);
@@ -104,12 +106,11 @@ void Actions::act_file_close_callback() {
   parent_->scene_->clear();
 }
 
-void Actions::act_show_res_callback() {
-  LOG(INFO) << "act_show_res_callback";
-}
+void Actions::act_show_res_callback() { LOG(INFO) << "act_show_res_callback"; }
 
 void Actions::act_random_graph_callback() {
   LOG(INFO) << "act_random_graph_callback";
+  parent_->scene_->clear();
   auto g = utils::simonnx::gen_random_graph(50);
   parent_->scene_->loadGraph(&g);
   parent_->scene_->layout();

@@ -163,10 +163,19 @@ void Scene::clear() {
     delete n;
   }
   mNodes.clear();
+  mNode2Inputs.clear();
+  mNode2Outputs.clear();
+  mEdge2Nodes.clear();
   update();
+  if (ctx_ != nullptr) {
+    ctx_->reset();
+    ctx_ = nullptr;
+  }
 }
 
 void Scene::loadGraph(GraphNode2NodeDescExt* g) {
+  clear();
+  ctx_ = g->getCtx();
   std::vector<graph::Node*> nodes(g->getLen());
   for (size_t i = 0; i < g->getLen(); i++) {
     QList<QString> attr_key;

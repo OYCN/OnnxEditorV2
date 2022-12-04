@@ -24,5 +24,16 @@ namespace simonnx {
 
 SimOnnxCtx::SimOnnxCtx() { mp_ = new ::ONNX_NAMESPACE::ModelProto(); }
 
+void SimOnnxCtx::reset() {
+  if (obj_ctx_.size() > 0) {
+    for (auto kv : obj_ctx_) {
+      for (auto ptr : obj_ctx_.at(kv.first)) {
+        delete ptr;
+      }
+      obj_ctx_.at(kv.first).clear();
+    }
+  }
+}
+
 }  // namespace simonnx
 }  // namespace utils

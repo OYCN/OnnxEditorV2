@@ -32,10 +32,7 @@ class Scene : public QGraphicsScene {
   Q_OBJECT
 
  public:
-  using NodeHandle = utils::simonnx::NodeHandle;
-  using TensorHandle = utils::simonnx::TensorHandle;
-  using GraphNode2NodeDescExt =
-      utils::algorithm::desc::GraphNode2NodeDescExt<NodeHandle, TensorHandle>;
+  using GraphNode2NodeDescExt = utils::simonnx::GraphNode2NodeDescExt;
 
   explicit Scene(config::Ui& cfg, QObject* parent = nullptr);
 
@@ -53,6 +50,7 @@ class Scene : public QGraphicsScene {
   void loadGraph(GraphNode2NodeDescExt* g);
 
  private:
+  utils::simonnx::SimOnnxCtx* ctx_;
   config::Ui& mCfg;
   QList<Node*> mNodes;
   QList<Edge*> mEdges;

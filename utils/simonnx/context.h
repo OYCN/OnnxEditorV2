@@ -20,13 +20,14 @@
 #include <memory>
 #include <type_traits>
 
+#include "utils/algorithm/graph_desc.h"
 #include "utils/simonnx/node.h"
 #include "utils/simonnx/tensor.h"
 
 namespace ONNX_NAMESPACE {
 class ModelProto;
 class GraphProto;
-};
+};  // namespace ONNX_NAMESPACE
 
 namespace utils {
 namespace simonnx {
@@ -58,6 +59,8 @@ class SimOnnxCtx {
 
   ModelProtoPtr getModelProtoPtr() { return mp_; }
 
+  void reset();
+
  private:
   SimOnnxCtx();
 
@@ -79,6 +82,15 @@ class SimOnnxCtx {
   std::map<ObjType_t, std::list<IObject*>> obj_ctx_;
   ModelProtoPtr mp_;
 };
+
+using SimOnnxCtxHandle = SimOnnxCtx*;
+
+using GraphNode2NodeDescExtTmp =
+    utils::algorithm::desc::GraphNode2NodeDescExtTmp<NodeHandle, TensorHandle,
+                                                     SimOnnxCtxHandle>;
+using GraphNode2NodeDescExt =
+    utils::algorithm::desc::GraphNode2NodeDescExt<NodeHandle, TensorHandle,
+                                                  SimOnnxCtxHandle>;
 
 }  // namespace simonnx
 }  // namespace utils

@@ -49,7 +49,7 @@ class Object : public IObject {
   SimOnnxCtx* getCtx() const override { return ctx_; }
 
  protected:
-  Object(SimOnnxCtx* ctx) : ctx_(ctx) {}
+  explicit Object(SimOnnxCtx* ctx) : ctx_(ctx) {}
 
  private:
   friend class SimOnnxCtx;

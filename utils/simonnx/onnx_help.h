@@ -20,16 +20,10 @@
 #include <string>
 #include <vector>
 
-#include "utils/algorithm/graph_desc.h"
 #include "utils/simonnx/context.h"
 
 namespace utils {
 namespace simonnx {
-
-using NodeHandle = utils::simonnx::NodeHandle;
-using TensorHandle = utils::simonnx::TensorHandle;
-using GraphNode2NodeDescExtTmp =
-    utils::algorithm::desc::GraphNode2NodeDescExtTmp<NodeHandle, TensorHandle>;
 
 GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx);
 GraphNode2NodeDescExtTmp onnx2graph(const std::string path);
