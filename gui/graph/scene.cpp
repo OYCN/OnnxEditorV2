@@ -176,6 +176,7 @@ void Scene::clear() {
 void Scene::loadGraph(GraphNode2NodeDescExt* g) {
   clear();
   ctx_ = g->getCtx();
+  LOG(INFO) << "set ctx_ to " << ctx_;
   std::vector<graph::Node*> nodes(g->getLen());
   for (size_t i = 0; i < g->getLen(); i++) {
     QList<QString> attr_key;

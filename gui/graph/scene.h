@@ -50,7 +50,7 @@ class Scene : public QGraphicsScene {
   void loadGraph(GraphNode2NodeDescExt* g);
 
  private:
-  utils::simonnx::SimOnnxCtx* ctx_;
+  utils::simonnx::SimOnnxCtx* ctx_ = nullptr;
   config::Ui& mCfg;
   QList<Node*> mNodes;
   QList<Edge*> mEdges;

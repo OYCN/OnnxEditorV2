@@ -137,11 +137,6 @@ GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx) {
       out_node2tensor, SimOnnxCtx::getSimOnnxCtx());
 }
 
-GraphNode2NodeDescExtTmp onnx2graph(const std::string path) {
-  SimOnnxCtx::getSimOnnxCtx()->openOnnx(path);
-  return onnx2graph(SimOnnxCtx::getSimOnnxCtx());
-}
-
 using NodeProto = ::ONNX_NAMESPACE::NodeProto;
 GraphNode2NodeDescExtTmp gen_random_graph(int num) {
   auto g = utils::algorithm::external::ogdf::genRandomGraph(num, num);

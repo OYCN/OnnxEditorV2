@@ -16,9 +16,9 @@
 
 #include <glog/logging.h>
 
-#include <QDialog>
 #include <QFileDialog>
 #include <QMenuBar>
+#include <QMessageBox>
 
 #include "gui/graph/view.h"
 #include "gui/mainwindow.h"
@@ -84,10 +84,24 @@ void Actions::act_file_open_callback() {
   LOG(INFO) << "act_file_open_callback";
   QString fileName = QFileDialog::getOpenFileName(parent_, "open onnx file",
                                                   "/", tr("*.onnx"));
+  if (fileName.isEmpty()) {
+    return;
+  }
   // onnx2graph will reset ctx, if not switch ctx obj, we will clear scene
   // before process it
   parent_->scene_->clear();
-  auto g = utils::simonnx::onnx2graph(fileName.toStdString());
+  utils::simonnx::SimOnnxCtx::getSimOnnxCtx()->setErrorFn([&](std::string msg) {
+    QMessageBox::critical(parent_, tr("Open Error"), tr(msg.c_str()),
+                          QMessageBox::Ok);
+  });
+  bool ret = utils::simonnx::SimOnnxCtx::getSimOnnxCtx()->openOnnx(
+      fileName.toStdString());
+  utils::simonnx::SimOnnxCtx::getSimOnnxCtx()->resetErrorFn();
+  if (!ret) {
+    return;
+  }
+  auto g =
+      utils::simonnx::onnx2graph(utils::simonnx::SimOnnxCtx::getSimOnnxCtx());
   parent_->scene_->loadGraph(&g);
   parent_->scene_->layout();
   parent_->view_->expand(5);
@@ -96,9 +110,21 @@ void Actions::act_file_open_callback() {
 
 void Actions::act_file_save_a_callback() {
   LOG(INFO) << "act_file_save_a_callback";
-  QDialog dialog(parent_);
-  dialog.setWindowTitle("act_file_save_a_callback");
-  dialog.exec();
+  QString fileName = QFileDialog::getSaveFileName(parent_, "save onnx file",
+                                                  "/", tr("*.onnx"));
+  if (fileName.isEmpty()) {
+    return;
+  }
+  utils::simonnx::SimOnnxCtx::getSimOnnxCtx()->setErrorFn([&](std::string msg) {
+    QMessageBox::critical(parent_, tr("Save Error"), tr(msg.c_str()),
+                          QMessageBox::Ok);
+  });
+  bool ret = utils::simonnx::SimOnnxCtx::getSimOnnxCtx()->saveOnnx(
+      fileName.toStdString(), true);
+  utils::simonnx::SimOnnxCtx::getSimOnnxCtx()->resetErrorFn();
+  if (!ret) {
+    return;
+  }
 }
 
 void Actions::act_file_close_callback() {

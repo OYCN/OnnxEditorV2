@@ -48,7 +48,7 @@ class TensorObj : public TensorObjBase {
   explicit TensorObj(SimOnnxCtx* ctx) : TensorObjBase(ctx) {}
   virtual ~TensorObj() {}
   virtual std::string getName() = 0;
-  virtual bool setName(std::string name) { return false; };
+  virtual bool setName(std::string name) { return false; }
 };
 
 using TensorHandle = utils::simonnx::TensorObj*;

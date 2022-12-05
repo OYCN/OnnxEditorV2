@@ -26,7 +26,6 @@ namespace utils {
 namespace simonnx {
 
 GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx);
-GraphNode2NodeDescExtTmp onnx2graph(const std::string path);
 GraphNode2NodeDescExtTmp gen_random_graph(int num);
 }  // namespace simonnx
 }  // namespace utils

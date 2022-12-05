@@ -18,6 +18,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <mutex>  // NOLINT [build/c++11]
 #include <type_traits>
 
 #include "utils/algorithm/graph_desc.h"
@@ -37,11 +38,13 @@ using GraphProtoPtr = ::ONNX_NAMESPACE::GraphProto*;
 
 class SimOnnxCtx {
  public:
+  SimOnnxCtx();
+
   static SimOnnxCtx* createSimOnnxCtx() {
+    static std::mutex mutex;
+    std::unique_lock lock(mutex);
     static size_t idx = 0;
-    SimOnnxCtx new_ctx;
-    getCtxMap().emplace(idx, std::move(new_ctx));
-    auto ptr = &getCtxMap().at(idx++);
+    auto ptr = &getCtxMap()[idx];
     return ptr;
   }
   static SimOnnxCtx* getSimOnnxCtx(size_t idx = 0) {
@@ -60,13 +63,18 @@ class SimOnnxCtx {
 
   ModelProtoPtr getModelProtoPtr() { return mp_; }
   bool openOnnx(const std::string path);
+  bool saveOnnx(const std::string path, bool overwrite);
   void reset();
-
- private:
-  SimOnnxCtx();
+  void setDebugFn(std::function<void(std::string)> fn);
+  void setInfoFn(std::function<void(std::string)> fn);
+  void setErrorFn(std::function<void(std::string)> fn);
+  void resetDebugFn();
+  void resetInfoFn();
+  void resetErrorFn();
 
   template <typename _Ret, typename... _Args>
   _Ret CreateObj(_Args&&... args) {
+    std::unique_lock lock(mutex_);
     using ObjType = typename std::remove_pointer<_Ret>::type;
     auto ptr = ObjType::Create(this, std::forward<_Args>(args)...);
     ptr->setId(obj_ctx_[ObjType::ObjType].size());
@@ -80,8 +88,12 @@ class SimOnnxCtx {
   }
 
  private:
+  std::mutex mutex_;
   std::map<ObjType_t, std::list<IObject*>> obj_ctx_;
   ModelProtoPtr mp_;
+  std::function<void(std::string)> infofn_;
+  std::function<void(std::string)> errorfn_;
+  std::function<void(std::string)> debugfn_;
 };
 
 using SimOnnxCtxHandle = SimOnnxCtx*;
