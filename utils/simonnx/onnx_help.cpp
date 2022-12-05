@@ -17,42 +17,13 @@
 #include <glog/logging.h>
 #include <onnx/onnx_pb.h>
 
-#include <filesystem>
-#include <fstream>
 #include <magic_enum.hpp>
 
 #include "utils/algorithm/external/ogdf/ogdf_proxy.h"
 #include "utils/simonnx/context.h"
 
-#define CHECK_RETURN(cond, def) \
-  do {                          \
-    bool ret = (cond);          \
-    if (!ret) {                 \
-      return def;               \
-    }                           \
-  } while (0)
-
 namespace utils {
 namespace simonnx {
-
-namespace fs = std::filesystem;
-
-SimOnnxCtx* open_onnx(const std::string path) {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-  CHECK(fs::exists(path));
-  CHECK(!fs::is_directory(path));
-  auto socb = SimOnnxCtx::getSimOnnxCtx();
-  socb->reset();
-  auto omp = socb->getModelProtoPtr();
-  std::ifstream fin(path, std::ios::in | std::ios::binary);
-  if (!fin.good()) {
-    LOG(FATAL) << "Could not open file " << path;
-  } else {
-    bool ret = omp->ParseFromIstream(&fin);
-    CHECK(ret);
-  }
-  return socb;
-}
 
 template <typename _K, typename _V>
 void map_set_unique_insert(std::map<_K, std::set<_V>>& mapset, const _K& key,
@@ -167,7 +138,8 @@ GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx) {
 }
 
 GraphNode2NodeDescExtTmp onnx2graph(const std::string path) {
-  return onnx2graph(open_onnx(path));
+  SimOnnxCtx::getSimOnnxCtx()->openOnnx(path);
+  return onnx2graph(SimOnnxCtx::getSimOnnxCtx());
 }
 
 using NodeProto = ::ONNX_NAMESPACE::NodeProto;

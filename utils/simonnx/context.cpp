@@ -18,11 +18,37 @@
 #include <onnx/onnx_pb.h>
 
 #include <cstdio>
+#include <filesystem>
+#include <fstream>
 
 namespace utils {
 namespace simonnx {
 
+namespace fs = std::filesystem;
+
 SimOnnxCtx::SimOnnxCtx() { mp_ = new ::ONNX_NAMESPACE::ModelProto(); }
+
+bool SimOnnxCtx::openOnnx(const std::string path) {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+  if (!fs::exists(path)) {
+    LOG(ERROR) << "Path invalid " << path;
+    return false;
+  }
+  if (fs::is_directory(path)) {
+    LOG(ERROR) << "Path is not a file " << path;
+    return false;
+  }
+  this->reset();
+  auto omp = this->getModelProtoPtr();
+  std::ifstream fin(path, std::ios::in | std::ios::binary);
+  if (!fin.good()) {
+    LOG(ERROR) << "Could not open file " << path;
+    return false;
+  } else {
+    bool ret = omp->ParseFromIstream(&fin);
+    return ret;
+  }
+}
 
 void SimOnnxCtx::reset() {
   if (obj_ctx_.size() > 0) {

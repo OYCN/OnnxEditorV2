@@ -48,6 +48,7 @@ class SimOnnxCtx {
     return &getCtxMap().at(idx);
   }
 
+ public:
   template <typename... _Args>
   NodeHandle CreateNodeObj(_Args&&... args) {
     return CreateObj<NodeHandle, _Args...>(std::forward<_Args>(args)...);
@@ -58,7 +59,7 @@ class SimOnnxCtx {
   }
 
   ModelProtoPtr getModelProtoPtr() { return mp_; }
-
+  bool openOnnx(const std::string path);
   void reset();
 
  private:
