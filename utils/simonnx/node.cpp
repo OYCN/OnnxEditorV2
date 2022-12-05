@@ -20,27 +20,26 @@
 namespace utils {
 namespace simonnx {
 
-using NodeProto = ::ONNX_NAMESPACE::NodeProto;
-
-NodeObj::NodeObj(SimOnnxCtx* ctx, ::ONNX_NAMESPACE::NodeProto* handle,
-                 bool own)
-    : NodeObjBase(ctx), own_(own), handle_(handle) {
-  CHECK(handle_ != nullptr);
+NodeObj* NodeObj::Create(SimOnnxCtx* ctx, FakeNode_t args) {
+  return new FakeNodeObj(ctx, args);
+}
+NodeObj* NodeObj::Create(SimOnnxCtx* ctx, NodeProtoPtr handle) {
+  return new RealNodeObj(ctx, handle);
 }
 
-NodeObj::~NodeObj() {
-  if (own_) {
-    delete handle_;
-  }
+std::string RealNodeObj::getName() { return handle_->name(); }
+
+bool RealNodeObj::setName(std::string name) {
+  handle_->set_name(name);
+  return true;
 }
 
-std::string NodeObj::getName() { return handle_->name(); }
+std::string RealNodeObj::getOpType() { return handle_->op_type(); }
 
-void NodeObj::setName(std::string name) { handle_->set_name(name); }
-
-std::string NodeObj::getOpType() { return handle_->op_type(); }
-
-void NodeObj::setOpType(std::string op_type) { handle_->set_op_type(op_type); }
+bool RealNodeObj::setOpType(std::string op_type) {
+  handle_->set_op_type(op_type);
+  return true;
+}
 
 }  // namespace simonnx
 }  // namespace utils

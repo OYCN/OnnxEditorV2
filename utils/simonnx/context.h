@@ -67,7 +67,7 @@ class SimOnnxCtx {
   template <typename _Ret, typename... _Args>
   _Ret CreateObj(_Args&&... args) {
     using ObjType = typename std::remove_pointer<_Ret>::type;
-    auto ptr = new ObjType(this, std::forward<_Args>(args)...);
+    auto ptr = ObjType::Create(this, std::forward<_Args>(args)...);
     ptr->setId(obj_ctx_[ObjType::ObjType].size());
     obj_ctx_[ObjType::ObjType].emplace_back(ptr);
     return ptr;

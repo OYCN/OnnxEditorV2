@@ -35,23 +35,51 @@ using NodeProtoPtr = ::ONNX_NAMESPACE::NodeProto*;
 
 class SimOnnxCtx;
 
+struct FakeNode_t {
+  std::string fake_op_type;
+  std::string fake_name;
+};
+
 class NodeObj : public NodeObjBase {
  public:
-  explicit NodeObj(SimOnnxCtx* ctx, ::ONNX_NAMESPACE::NodeProto* handle,
-                   bool own = false);
-  ~NodeObj();
+  static NodeObj* Create(SimOnnxCtx* ctx, FakeNode_t args);
+  static NodeObj* Create(SimOnnxCtx* ctx, NodeProtoPtr handle);
 
-  std::string getName();
-  void setName(std::string name);
-  std::string getOpType();
-  void setOpType(std::string op_type);
+ public:
+  explicit NodeObj(SimOnnxCtx* ctx) : NodeObjBase(ctx) {}
+  ~NodeObj() = default;
 
- private:
-  NodeProtoPtr handle_;
-  bool own_;
+  virtual std::string getName() = 0;
+  virtual bool setName(std::string name) { return false; }
+  virtual std::string getOpType() = 0;
+  virtual bool setOpType(std::string op_type) { return false; }
 };
 
 using NodeHandle = utils::simonnx::NodeObj*;
+
+class FakeNodeObj : public NodeObj {
+ public:
+  explicit FakeNodeObj(SimOnnxCtx* ctx, FakeNode_t args)
+      : NodeObj(ctx), faked_(args) {}
+  std::string getName() override { return faked_.fake_name; }
+  std::string getOpType() override { return faked_.fake_op_type; }
+
+ private:
+  FakeNode_t faked_;
+};
+
+class RealNodeObj : public NodeObj {
+ public:
+  explicit RealNodeObj(SimOnnxCtx* ctx, NodeProtoPtr handle)
+      : NodeObj(ctx), handle_(handle) {}
+  std::string getName() override;
+  bool setName(std::string name) override;
+  std::string getOpType() override;
+  bool setOpType(std::string op_type) override;
+
+ private:
+  NodeProtoPtr handle_;
+};
 
 }  // namespace simonnx
 }  // namespace utils

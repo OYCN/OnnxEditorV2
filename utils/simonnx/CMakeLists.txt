@@ -2,6 +2,7 @@ add_library(simonnx
   onnx_help.cpp
   context.cpp
   node.cpp
+  tensor.cpp
 )
 
 target_link_libraries(simonnx
