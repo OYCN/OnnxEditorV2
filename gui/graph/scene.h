@@ -21,12 +21,11 @@
 #include "gui/config/ui.h"
 #include "utils/algorithm/graph_desc.h"
 #include "utils/simonnx/context.h"
+#include "gui/graph/node.h"
+#include "gui/graph/edge.h"
 
 namespace gui {
 namespace graph {
-
-class Node;
-class Edge;
 
 class Scene : public QGraphicsScene {
   Q_OBJECT
@@ -38,8 +37,7 @@ class Scene : public QGraphicsScene {
 
  public:
   void updateCfg();
-  Node* addNode(const QString& title, const QList<QString>& attr_key,
-                const QList<QString>& attr_val);
+  Node* addNode(NodeHandle handle);
   Edge* addEdge(const Node* src, const Node* dst, const QString& label,
                 const QPointF& srcp = {0, 0}, const QPointF& dstp = {0, 0},
                 bool update = false);

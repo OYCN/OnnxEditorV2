@@ -4,6 +4,7 @@ add_library(graph
   scene.cpp
   node.cpp
   edge.cpp
+  node_menu.cpp
 )
 
 target_link_libraries(graph

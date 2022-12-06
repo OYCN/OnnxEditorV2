@@ -16,13 +16,20 @@
 #define GUI_GRAPH_NODE_H_
 
 #include <QGraphicsItem>
+#include <QObject>
 
 #include "gui/config/ui.h"
+#include "utils/simonnx/context.h"
+#include "gui/graph/node_menu.h"
 
 namespace gui {
 namespace graph {
 
-class Node : public QGraphicsItem {
+using NodeHandle = utils::simonnx::NodeHandle;
+
+class Node : public QObject, public QGraphicsItem {
+  friend class NodeMenu;
+
  public:
   struct NodeAttr_t {
     QString key;
@@ -34,8 +41,7 @@ class Node : public QGraphicsItem {
  public:
   explicit Node(config::Ui &cfg);
 
-  void init(const QString &title, const QList<QString> &attr_keys,
-            const QList<QString> &attr_vals);
+  void init(NodeHandle handle);
 
  public:
   QRectF boundingRect() const override;
@@ -46,9 +52,15 @@ class Node : public QGraphicsItem {
              QWidget *widget = 0) override;
   void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
   void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
+  void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+  void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+  void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 
  private:
   config::Ui &mCfg;
+  NodeMenu menu_;
+
+  NodeHandle handle_;
 
   QString mTitle = "";
   QList<NodeAttr_t> mAttrs;

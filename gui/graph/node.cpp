@@ -17,12 +17,14 @@
 #include <glog/logging.h>
 
 #include <QDebug>
+#include <QGraphicsSceneContextMenuEvent>
+#include <QMenu>
 #include <QtGui/QPainter>
 
 namespace gui {
 namespace graph {
 
-Node::Node(config::Ui &cfg) : mCfg(cfg) {
+Node::Node(config::Ui &cfg) : mCfg(cfg), menu_(this) {
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setAcceptHoverEvents(true);
 }
@@ -73,11 +75,12 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
   painter->restore();
 }
 
-void Node::init(const QString &title, const QList<QString> &attr_keys,
-                const QList<QString> &attr_vals) {
-  CHECK_GT(title.size(), 0);
-  mTitle = title;
-  CHECK_EQ(attr_keys.size(), attr_vals.size());
+void Node::init(NodeHandle handle) {
+  handle_ = handle;
+  // mTitle = handle_->getName().c_str();
+  mTitle = handle_->getOpType().c_str();
+  QList<QString> attr_keys;
+  QList<QString> attr_vals;
 
   // title
   QFont title_font(mCfg.node.mFont);
@@ -172,6 +175,18 @@ void Node::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
   // qDebug() << "Leave hover";
   mHovered = false;
   update();
+}
+
+void Node::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) {
+  // qDebug() << "Double click: " << this;
+}
+
+void Node::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+  // qDebug() << "Double press: " << this;
+}
+
+void Node::contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {
+  menu_.exec(event->screenPos());
 }
 
 }  // namespace graph

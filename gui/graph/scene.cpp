@@ -30,11 +30,10 @@ Scene::Scene(config::Ui& cfg, QObject* parent)
 
 void Scene::updateCfg() {}
 
-Node* Scene::addNode(const QString& title, const QList<QString>& attr_key,
-                     const QList<QString>& attr_val) {
+Node* Scene::addNode(NodeHandle handle) {
   auto n = new Node(mCfg);
   CHECK_NOTNULL(n);
-  n->init(title, attr_key, attr_val);
+  n->init(handle);
   addItem(n);
   mNodes.append(n);
   mNode2Inputs[n] = {};
@@ -179,15 +178,7 @@ void Scene::loadGraph(GraphNode2NodeDescExt* g) {
   LOG(INFO) << "set ctx_ to " << ctx_;
   std::vector<graph::Node*> nodes(g->getLen());
   for (size_t i = 0; i < g->getLen(); i++) {
-    QList<QString> attr_key;
-    QList<QString> attr_val;
-    auto node_handle = g->getNodeHandle(i);
-    // for (const auto& kv : g->getNodeAttrs(i)) {
-    //   attr_key.append(kv.first.c_str());
-    //   attr_val.append(kv.second.c_str());
-    // }
-    VLOG(1) << "load Node with id=" << node_handle->getId();
-    nodes[i] = addNode(node_handle->getOpType().c_str(), attr_key, attr_val);
+    nodes[i] = addNode(g->getNodeHandle(i));
   }
 
   size_t edge_count = 0;
