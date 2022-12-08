@@ -2,15 +2,20 @@ cmake_minimum_required(VERSION 3.11)
 
 project(OnnxEdit VERSION 0.0.0 LANGUAGES CXX)
 
+cmake_policy(SET CMP0077 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+
 option(ENABLE_TEST "If enable the test" ON)
 option(BUILD_SHARED_LIBS "If build as static mode" OFF)
+option(QT_PREFIX_PATH "QT LIB PATH" "${CMAKE_SOURCE_DIR}/3rd_party/qtbase-release")
 
+set(ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(3rd_party)
 
-set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/3rd_party/qtbase-release")
+set(CMAKE_PREFIX_PATH  ${CMAKE_PREFIX_PATH} ${QT_PREFIX_PATH})
 find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core)
 
 set(CMAKE_AUTOMOC ON)

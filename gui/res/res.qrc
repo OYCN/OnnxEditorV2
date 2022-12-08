@@ -1,6 +1,9 @@
+<!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource>
-        <file>appicon.ico</file>
-        <file>BM2.jpg</file>
+        <file>img/appicon.ico</file>
+        <file>img/BM2.jpg</file>
+        <file>fonts/Monospace.ttf</file>
+        <file>fonts/UbuntuMono-R.ttf</file>
     </qresource>
 </RCC>

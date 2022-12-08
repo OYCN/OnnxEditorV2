@@ -30,9 +30,8 @@ void map_set_unique_insert(std::map<_K, std::set<_V>>& mapset, const _K& key,
                            const _V& val) {
   if (mapset.count(key) == 1) {
     CHECK_EQ(mapset.at(key).count(val), 0) << key;
-  } else {
-    mapset[key].insert(val);
   }
+  mapset[key].insert(val);
 }
 
 GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx) {
@@ -41,7 +40,7 @@ GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx) {
   size_t len = model.graph().node().size();
   std::vector<std::vector<size_t>> out_outputs(len);
   std::vector<std::vector<size_t>> out_inputs(len);
-  std::vector<size_t> out_roots(len);
+  std::vector<size_t> out_roots;
   std::vector<std::pair<float, float>> out_whs(len, {0, 0});
   // ext desc
   std::vector<NodeHandle> out_id2node(len);
@@ -97,7 +96,11 @@ GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx) {
     auto node_ptr = model.mutable_graph()->mutable_node(i);
     out_id2node[i] = SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(node_ptr);
     for (const auto& input : node.input()) {
-      if (graph_output_map_node.count(input) == 1) {
+      if (input.size() == 0) {
+        VLOG(1) << "Node " << name << " has empty input";
+        continue;
+      }
+      if (graph_output_map_node.count(input) != 0) {
         auto& target_nodes = graph_output_map_node.at(input);
         CHECK_EQ(target_nodes.size(), 1) << input;
         auto target_node_idx = *target_nodes.begin();
@@ -106,11 +109,11 @@ GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx) {
         CHECK_EQ(out_node2tensor.count(nn), 0) << input;
         VLOG(1) << "add edge: " << target_node_idx << " -> " << i;
         if (graph_value_map_dix.count(input) != 0) {
-          auto value_ptr = model.mutable_graph()->mutable_value_info(i);
+          auto value_ptr = model.mutable_graph()->mutable_value_info(*graph_value_map_dix.at(input).begin());
           out_node2tensor[nn] =
               SimOnnxCtx::getSimOnnxCtx()->CreateTensorObj(value_ptr);
         } else if (graph_init_map_dix.count(input) != 0) {
-          auto init_ptr = model.mutable_graph()->mutable_initializer(i);
+          auto init_ptr = model.mutable_graph()->mutable_initializer(*graph_init_map_dix.at(input).begin());
           out_node2tensor[nn] =
               SimOnnxCtx::getSimOnnxCtx()->CreateTensorObj(init_ptr);
         } else {
@@ -118,12 +121,13 @@ GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx) {
           out_node2tensor[nn] =
               SimOnnxCtx::getSimOnnxCtx()->CreateTensorObj(args);
         }
-      } else if (graph_inputs.count(input)) {
+      } else if (graph_inputs.count(input) != 0) {
         out_roots.emplace_back(i);
       } else {
         CHECK_EQ(graph_init_map_dix.count(input), 1) << input;
       }
     }
+    CHECK_EQ(out_roots.size(), graph_inputs.size());
     for (const auto& output : node.output()) {
       if (graph_input_map_node.count(output) != 0) {
         for (const auto& target_node : graph_input_map_node.at(output)) {
@@ -132,6 +136,14 @@ GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx) {
       }
     }
   }
+  LOG(INFO) << " === Graph Summary After Read === ";
+  LOG(INFO) << "\t Input num:\t" << graph_inputs.size();
+  LOG(INFO) << "\t Root num:\t" << out_roots.size();
+  LOG(INFO) << "\t Output num:\t" << graph_outputs.size();
+  LOG(INFO) << "\t Node num:\t" << len;
+  LOG(INFO) << "\t Edge num:\t" << out_node2tensor.size();
+  LOG(INFO) << "\t Initializer num:\t" << graph_init_map_dix.size();
+  LOG(INFO) << "\t ValueInfo num:\t" << graph_value_map_dix.size();
   return GraphNode2NodeDescExtTmp(
       {len, out_outputs, out_inputs, out_whs, out_roots}, out_id2node,
       out_node2tensor, SimOnnxCtx::getSimOnnxCtx());

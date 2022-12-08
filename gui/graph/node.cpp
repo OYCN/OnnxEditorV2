@@ -27,6 +27,7 @@ namespace graph {
 Node::Node(config::Ui &cfg) : mCfg(cfg), menu_(this) {
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setAcceptHoverEvents(true);
+  setZValue(2);
 }
 
 QRectF Node::boundingRect() const { return mAllRect; }

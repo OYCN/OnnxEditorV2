@@ -24,6 +24,7 @@ namespace graph {
 Edge::Edge(config::Ui& cfg) : mCfg(cfg) {
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setAcceptHoverEvents(true);
+  setZValue(0);
 }
 
 QRectF Edge::boundingRect() const { return shape().boundingRect(); }
@@ -44,7 +45,7 @@ QPainterPath Edge::shape() const {
   ps.setMiterLimit(pen.miterLimit());
 
   QPainterPath p = ps.createStroke(mPath);
-  p.addRect(mLabelRect);
+  // p.addRect(mLabelRect);
   p.addEllipse(mSrcP, mCfg.edge.mEdgeStartPointRadius,
                mCfg.edge.mEdgeStartPointRadius);
   p.addEllipse(mDstP, mCfg.edge.mEdgeStopPointRadius,
@@ -88,14 +89,14 @@ void Edge::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
                        mCfg.edge.mEdgeStopPointRadius);
 
   // for label
-  {
-    painter->save();
-    QFont f(mCfg.edge.mEdgeFont);
-    painter->setFont(f);
-    painter->setPen(mCfg.edge.mEdgeFontColor);
-    painter->drawText(mLabelRect, Qt::AlignLeft, mLabel);
-    painter->restore();
-  }
+  // {
+  //   painter->save();
+  //   QFont f(mCfg.edge.mEdgeFont);
+  //   painter->setFont(f);
+  //   painter->setPen(mCfg.edge.mEdgeFontColor);
+  //   painter->drawText(mLabelRect, Qt::AlignLeft, mLabel);
+  //   painter->restore();
+  // }
 
   painter->restore();
 }
@@ -167,9 +168,9 @@ void Edge::updatePoints(const QPointF* srcp, const QPointF* dstp) {
   QLineF l(mSrcP, mDstP);
   auto center = l.center();
 
-  QFontMetrics fm(QFont(mCfg.edge.mEdgeFont));
-  QRectF rect = fm.boundingRect(mLabel);
-  mLabelRect = QRectF(center.x(), center.y(), rect.width() + 1, rect.height());
+  // QFontMetrics fm(QFont(mCfg.edge.mEdgeFont));
+  // QRectF rect = fm.boundingRect(mLabel);
+  // mLabelRect = QRectF(center.x(), center.y(), rect.width() + 1, rect.height());
 
   update();
 }

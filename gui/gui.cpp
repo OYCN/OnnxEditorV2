@@ -14,17 +14,26 @@
 
 #include "gui/gui.h"
 
-#include <QtWidgets/QApplication>
+#include <glog/logging.h>
+
+#include <QApplication>
+#include <QFontDatabase>
 
 #include "gui/mainwindow.h"
 
 namespace gui {
 
 int gui_on(int argc, char* argv[]) {
-  QApplication a(argc, argv);
+  QApplication app(argc, argv);
+  // QString fontPath = ":/fonts/Monospace.ttf";
+  QString fontPath = ":/fonts/UbuntuMono-R.ttf";
+  int fontId = QFontDatabase::addApplicationFont(fontPath);
+  CHECK_NE(fontId, -1);
+  QFont font("Monospace");
+  app.setFont(font);
   MainWindow w;
   w.show();
-  return a.exec();
+  return app.exec();
 }
 
 }  // namespace gui

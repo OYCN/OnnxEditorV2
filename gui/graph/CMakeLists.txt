@@ -1,5 +1,5 @@
 
-add_library(graph
+add_library(graph STATIC
   view.cpp
   scene.cpp
   node.cpp

@@ -1,6 +1,6 @@
 add_subdirectory(external)
 
-add_library(utils_algorithm
+add_library(utils_algorithm STATIC
   topo_sort.cpp
   layout.cpp
 )

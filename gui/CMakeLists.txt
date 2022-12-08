@@ -1,6 +1,6 @@
 add_subdirectory(graph)
 
-add_library(gui
+add_library(gui OBJECT
   gui.cpp
   mainwindow.cpp
   actions.cpp

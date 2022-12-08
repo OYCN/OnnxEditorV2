@@ -1,4 +1,4 @@
-add_library(simonnx
+add_library(simonnx STATIC
   onnx_help.cpp
   context.cpp
   node.cpp
