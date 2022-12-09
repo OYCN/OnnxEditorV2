@@ -26,4 +26,3 @@ build_multi_platform_docker () {
 
 build_multi_platform_docker "ubuntu" "22.04"
 build_multi_platform_docker "ubuntu" "20.04"
-build_multi_platform_docker "ubuntu" "18.04"

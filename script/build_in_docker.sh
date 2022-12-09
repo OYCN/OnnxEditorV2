@@ -13,6 +13,14 @@ parse_args ()
       CURRENT_OPT="$1"
       debug_print "${CURRENT_OPT}"
       case "$1" in
+      --os-name)
+          shift
+          OS_NAME="${1}"
+          ;;
+      --os-version)
+          shift
+          OS_VER="${1}"
+          ;;
       -r|--release)
           BUILD_TYPE="Release"
           ;;

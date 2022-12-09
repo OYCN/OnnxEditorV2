@@ -29,7 +29,8 @@ ${QT_DIR}/configure \
     -make libs \
     -nomake tests \
     -nomake examples \
-    -prefix ${QT_DST}
+    -prefix ${QT_DST} \
+    ${@}
     # -xcb \
     # -system-sqlite \
     # -system-pcre \
