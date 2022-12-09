@@ -5,7 +5,7 @@ set -e
 source "$(cd "$(dirname "${0}")"; pwd)/utils/common.sh" > /dev/null
 
 BUILD_TYPE=${BUILD_TYPE:-"Debug"}
-BUILD_DIR=${BUILD_DIR:-"${CODE_DIR}/build"}
+BUILD_DIR=${BUILD_DIR:-"/hostfs/${CODE_DIR}/build"}
 
 parse_args ()
 {
