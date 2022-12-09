@@ -127,7 +127,8 @@ GraphNode2NodeDescExtTmp onnx2graph(SimOnnxCtx* ctx) {
         CHECK_EQ(graph_init_map_dix.count(input), 1) << input;
       }
     }
-    CHECK_EQ(out_roots.size(), graph_inputs.size());
+    // If input not as a fake node, the root num not equal to input num
+    // CHECK_EQ(out_roots.size(), graph_inputs.size());
     for (const auto& output : node.output()) {
       if (graph_input_map_node.count(output) != 0) {
         for (const auto& target_node : graph_input_map_node.at(output)) {
