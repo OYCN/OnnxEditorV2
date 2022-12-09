@@ -23,6 +23,7 @@ parse_args ()
   TAG=""
   PLATFORM=()
   UPLOAD="no"
+  REBUILD="no"
   while [ "$#" -gt 0 ]; do
       CURRENT_OPT="$1"
       debug_print "${CURRENT_OPT}"
@@ -50,6 +51,10 @@ parse_args ()
       -u|--upload)
           UPLOAD="yes"
           debug_print "set UPLOAD to ${UPLOAD}"
+          ;;
+      -r|--rebuild)
+          REBUILD="yes"
+          debug_print "set REBUILD to ${REBUILD}"
           ;;
       -d|--debug)
           DEBUG="yes"
@@ -138,12 +143,18 @@ check_args
 
 if [ "${UPLOAD}" = "yes" ]
 then
-  CMD+=( "&&" docker push ${DOCKER_PREFIX}:${TAG} )
+  CMD+=( "&&" docker push "${DOCKER_PREFIX}:${TAG}" )
 fi
 
 echo "${CMD[*]}"
 
 if [ "${DEBUG}" = "no" ]
 then
-  bash -c "${CMD[*]}"
+  if ! docker pull "${DOCKER_PREFIX}:${TAG}"
+  then
+    bash -c "${CMD[*]}"
+  elif [ "${REBUILD}" = "yes" ]
+  then
+    bash -c "${CMD[*]}"
+  fi
 fi
