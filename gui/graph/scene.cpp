@@ -20,65 +20,84 @@
 #include "gui/graph/node.h"
 #include "utils/algorithm/layout.h"
 
-// #include "utils/algorithm/external/ogdf/ogdf_proxy.h"
+using FakeTensor_t = utils::simonnx::FakeTensor_t;
 
 namespace gui {
 namespace graph {
 
-Scene::Scene(config::Ui& cfg, QObject* parent)
-    : mCfg(cfg), QGraphicsScene{parent} {}
+Scene::Scene(Context& cfg, QObject* parent)
+    : gui_ctx_(cfg), QGraphicsScene{parent} {}
 
-void Scene::updateCfg() {}
+void Scene::refreshAll() {}
 
 Node* Scene::addNode(NodeHandle handle) {
-  auto n = new Node(mCfg);
+  auto n = new Node(gui_ctx_);
   CHECK_NOTNULL(n);
-  n->init(handle);
+  n->bind(handle);
   addItem(n);
-  mNodes.append(n);
-  mNode2Inputs[n] = {};
-  mNode2Outputs[n] = {};
+  nodes_.append(n);
+
+  auto inputs = n->getInputs();
+  auto outputs = n->getOutputs();
+  for (const auto& v : n->getInputs()) {
+    edge_dst_[v].insert(n);
+  }
+  for (const auto& v : n->getOutputs()) {
+    edge_src_[v].insert(n);
+  }
+
   return n;
 }
 
-Edge* Scene::addEdge(const Node* src, const Node* dst, const QString& label,
-                     const QPointF& srcp, const QPointF& dstp, bool update) {
-  VLOG(1) << "add edge: " << label.toStdString();
-  auto e = new Edge(mCfg);
-  CHECK_NOTNULL(e);
-
-  if (src != nullptr) {
-    CHECK(mNode2Outputs.contains(src));
-    mNode2Outputs[src].append(e);
-    VLOG(1) << "\t from: " << src->getTitle().toStdString();
+Edge* Scene::addEdge(TensorHandle handle) {
+  VLOG(1) << "add edge: " << handle->getName();
+  QString name = QString::fromStdString(handle->getName());
+  if (!edges_.contains(name)) {
+    auto e = new Edge(gui_ctx_);
+    CHECK_NOTNULL(e);
+    e->bind(handle);
+    addItem(e);
+    edges_[name] = e;
+    return e;
   } else {
-    VLOG(1) << "\t from: Point(" << srcp.x() << ", " << dstp.y() << ")";
+    VLOG(1) << "already exist, skip";
+    return nullptr;
   }
-
-  if (dst != nullptr) {
-    CHECK(mNode2Inputs.contains(dst));
-    mNode2Inputs[dst].append(e);
-    VLOG(1) << "\t from: " << dst->getTitle().toStdString();
-  } else {
-    VLOG(1) << "\t from: Point(" << dstp.x() << ", " << dstp.y() << ")";
-  }
-
-  CHECK(!mEdge2Nodes.contains(e));
-  mEdge2Nodes[e] = {src, dst};
-  e->init(src, dst, label, srcp, dstp);
-  if (update) {
-    e->updatePoints();
-  }
-  addItem(e);
-  mEdges.append(e);
-
-  return e;
 }
 
-void Scene::updateEdgePoints() {
-  for (auto e : mEdges) {
-    e->updatePoints();
+void Scene::updateEdge() {
+  for (const auto& e : edges_) {
+    updateEdge(e->getName());
   }
+}
+
+void Scene::updateEdge(const QString& name) {
+  CHECK(edges_.contains(name));
+  CHECK(edge_dst_.contains(name));
+  CHECK(edge_src_.contains(name));
+  QList<QPointF> src;
+  VLOG(1) << "src size: " << name.toStdString() << " -> "
+          << edge_src_[name].size();
+  VLOG(1) << "dst size: " << name.toStdString() << " -> "
+          << edge_dst_[name].size();
+  for (const auto& n : edge_src_[name]) {
+    if (!n->isVisible()) {
+      continue;
+    }
+    QPointF pos = n->pos();
+    QRectF rect = n->boundingRect();
+    src.push_back({pos.x() + rect.width() / 2, pos.y() + rect.height()});
+  }
+  QList<QPointF> dst;
+  for (const auto& n : edge_dst_[name]) {
+    if (!n->isVisible()) {
+      continue;
+    }
+    QPointF pos = n->pos();
+    QRectF rect = n->boundingRect();
+    dst.push_back({pos.x() + rect.width() / 2, pos.y()});
+  }
+  edges_[name]->updateEdge(src, dst);
 }
 
 void Scene::layout() {
@@ -87,41 +106,45 @@ void Scene::layout() {
   using utils::algorithm::layout::LayoutAlgorithm_t;
 
   std::map<const Node*, size_t> node2idx;
-  std::vector<Node*> idx2node(mNodes.size());
-  for (size_t i = 0; i < mNodes.size(); i++) {
-    auto& node = mNodes[i];
+  QList<Node*> idx2node;
+  for (auto node : nodes_) {
+    if (!node->isVisible()) {
+      continue;
+    }
     CHECK_EQ(node2idx.count(node), 0);
-    node2idx[node] = i;
-    idx2node[i] = node;
+    node2idx[node] = idx2node.size();
+    idx2node.push_back(node);
   }
 
-  size_t g_len = mNodes.size();
+  size_t g_len = idx2node.size();
   std::vector<size_t> g_roots;
   std::vector<std::pair<float, float>> g_whs(g_len);
   std::vector<std::vector<size_t>> g_outputs(g_len);
   std::vector<std::vector<size_t>> g_inputs(g_len);
-  for (size_t i = 0; i < mNodes.size(); i++) {
-    auto& node = mNodes[i];
-    CHECK(mNode2Inputs.contains(node));
-    CHECK(mNode2Outputs.contains(node));
-    auto& inputs = mNode2Inputs[node];
-    auto& outputs = mNode2Outputs[node];
+  for (size_t i = 0; i < idx2node.size(); i++) {
+    auto& node = idx2node[i];
+    auto inputs = node->getInputs();
+    auto outputs = node->getOutputs();
     if (inputs.size() == 0) {
       g_roots.push_back(i);
     }
     auto rect = node->boundingRect();
     g_whs[i] = {rect.width(), rect.height()};
-    for (auto input_e : inputs) {
-      auto e = mEdge2Nodes[input_e];
-      auto n = e.first == node ? e.second : e.first;
-      CHECK_EQ(node2idx.count(n), 1);
-      g_inputs[i].push_back(node2idx[n]);
+    for (auto v : inputs) {
+      auto src = edge_src_[v];
+      for (const auto& s : src) {
+        if (node2idx.count(s), 1) {
+          g_inputs[i].push_back(node2idx[s]);
+        }
+      }
     }
-    for (auto output_e : outputs) {
-      auto e = mEdge2Nodes[output_e];
-      auto n = e.first == node ? e.second : e.first;
-      CHECK_EQ(node2idx.count(n), 1);
-      g_outputs[i].push_back(node2idx[n]);
+    for (auto v : outputs) {
+      auto dst = edge_dst_[v];
+      for (const auto& d : dst) {
+        if (node2idx.count(d), 1) {
+          g_outputs[i].push_back(node2idx[d]);
+        }
+      }
     }
   }
 
@@ -146,48 +169,53 @@ void Scene::layout() {
     auto rect = idx2node[i]->boundingRect();
     idx2node[i]->setPos(pos.x - rect.width() / 2, pos.y - rect.height() / 2);
   }
-  updateEdgePoints();
+  updateEdge();
 
   // utils::algorithm::external::ogdf::toSvg(&g, "debugs.svg", true);
 }
 
 void Scene::clear() {
-  for (const auto e : mEdges) {
+  for (const auto e : edges_) {
     removeItem(e);
     delete e;
   }
-  mEdges.clear();
-  for (const auto n : mNodes) {
+  edges_.clear();
+  for (const auto n : nodes_) {
     removeItem(n);
     delete n;
   }
-  mNodes.clear();
-  mNode2Inputs.clear();
-  mNode2Outputs.clear();
-  mEdge2Nodes.clear();
+  nodes_.clear();
+  edge_src_.clear();
+  edge_dst_.clear();
   update();
-  if (ctx_ != nullptr) {
-    ctx_->reset();
-    ctx_ = nullptr;
+  if (graph_ctx_ != nullptr) {
+    graph_ctx_->reset();
+    graph_ctx_ = nullptr;
   }
 }
 
-void Scene::loadGraph(GraphNode2NodeDescExt* g) {
+void Scene::loadGraph(SimOnnxCtx* ctx) {
   clear();
-  ctx_ = g->getCtx();
-  LOG(INFO) << "set ctx_ to " << ctx_;
-  std::vector<graph::Node*> nodes(g->getLen());
-  for (size_t i = 0; i < g->getLen(); i++) {
-    nodes[i] = addNode(g->getNodeHandle(i));
+  graph_ctx_ = ctx;
+  LOG(INFO) << "set graph_ctx_ to " << graph_ctx_;
+
+  auto node_handles = ctx->getObjVec<NodeHandle>();
+  for (auto n : node_handles) {
+    addNode(n);
   }
 
-  size_t edge_count = 0;
-  for (size_t i = 0; i < g->getLen(); i++) {
-    auto from = nodes[i];
-    for (auto j : g->getOutput(i)) {
-      auto to = nodes[j];
-      auto tensor_handle = g->getTensorHandle(i, j);
-      addEdge(from, to, tensor_handle->getName().c_str());
+  auto tensor_handles = ctx->getObjVec<TensorHandle>();
+  for (auto t : tensor_handles) {
+    addEdge(t);
+  }
+
+  // auto create remainder edge
+  for (auto e_name : edge_src_.keys()) {
+    if (!edges_.contains(e_name)) {
+      FakeTensor_t args = {e_name.toStdString()};
+      auto e_handle = graph_ctx_->CreateTensorObj(args);
+      CHECK_NOTNULL(e_handle);
+      addEdge(e_handle);
     }
   }
 }

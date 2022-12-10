@@ -22,7 +22,9 @@
 
 #include "gui/graph/view.h"
 #include "gui/mainwindow.h"
-#include "utils/simonnx/onnx_help.h"
+#include "utils/simonnx/context.h"
+
+using SimOnnxCtx = utils::simonnx::SimOnnxCtx;
 
 namespace gui {
 
@@ -90,19 +92,16 @@ void Actions::act_file_open_callback() {
   // onnx2graph will reset ctx, if not switch ctx obj, we will clear scene
   // before process it
   parent_->scene_->clear();
-  utils::simonnx::SimOnnxCtx::getSimOnnxCtx()->setErrorFn([&](std::string msg) {
+  SimOnnxCtx::getSimOnnxCtx()->setErrorFn([&](std::string msg) {
     QMessageBox::critical(parent_, tr("Open Error"), tr(msg.c_str()),
                           QMessageBox::Ok);
   });
-  bool ret = utils::simonnx::SimOnnxCtx::getSimOnnxCtx()->openOnnx(
-      fileName.toStdString());
-  utils::simonnx::SimOnnxCtx::getSimOnnxCtx()->resetErrorFn();
+  bool ret = SimOnnxCtx::getSimOnnxCtx()->openOnnx(fileName.toStdString());
+  SimOnnxCtx::getSimOnnxCtx()->resetErrorFn();
   if (!ret) {
     return;
   }
-  auto g =
-      utils::simonnx::onnx2graph(utils::simonnx::SimOnnxCtx::getSimOnnxCtx());
-  parent_->scene_->loadGraph(&g);
+  parent_->scene_->loadGraph(SimOnnxCtx::getSimOnnxCtx());
   parent_->scene_->layout();
   parent_->view_->expand(5);
   parent_->view_->center();
@@ -115,13 +114,13 @@ void Actions::act_file_save_a_callback() {
   if (fileName.isEmpty()) {
     return;
   }
-  utils::simonnx::SimOnnxCtx::getSimOnnxCtx()->setErrorFn([&](std::string msg) {
+  SimOnnxCtx::getSimOnnxCtx()->setErrorFn([&](std::string msg) {
     QMessageBox::critical(parent_, tr("Save Error"), tr(msg.c_str()),
                           QMessageBox::Ok);
   });
-  bool ret = utils::simonnx::SimOnnxCtx::getSimOnnxCtx()->saveOnnx(
-      fileName.toStdString(), true);
-  utils::simonnx::SimOnnxCtx::getSimOnnxCtx()->resetErrorFn();
+  bool ret =
+      SimOnnxCtx::getSimOnnxCtx()->saveOnnx(fileName.toStdString(), true);
+  SimOnnxCtx::getSimOnnxCtx()->resetErrorFn();
   if (!ret) {
     return;
   }
@@ -137,8 +136,8 @@ void Actions::act_show_res_callback() { LOG(INFO) << "act_show_res_callback"; }
 void Actions::act_random_graph_callback() {
   LOG(INFO) << "act_random_graph_callback";
   parent_->scene_->clear();
-  auto g = utils::simonnx::gen_random_graph(50);
-  parent_->scene_->loadGraph(&g);
+  SimOnnxCtx::getSimOnnxCtx()->genRandomOnnx(50);
+  parent_->scene_->loadGraph(SimOnnxCtx::getSimOnnxCtx());
   parent_->scene_->layout();
   parent_->view_->expand(5);
   parent_->view_->center();

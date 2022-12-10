@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), actions_(this) {
 
 void MainWindow::InitWindow() {
   this->resize(QSize(800, 600));
-  setWindowIcon(QIcon(":appicon.ico"));
+  setWindowIcon(QIcon(":/img/appicon.ico"));
   setWindowTitle("OnnxEditor");
 }
 

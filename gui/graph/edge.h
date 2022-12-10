@@ -17,22 +17,21 @@
 
 #include <QGraphicsItem>
 
-#include "gui/config/ui.h"
+#include "gui/graph/context.h"
+#include "utils/simonnx/context.h"
 
 namespace gui {
 namespace graph {
 
-class Node;
+using TensorHandle = utils::simonnx::TensorHandle;
 
 class Edge : public QGraphicsItem {
  public:
-  explicit Edge(config::Ui& cfg);
+  explicit Edge(Context& cfg);
 
-  void init(const Node* src, const Node* dst, const QString& label,
-            const QPointF& srcp, const QPointF& dstp);
-  void updatePoints(const QPointF* srcp = nullptr,
-                    const QPointF* dstp = nullptr);
-  const std::string getLabel() const { return mLabel.toStdString(); }
+  void bind(TensorHandle handle);
+  void updateEdge(const QList<QPointF>& src, const QList<QPointF>& dst);
+  QString getName() const;
 
  protected:
   QRectF boundingRect() const override;
@@ -43,19 +42,16 @@ class Edge : public QGraphicsItem {
   void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
 
  private:
-  config::Ui& mCfg;
+  Context& ctx_;
+  TensorHandle handle_;
+
+  QList<QPointF> src_;
+  QList<QPointF> dst_;
 
   bool mHovered = false;
 
-  QString mLabel;
-
-  const Node* mSrc = nullptr;
-  const Node* mDst = nullptr;
-  QPointF mSrcP;
-  QPointF mDstP;
-
   QPainterPath mPath;
-  QRectF mLabelRect;
+  QRectF mNameRect;
 };
 
 }  // namespace graph

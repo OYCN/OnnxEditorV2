@@ -64,7 +64,7 @@ class GraphNode2NodeDesc {
    * @param  i                Node id
    * @return std::vector<size_t> Node id
    */
-  virtual std::vector<size_t> getIntput(size_t i) const = 0;
+  virtual std::vector<size_t> getInput(size_t i) const = 0;
   /**
    * @brief Get the root nodes
    * @return std::vector<size_t>
@@ -89,7 +89,7 @@ class GraphNode2NodeDescTmp : virtual public GraphNode2NodeDesc {
  public:
   size_t getLen() const override { return len_; }
   std::vector<size_t> getOutput(size_t i) const override { return outputs_[i]; }
-  std::vector<size_t> getIntput(size_t i) const override { return inputs_[i]; }
+  std::vector<size_t> getInput(size_t i) const override { return inputs_[i]; }
   std::vector<size_t> getRoot() const override { return roots_; }
   std::pair<float, float> getWH(size_t i) const override { return whs_[i]; }
 

@@ -37,11 +37,11 @@ void NodeMenu::slot_reset_name() {
   bool bRet = false;
   QString text = QInputDialog::getText(
       nullptr, tr("Input"), tr("New name"), QLineEdit::Normal,
-      node_->handle_->getName().c_str(), &bRet);
+      QString::fromStdString(node_->handle_->getName()), &bRet);
   if (bRet && !text.isEmpty()) {
     if (node_->handle_->setName(text.toStdString())) {
       CHECK_EQ(text.toStdString(), node_->handle_->getName());
-      node_->init(node_->handle_);
+      node_->refresh();
     } else {
       QMessageBox::critical(this, tr("Error"), tr("set name error"));
     }
@@ -52,11 +52,11 @@ void NodeMenu::slot_reset_op_type() {
   bool bRet = false;
   QString text = QInputDialog::getText(
       nullptr, tr("Input"), tr("New op_type"), QLineEdit::Normal,
-      node_->handle_->getOpType().c_str(), &bRet);
+      QString::fromStdString(node_->handle_->getOpType()), &bRet);
   if (bRet && !text.isEmpty()) {
     if (node_->handle_->setOpType(text.toStdString())) {
       CHECK_EQ(text.toStdString(), node_->handle_->getOpType());
-      node_->init(node_->handle_);
+      node_->refresh();
     } else {
       QMessageBox::critical(this, tr("Error"), tr("set op_type error"));
     }

@@ -16,12 +16,12 @@
 
 #include <glog/logging.h>
 
-#include <QtCore/QDebug>
-#include <QtGui/QWheelEvent>
 #include <QGraphicsItem>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QScrollBar>
+#include <QtCore/QDebug>
+#include <QtGui/QWheelEvent>
 
 #include "gui/graph/scene.h"
 
@@ -37,16 +37,18 @@ View::View(QWidget *parent) : QGraphicsView{parent} {
 
   setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 
-  scene_ = new Scene(mCfg, this);
+  ctx_.top_widget = this;
+
+  scene_ = new Scene(ctx_, this);
   setScene(scene_);
 
-  updateCfg();
+  refreshAll();
 }
 
-void View::updateCfg() {
-  setBackgroundBrush(mCfg.view.mBackgroundColor);
+void View::refreshAll() {
+  setBackgroundBrush(ctx_.ui.view.mBackgroundColor);
   update();
-  scene_->updateCfg();
+  scene_->refreshAll();
 }
 
 Scene *View::getScene() {
@@ -85,12 +87,12 @@ void View::drawBackground(QPainter *painter, const QRectF &r) {
 
   QBrush bBrush = backgroundBrush();
 
-  QPen pfine(mCfg.view.mBackgroundFineGridColor, 1.0);
+  QPen pfine(ctx_.ui.view.mBackgroundFineGridColor, 1.0);
 
   painter->setPen(pfine);
   drawGrid(15);
 
-  QPen p(mCfg.view.mBackgroundCoarseGridColor, 1.0);
+  QPen p(ctx_.ui.view.mBackgroundCoarseGridColor, 1.0);
 
   painter->setPen(p);
   drawGrid(150);
@@ -174,9 +176,9 @@ void View::scaleDown() {
   scale(factor, factor);
 }
 
-void View::setCfg(config::Ui cfg) {
-  mCfg = cfg;
-  updateCfg();
+void View::setCfg(Context ctx) {
+  ctx_ = ctx;
+  refreshAll();
 }
 
 void View::expand(qreal f) {

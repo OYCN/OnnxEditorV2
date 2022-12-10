@@ -1,5 +1,4 @@
 add_library(simonnx STATIC
-  onnx_help.cpp
   context.cpp
   node.cpp
   tensor.cpp

@@ -17,10 +17,11 @@
 
 #include <QGraphicsItem>
 #include <QObject>
+#include <QSet>
 
-#include "gui/config/ui.h"
-#include "utils/simonnx/context.h"
+#include "gui/graph/context.h"
 #include "gui/graph/node_menu.h"
+#include "utils/simonnx/context.h"
 
 namespace gui {
 namespace graph {
@@ -39,9 +40,11 @@ class Node : public QObject, public QGraphicsItem {
   };
 
  public:
-  explicit Node(config::Ui &cfg);
-
-  void init(NodeHandle handle);
+  explicit Node(Context &cfg);
+  void bind(NodeHandle handle);
+  void refresh();
+  QSet<QString> getInputs() const;
+  QSet<QString> getOutputs() const;
 
  public:
   QRectF boundingRect() const override;
@@ -57,7 +60,7 @@ class Node : public QObject, public QGraphicsItem {
   void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 
  private:
-  config::Ui &mCfg;
+  Context &ctx_;
   NodeMenu menu_;
 
   NodeHandle handle_;

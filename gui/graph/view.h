@@ -18,7 +18,7 @@
 #include <QGraphicsView>
 #include <QMenu>
 
-#include "gui/config/ui.h"
+#include "gui/graph/context.h"
 #include "gui/graph/scene.h"
 
 namespace gui {
@@ -38,14 +38,14 @@ class View : public QGraphicsView {
  public:
   void expand(qreal f);
   void center();
-  void setCfg(config::Ui cfg);
-  config::Ui getCfg() { return mCfg; }
+  void setCfg(Context ctx);
+  Context getCfg() { return ctx_; }
   Scene* getScene();
 
  private:
-  void updateCfg();
+  void refreshAll();
 
- public Q_SLOTS: // NOLINT
+ public Q_SLOTS:  // NOLINT
   void scaleUp();
   void scaleDown();
 
@@ -58,7 +58,7 @@ class View : public QGraphicsView {
   void drawBackground(QPainter* painter, const QRectF& r) override;
 
  private:
-  config::Ui mCfg;
+  Context ctx_;
 
   Scene* scene_ = nullptr;
   QPointF click_pos_;

@@ -1,12 +1,3 @@
-add_executable(simonnx_test
-  simonnx_test.cpp
-)
-target_link_libraries(simonnx_test
-  GTest::gtest_main
-  simonnx
-)
-gtest_discover_tests(simonnx_test)
-
 add_executable(algorithm_test
 algorithm_test.cpp
 )

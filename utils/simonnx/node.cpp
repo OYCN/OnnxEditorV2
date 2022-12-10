@@ -41,5 +41,39 @@ bool RealNodeObj::setOpType(std::string op_type) {
   return true;
 }
 
+std::vector<std::string> RealNodeObj::getInputs() {
+  std::vector<std::string> ret(handle_->input_size());
+  for (size_t i = 0; i < ret.size(); i++) {
+    ret[i] = handle_->input(i);
+  }
+  return ret;
+}
+
+bool RealNodeObj::setInputs(const std::vector<std::string>& inputs) {
+  handle_->clear_input();
+  auto& obj = *handle_->mutable_input();
+  for (const auto& n : inputs) {
+    *obj.Add() = n;
+  }
+  return true;
+}
+
+std::vector<std::string> RealNodeObj::getOutputs() {
+  std::vector<std::string> ret(handle_->output_size());
+  for (size_t i = 0; i < ret.size(); i++) {
+    ret[i] = handle_->output(i);
+  }
+  return ret;
+}
+
+bool RealNodeObj::setOutputs(const std::vector<std::string>& outputs) {
+  handle_->clear_output();
+  auto& obj = *handle_->mutable_output();
+  for (const auto& n : outputs) {
+    *obj.Add() = n;
+  }
+  return true;
+}
+
 }  // namespace simonnx
 }  // namespace utils

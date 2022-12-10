@@ -14,6 +14,8 @@
 
 #include "gui/graph/edge.h"
 
+#include <glog/logging.h>
+
 #include <QtGui/QPainter>
 
 #include "gui/graph/node.h"
@@ -21,7 +23,7 @@
 namespace gui {
 namespace graph {
 
-Edge::Edge(config::Ui& cfg) : mCfg(cfg) {
+Edge::Edge(Context& ctx) : ctx_(ctx) {
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setAcceptHoverEvents(true);
   setZValue(0);
@@ -34,9 +36,9 @@ QPainterPath Edge::shape() const {
   QPen pen;
 
   if (mHovered || isSelected()) {
-    pen.setWidth(2 * mCfg.edge.mEdgeLineWidth);
+    pen.setWidth(2 * ctx_.ui.edge.mEdgeLineWidth);
   } else {
-    pen.setWidth(mCfg.edge.mEdgeLineWidth);
+    pen.setWidth(ctx_.ui.edge.mEdgeLineWidth);
   }
 
   ps.setCapStyle(pen.capStyle());
@@ -45,11 +47,15 @@ QPainterPath Edge::shape() const {
   ps.setMiterLimit(pen.miterLimit());
 
   QPainterPath p = ps.createStroke(mPath);
-  // p.addRect(mLabelRect);
-  p.addEllipse(mSrcP, mCfg.edge.mEdgeStartPointRadius,
-               mCfg.edge.mEdgeStartPointRadius);
-  p.addEllipse(mDstP, mCfg.edge.mEdgeStopPointRadius,
-               mCfg.edge.mEdgeStopPointRadius);
+  // p.addRect(mNameRect);
+  for (const auto& s : src_) {
+    p.addEllipse(s, ctx_.ui.edge.mEdgeStartPointRadius,
+                 ctx_.ui.edge.mEdgeStartPointRadius);
+  }
+  for (const auto& d : dst_) {
+    p.addEllipse(d, ctx_.ui.edge.mEdgeStopPointRadius,
+                 ctx_.ui.edge.mEdgeStopPointRadius);
+  }
   return p;
 }
 
@@ -59,9 +65,9 @@ void Edge::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
   // hovered or selected
   if (mHovered || isSelected()) {
     QPen p;
-    p.setWidth(2 * mCfg.edge.mEdgeLineWidth);
-    p.setColor(isSelected() ? mCfg.edge.mEdgeSelectedHaloColor
-                            : mCfg.edge.mEdgeHoveredColor);
+    p.setWidth(2 * ctx_.ui.edge.mEdgeLineWidth);
+    p.setColor(isSelected() ? ctx_.ui.edge.mEdgeSelectedHaloColor
+                            : ctx_.ui.edge.mEdgeHoveredColor);
     painter->setPen(p);
     painter->setBrush(Qt::NoBrush);
     painter->drawPath(mPath);
@@ -70,109 +76,77 @@ void Edge::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
   // for normal
   {
     QPen p;
-    p.setWidth(mCfg.edge.mEdgeLineWidth);
-    p.setColor(isSelected() ? mCfg.edge.mEdgeSelectedColor
-                            : mCfg.edge.mEdgeNormalColor);
+    p.setWidth(ctx_.ui.edge.mEdgeLineWidth);
+    p.setColor(isSelected() ? ctx_.ui.edge.mEdgeSelectedColor
+                            : ctx_.ui.edge.mEdgeNormalColor);
     painter->setPen(p);
     painter->setBrush(Qt::NoBrush);
     painter->drawPath(mPath);
   }
 
   // Ellipse
-  painter->setPen(mCfg.edge.mEdgeStartPointColor);
-  painter->setBrush(mCfg.edge.mEdgeStartPointColor);
-  painter->drawEllipse(mSrcP, mCfg.edge.mEdgeStartPointRadius,
-                       mCfg.edge.mEdgeStartPointRadius);
-  painter->setPen(mCfg.edge.mEdgeStopPointColor);
-  painter->setBrush(mCfg.edge.mEdgeStopPointColor);
-  painter->drawEllipse(mDstP, mCfg.edge.mEdgeStopPointRadius,
-                       mCfg.edge.mEdgeStopPointRadius);
+  for (const auto& s : src_) {
+    painter->setPen(ctx_.ui.edge.mEdgeStartPointColor);
+    painter->setBrush(ctx_.ui.edge.mEdgeStartPointColor);
+    painter->drawEllipse(s, ctx_.ui.edge.mEdgeStartPointRadius,
+                         ctx_.ui.edge.mEdgeStartPointRadius);
+  }
+  for (const auto& d : dst_) {
+    painter->setPen(ctx_.ui.edge.mEdgeStopPointColor);
+    painter->setBrush(ctx_.ui.edge.mEdgeStopPointColor);
+    painter->drawEllipse(d, ctx_.ui.edge.mEdgeStopPointRadius,
+                         ctx_.ui.edge.mEdgeStopPointRadius);
+  }
 
   // for label
   // {
   //   painter->save();
-  //   QFont f(mCfg.edge.mEdgeFont);
+  //   QFont f(ctx_.ui.edge.mEdgeFont);
   //   painter->setFont(f);
-  //   painter->setPen(mCfg.edge.mEdgeFontColor);
-  //   painter->drawText(mLabelRect, Qt::AlignLeft, mLabel);
+  //   painter->setPen(ctx_.ui.edge.mEdgeFontColor);
+  //   painter->drawText(mNameRect, Qt::AlignLeft, mName);
   //   painter->restore();
   // }
 
   painter->restore();
 }
 
-void Edge::init(const Node* src, const Node* dst, const QString& label,
-                const QPointF& srcp, const QPointF& dstp) {
-  mLabel = label;
-  mSrc = src;
-  mDst = dst;
+void Edge::bind(TensorHandle handle) { handle_ = handle; }
 
-  // we assume the graph is from top to bottom
+void Edge::updateEdge(const QList<QPointF>& src, const QList<QPointF>& dst) {
+  src_ = src;
+  dst_ = dst;
 
-  // compute the start point which is the top of edge
-  if (mSrc != nullptr) {
-    QPointF pos = mSrc->pos();
-    QRectF rect = mSrc->boundingRect();
-    mSrcP = {pos.x() + rect.width() / 2, pos.y() + rect.height()};
-  } else {
-    mSrcP = srcp;
-  }
-
-  // compute the end point which is the bottom of edge
-  if (mDst != nullptr) {
-    QPointF pos = mDst->pos();
-    QRectF rect = mDst->boundingRect();
-    mDstP = {pos.x() + rect.width() / 2, pos.y()};
-  } else {
-    mDstP = dstp;
-  }
-}
-
-void Edge::updatePoints(const QPointF* srcp, const QPointF* dstp) {
-  if (srcp != nullptr) {
-    mSrcP = *srcp;
-  } else {
-    if (mSrc != nullptr) {
-      QPointF pos = mSrc->pos();
-      QRectF rect = mSrc->boundingRect();
-      mSrcP = {pos.x() + rect.width() / 2, pos.y() + rect.height()};
-    }
-  }
-
-  if (dstp != nullptr) {
-    mSrcP = *dstp;
-  } else {
-    if (mDst != nullptr) {
-      QPointF pos = mDst->pos();
-      QRectF rect = mDst->boundingRect();
-      mDstP = {pos.x() + rect.width() / 2, pos.y()};
-    }
-  }
-
-  // update path
   mPath.clear();
-  mPath.moveTo(mSrcP);
-
-  // QPointF c1 = QPointF((mSrcP.x() + mDstP.x()) / 2, mSrcP.y());
-  // QPointF c2 = QPointF((mSrcP.x() + mDstP.x()) / 2, mDstP.y());
-  QPointF c1 = QPointF(mSrcP.x(), (mSrcP.y() + mDstP.y()) / 2);
-  QPointF c2 = QPointF(mDstP.x(), (mSrcP.y() + mDstP.y()) / 2);
-  mPath.cubicTo(c1, c2, mDstP);
-
-  // QPointF c0 = QPointF((mSrcP.x() + mDstP.x()) / 2, mSrcP.y());
-  // mPath.quadTo(c0, mDstP);
-
-  // mPath.lineTo(mDstP);
+  update();
+  if (src_.size() == 0 || dst_.size() == 0) {
+    return;
+  }
+  if (src_.size() > 1) {
+    LOG(ERROR) << "Not handled multi src case";
+    return;
+  }
+  auto s = src_[0];
+  for (const auto d : dst_) {
+    mPath.moveTo(s);
+    QPointF c1 = QPointF(s.x(), (s.y() + d.y()) / 2);
+    QPointF c2 = QPointF(d.x(), (s.y() + d.y()) / 2);
+    mPath.cubicTo(c1, c2, d);
+  }
 
   // update text pos
-  QLineF l(mSrcP, mDstP);
-  auto center = l.center();
-
-  // QFontMetrics fm(QFont(mCfg.edge.mEdgeFont));
-  // QRectF rect = fm.boundingRect(mLabel);
-  // mLabelRect = QRectF(center.x(), center.y(), rect.width() + 1, rect.height());
+  // QLineF l(mSrcP, mDstP);
+  // auto center = l.center();
+  // QFontMetrics fm(QFont(ctx_.ui.edge.mEdgeFont));
+  // QRectF rect = fm.boundingRect(mName);
+  // mNameRect = QRectF(center.x(), center.y(), rect.width() + 1,
+  // rect.height());
 
   update();
+}
+
+QString Edge::getName() const {
+  return QString::fromStdString(handle_->getName());
 }
 
 void Edge::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {

@@ -17,44 +17,43 @@
 
 #include <QGraphicsScene>
 #include <QMap>
+#include <QSet>
 
-#include "gui/config/ui.h"
+#include "gui/graph/context.h"
+#include "gui/graph/edge.h"
+#include "gui/graph/node.h"
 #include "utils/algorithm/graph_desc.h"
 #include "utils/simonnx/context.h"
-#include "gui/graph/node.h"
-#include "gui/graph/edge.h"
 
 namespace gui {
 namespace graph {
+
+using SimOnnxCtx = utils::simonnx::SimOnnxCtx;
 
 class Scene : public QGraphicsScene {
   Q_OBJECT
 
  public:
-  using GraphNode2NodeDescExt = utils::simonnx::GraphNode2NodeDescExt;
-
-  explicit Scene(config::Ui& cfg, QObject* parent = nullptr);
+  explicit Scene(Context& cfg, QObject* parent = nullptr);
 
  public:
-  void updateCfg();
+  void refreshAll();
   Node* addNode(NodeHandle handle);
-  Edge* addEdge(const Node* src, const Node* dst, const QString& label,
-                const QPointF& srcp = {0, 0}, const QPointF& dstp = {0, 0},
-                bool update = false);
-  void updateEdgePoints();
+  Edge* addEdge(TensorHandle handle);
+  void updateEdge();
+  void updateEdge(const QString& name);
   void layout();
   void clear();
 
-  void loadGraph(GraphNode2NodeDescExt* g);
+  void loadGraph(SimOnnxCtx* ctx);
 
  private:
-  utils::simonnx::SimOnnxCtx* ctx_ = nullptr;
-  config::Ui& mCfg;
-  QList<Node*> mNodes;
-  QList<Edge*> mEdges;
-  QMap<const Node*, QList<Edge*>> mNode2Inputs;
-  QMap<const Node*, QList<Edge*>> mNode2Outputs;
-  QMap<const Edge*, QPair<const Node*, const Node*>> mEdge2Nodes;
+  SimOnnxCtx* graph_ctx_ = nullptr;
+  Context& gui_ctx_;
+  QList<Node*> nodes_;
+  QMap<QString, Edge*> edges_;
+  QMap<QString, QSet<Node*>> edge_src_;
+  QMap<QString, QSet<Node*>> edge_dst_;
 };
 
 }  // namespace graph

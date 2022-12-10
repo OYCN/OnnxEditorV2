@@ -34,11 +34,11 @@ namespace utils {
 namespace simonnx {
 
 using ModelProtoPtr = ::ONNX_NAMESPACE::ModelProto*;
-using GraphProtoPtr = ::ONNX_NAMESPACE::GraphProto*;
 
 class SimOnnxCtx {
  public:
   SimOnnxCtx();
+  ~SimOnnxCtx();
 
   static SimOnnxCtx* createSimOnnxCtx() {
     static std::mutex mutex;
@@ -60,8 +60,19 @@ class SimOnnxCtx {
   TensorHandle CreateTensorObj(_Args&&... args) {
     return CreateObj<TensorHandle, _Args...>(std::forward<_Args>(args)...);
   }
+  template <typename _T>
+  const std::vector<_T> getObjVec() {
+    std::vector<_T> ret;
+    using ObjType = typename std::remove_pointer<_T>::type;
+    if (obj_ctx_.count(ObjType::ObjType), 1) {
+      for (const auto& o : obj_ctx_.at(ObjType::ObjType)) {
+        ret.emplace_back(dynamic_cast<_T>(o));
+      }
+    }
+    return ret;
+  }
 
-  ModelProtoPtr getModelProtoPtr() { return mp_; }
+  void genRandomOnnx(int num);
   bool openOnnx(const std::string path);
   bool saveOnnx(const std::string path, bool overwrite);
   void reset();
@@ -72,6 +83,7 @@ class SimOnnxCtx {
   void resetInfoFn();
   void resetErrorFn();
 
+ private:
   template <typename _Ret, typename... _Args>
   _Ret CreateObj(_Args&&... args) {
     std::unique_lock lock(mutex_);
@@ -86,6 +98,7 @@ class SimOnnxCtx {
     static std::map<size_t, SimOnnxCtx> ctxes;
     return ctxes;
   }
+  void reset_impl();
 
  private:
   std::mutex mutex_;
@@ -97,13 +110,6 @@ class SimOnnxCtx {
 };
 
 using SimOnnxCtxHandle = SimOnnxCtx*;
-
-using GraphNode2NodeDescExtTmp =
-    utils::algorithm::desc::GraphNode2NodeDescExtTmp<NodeHandle, TensorHandle,
-                                                     SimOnnxCtxHandle>;
-using GraphNode2NodeDescExt =
-    utils::algorithm::desc::GraphNode2NodeDescExt<NodeHandle, TensorHandle,
-                                                  SimOnnxCtxHandle>;
 
 }  // namespace simonnx
 }  // namespace utils
