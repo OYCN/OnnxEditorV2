@@ -101,40 +101,6 @@ class GraphNode2NodeDescTmp : virtual public GraphNode2NodeDesc {
   std::vector<size_t> roots_;
 };
 
-template <typename _Node_t, typename _Tensor_t, typename _Ctx_t>
-class GraphNode2NodeDescExt : virtual public GraphNode2NodeDesc {
- public:
-  virtual _Node_t getNodeHandle(size_t i) const = 0;
-  virtual _Tensor_t getTensorHandle(size_t i, size_t j) const = 0;
-  virtual _Ctx_t getCtx() = 0;
-};
-
-template <typename _Node_t, typename _Tensor_t, typename _Ctx_t>
-class GraphNode2NodeDescExtTmp
-    : public GraphNode2NodeDescExt<_Node_t, _Tensor_t, _Ctx_t>,
-      public GraphNode2NodeDescTmp {
- public:
-  GraphNode2NodeDescExtTmp(
-      GraphNode2NodeDescTmp g, std::vector<_Node_t> node_handles,
-      std::map<std::pair<size_t, size_t>, _Tensor_t> edge_handled, _Ctx_t ctx)
-      : GraphNode2NodeDescTmp(g),
-        node_handles_(node_handles),
-        edge_handled_(edge_handled),
-        ctx_(ctx) {}
-
- public:
-  _Node_t getNodeHandle(size_t i) const override { return node_handles_[i]; }
-  _Tensor_t getTensorHandle(size_t i, size_t j) const override {
-    return edge_handled_.at(std::pair<size_t, size_t>(i, j));
-  }
-  _Ctx_t getCtx() override { return ctx_; };
-
- public:
-  std::vector<_Node_t> node_handles_;
-  std::map<std::pair<size_t, size_t>, _Tensor_t> edge_handled_;
-  _Ctx_t ctx_;
-};
-
 class GraphNode2LayoutDesc {
  public:
   struct Pos_t {
