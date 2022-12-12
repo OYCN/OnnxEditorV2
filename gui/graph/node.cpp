@@ -225,6 +225,7 @@ void Node::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 }
 
 void Node::contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {
+  menu_.updateStatus();
   menu_.exec(event->screenPos());
 }
 

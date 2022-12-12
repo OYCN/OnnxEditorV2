@@ -25,12 +25,18 @@ namespace gui {
 namespace graph {
 
 NodeMenu::NodeMenu(Node *node) : node_(node) {
-  QAction *reset_name_action = this->addAction("reset name");
-  QAction *reset_op_type_action = this->addAction("reset op_yype");
-  connect(reset_name_action, &QAction::triggered, this,
+  reset_name_action_ = this->addAction("reset name");
+  reset_op_type_action_ = this->addAction("reset op_yype");
+  connect(reset_name_action_, &QAction::triggered, this,
           &NodeMenu::slot_reset_name);
-  connect(reset_op_type_action, &QAction::triggered, this,
+  connect(reset_op_type_action_, &QAction::triggered, this,
           &NodeMenu::slot_reset_op_type);
+}
+
+void NodeMenu::updateStatus() {
+  bool state = node_->handle_->getAttr("writable") == "true";
+  reset_name_action_->setEnabled(state);
+  reset_op_type_action_->setEnabled(state);
 }
 
 void NodeMenu::slot_reset_name() {

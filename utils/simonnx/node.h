@@ -70,7 +70,9 @@ using NodeHandle = utils::simonnx::NodeObj*;
 class FakeNodeObj : public NodeObj {
  public:
   explicit FakeNodeObj(SimOnnxCtx* ctx, FakeNode_t args)
-      : NodeObj(ctx), faked_(args) {}
+      : NodeObj(ctx), faked_(args) {
+    setAttr("writable", "false");
+  }
   std::string getName() override { return faked_.fake_name; }
   std::string getOpType() override { return faked_.fake_op_type; }
   std::vector<std::string> getInputs() override { return faked_.fake_inputs; }
@@ -83,7 +85,9 @@ class FakeNodeObj : public NodeObj {
 class RealNodeObj : public NodeObj {
  public:
   explicit RealNodeObj(SimOnnxCtx* ctx, NodeProtoPtr handle)
-      : NodeObj(ctx), handle_(handle) {}
+      : NodeObj(ctx), handle_(handle) {
+    setAttr("writable", "true");
+  }
   std::string getName() override;
   bool setName(std::string name) override;
   std::string getOpType() override;

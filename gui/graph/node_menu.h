@@ -26,12 +26,18 @@ class NodeMenu : public QMenu {
  public:
   explicit NodeMenu(Node* node);
 
+ public:
+  void updateStatus();
+
  private slots:
   void slot_reset_name();
   void slot_reset_op_type();
 
  private:
   Node* node_;
+
+  QAction* reset_name_action_;
+  QAction* reset_op_type_action_;
 };
 
 }  // namespace graph

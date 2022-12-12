@@ -29,6 +29,8 @@ namespace graph {
 using NodeHandle = utils::simonnx::NodeHandle;
 
 class Node : public QObject, public QGraphicsItem {
+  Q_OBJECT
+
   friend class NodeMenu;
 
  public:

@@ -56,7 +56,9 @@ using TensorHandle = utils::simonnx::TensorObj*;
 class FakeTensorObj : public TensorObj {
  public:
   explicit FakeTensorObj(SimOnnxCtx* ctx, FakeTensor_t args)
-      : TensorObj(ctx), faked_(args) {}
+      : TensorObj(ctx), faked_(args) {
+    setAttr("writable", "false");
+  }
   std::string getName() override { return faked_.fake_name; }
 
  private:
@@ -66,7 +68,9 @@ class FakeTensorObj : public TensorObj {
 class InitTensorObj : public TensorObj {
  public:
   explicit InitTensorObj(SimOnnxCtx* ctx, TensorProtoPtr handle)
-      : TensorObj(ctx), handle_(handle) {}
+      : TensorObj(ctx), handle_(handle) {
+    setAttr("writable", "true");
+  }
   std::string getName() override;
   bool setName(std::string name) override;
 
@@ -77,7 +81,9 @@ class InitTensorObj : public TensorObj {
 class ValueTensorObj : public TensorObj {
  public:
   explicit ValueTensorObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
-      : TensorObj(ctx), handle_(handle) {}
+      : TensorObj(ctx), handle_(handle) {
+    setAttr("writable", "true");
+  }
   std::string getName() override;
   bool setName(std::string name) override;
 
