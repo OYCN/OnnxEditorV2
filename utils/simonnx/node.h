@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "utils/simonnx/object.h"
+#include "utils/simonnx/treaty.h"
 
 namespace ONNX_NAMESPACE {
 class NodeProto;
@@ -76,7 +77,10 @@ class FakeNodeObj : public NodeObj {
  public:
   explicit FakeNodeObj(SimOnnxCtx* ctx, FakeNode_t args)
       : NodeObj(ctx), faked_(args) {
-    setAttr("writable", "false");
+    setAttr("setName", "false");
+    setAttr("setOpType", "false");
+    setAttr("setInputs", "false");
+    setAttr("setOutputs", "false");
   }
   std::string getName() override { return faked_.fake_name; }
   std::string getOpType() override { return faked_.fake_op_type; }
@@ -90,9 +94,7 @@ class FakeNodeObj : public NodeObj {
 class RealNodeObj : public NodeObj {
  public:
   explicit RealNodeObj(SimOnnxCtx* ctx, NodeProtoPtr handle)
-      : NodeObj(ctx), handle_(handle) {
-    setAttr("writable", "true");
-  }
+      : NodeObj(ctx), handle_(handle) {}
   std::string getName() override;
   bool setName(std::string name) override;
   std::string getOpType() override;
@@ -110,7 +112,7 @@ class IONodeObj : public NodeObj {
  public:
   explicit IONodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
       : NodeObj(ctx), handle_(handle) {
-    setAttr("writable", "true");
+    setAttr("setOpType", "false");
   }
   std::string getName() override;
   bool setName(std::string name) override;
@@ -122,8 +124,10 @@ class IONodeObj : public NodeObj {
 class InputNodeObj : public IONodeObj {
  public:
   explicit InputNodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
-      : IONodeObj(ctx, handle) {}
-  std::string getOpType() override { return "~::INPUT"; }
+      : IONodeObj(ctx, handle) {
+    setAttr("setInputs", "false");
+  }
+  std::string getOpType() override { return TREATY_INPUT_OP_TYPE; }
   std::vector<std::string> getInputs() override { return {}; }
   std::vector<std::string> getOutputs() override;
   bool setOutputs(const std::vector<std::string>& outputs) override;
@@ -132,8 +136,10 @@ class InputNodeObj : public IONodeObj {
 class OutputNodeObj : public IONodeObj {
  public:
   explicit OutputNodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
-      : IONodeObj(ctx, handle) {}
-  std::string getOpType() override { return "~::OUTPUT"; }
+      : IONodeObj(ctx, handle) {
+    setAttr("setOutputs", "false");
+  }
+  std::string getOpType() override { return TREATY_OUTPUT_OP_TYPE; }
   std::vector<std::string> getInputs() override;
   bool setInputs(const std::vector<std::string>& inputs) override;
   std::vector<std::string> getOutputs() override { return {}; }

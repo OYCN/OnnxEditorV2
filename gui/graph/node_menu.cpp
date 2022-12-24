@@ -27,16 +27,26 @@ namespace graph {
 NodeMenu::NodeMenu(Node *node) : node_(node) {
   reset_name_action_ = this->addAction("reset name");
   reset_op_type_action_ = this->addAction("reset op_yype");
+  reset_inputs_action_ = this->addAction("reset inputs");
+  reset_outputs_action_ = this->addAction("reset outputs");
   connect(reset_name_action_, &QAction::triggered, this,
           &NodeMenu::slot_reset_name);
   connect(reset_op_type_action_, &QAction::triggered, this,
           &NodeMenu::slot_reset_op_type);
+  connect(reset_inputs_action_, &QAction::triggered, this,
+          &NodeMenu::slot_reset_inputs);
+  connect(reset_outputs_action_, &QAction::triggered, this,
+          &NodeMenu::slot_reset_outputs);
 }
 
 void NodeMenu::updateStatus() {
-  bool state = node_->handle_->getAttr("writable") == "true";
-  reset_name_action_->setEnabled(state);
-  reset_op_type_action_->setEnabled(state);
+  auto if_disable = [&](std::string field) {
+    return node_->handle_->getAttr(field, "") != "false";
+  };
+  reset_name_action_->setEnabled(if_disable("setName"));
+  reset_op_type_action_->setEnabled(if_disable("setOpType"));
+  reset_inputs_action_->setEnabled(if_disable("setInputs"));
+  reset_outputs_action_->setEnabled(if_disable("setOutputs"));
 }
 
 void NodeMenu::slot_reset_name() {
@@ -67,6 +77,18 @@ void NodeMenu::slot_reset_op_type() {
       QMessageBox::critical(this, tr("Error"), tr("set op_type error"));
     }
   }
+}
+
+void NodeMenu::slot_reset_inputs() {
+  LOG(INFO) << "slot_reset_inputs called";
+  // TODO(opluss): Display dialog
+  node_->ioUpdateSend();
+}
+
+void NodeMenu::slot_reset_outputs() {
+  LOG(INFO) << "slot_reset_outputs called";
+  // TODO(opluss): Display dialog
+  node_->ioUpdateSend();
 }
 
 }  // namespace graph

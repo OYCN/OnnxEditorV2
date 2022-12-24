@@ -38,8 +38,7 @@ class View : public QGraphicsView {
  public:
   void expand(qreal f);
   void center();
-  void setCfg(Context ctx);
-  Context getCfg() { return ctx_; }
+  const Context& getCfg() const { return ctx_; }
   Scene* getScene();
 
  private:

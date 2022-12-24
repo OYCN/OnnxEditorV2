@@ -24,6 +24,7 @@
 #include "utils/algorithm/graph_desc.h"
 #include "utils/simonnx/node.h"
 #include "utils/simonnx/tensor.h"
+#include "utils/simonnx/treaty.h"
 
 namespace ONNX_NAMESPACE {
 class ModelProto;
@@ -49,6 +50,12 @@ class SimOnnxCtx {
   }
   static SimOnnxCtx* getSimOnnxCtx(size_t idx = 0) {
     return &getCtxMap().at(idx);
+  }
+
+  static void DeleteObj(IObject* obj) {
+    static std::mutex mutex;
+    std::unique_lock lock(mutex);
+    obj->setDeleted(true);
   }
 
  public:

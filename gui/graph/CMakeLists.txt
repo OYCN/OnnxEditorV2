@@ -5,6 +5,7 @@ add_library(graph STATIC
   node.cpp
   edge.cpp
   node_menu.cpp
+  context.cpp
 )
 
 target_link_libraries(graph

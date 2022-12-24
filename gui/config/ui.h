@@ -46,8 +46,8 @@ struct Ui {
     qreal mPadAttrsL = 0.5;
     qreal mPadAttrsR = 0.5;
     QString mSpan = ": ";
-    QColor mNormalBoundarColor = {255, 255, 255};
-    QColor mSelectedBoundarColor = {255, 165, 0};
+    QColor mNormalBoundaryColor = {255, 255, 255};
+    QColor mSelectedBoundaryColor = {255, 165, 0};
     QColor mGradientColor0 = {128, 128, 128};  // gray
     QColor mGradientColor1 = {80, 80, 80};
     QColor mGradientColor2 = {64, 64, 64};
@@ -61,9 +61,9 @@ struct Ui {
   // for edge
   struct {
     qreal mEdgeLineWidth = 3.0;
-    QColor mEdgeSelectedHaloColor = {255, 165, 0};  // orange
-    QColor mEdgeHoveredColor = {224, 255, 255};     // lightcyan
-    QColor mEdgeNormalColor = {0, 139, 139};        // darkcyan
+    QColor mEdgeSelectedHallowColor = {255, 165, 0};  // orange
+    QColor mEdgeHoveredColor = {224, 255, 255};       // lightcyan
+    QColor mEdgeNormalColor = {0, 139, 139};          // darkcyan
     QColor mEdgeSelectedColor = {100, 100, 100};
     qreal mEdgeStartPointRadius = 3;
     QColor mEdgeStartPointColor = {128, 128, 128};  // gray

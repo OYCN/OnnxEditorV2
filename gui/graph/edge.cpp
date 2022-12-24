@@ -66,7 +66,7 @@ void Edge::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
   if (mHovered || isSelected()) {
     QPen p;
     p.setWidth(2 * ctx_.ui.edge.mEdgeLineWidth);
-    p.setColor(isSelected() ? ctx_.ui.edge.mEdgeSelectedHaloColor
+    p.setColor(isSelected() ? ctx_.ui.edge.mEdgeSelectedHallowColor
                             : ctx_.ui.edge.mEdgeHoveredColor);
     painter->setPen(p);
     painter->setBrush(Qt::NoBrush);

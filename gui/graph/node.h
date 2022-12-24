@@ -28,9 +28,7 @@ namespace graph {
 
 using NodeHandle = utils::simonnx::NodeHandle;
 
-class Node : public QObject, public QGraphicsItem {
-  Q_OBJECT
-
+class Node : public QGraphicsItem {
   friend class NodeMenu;
 
  public:
@@ -45,6 +43,7 @@ class Node : public QObject, public QGraphicsItem {
   explicit Node(Context &cfg);
   void bind(NodeHandle handle);
   void refresh();
+  void ioUpdateSend();
   QSet<QString> getInputs() const;
   QSet<QString> getOutputs() const;
 

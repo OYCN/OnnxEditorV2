@@ -28,7 +28,7 @@
 namespace gui {
 namespace graph {
 
-View::View(QWidget *parent) : QGraphicsView{parent} {
+View::View(QWidget *parent) : QGraphicsView{parent}, ctx_(this) {
   setDragMode(QGraphicsView::ScrollHandDrag);
   setRenderHint(QPainter::Antialiasing);
   // setMouseTracking(true);
@@ -174,11 +174,6 @@ void View::scaleDown() {
   double const factor = std::pow(step, -1.0);
 
   scale(factor, factor);
-}
-
-void View::setCfg(Context ctx) {
-  ctx_ = ctx;
-  refreshAll();
 }
 
 void View::expand(qreal f) {

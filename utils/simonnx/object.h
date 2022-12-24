@@ -35,7 +35,7 @@ class IObject {
   virtual ObjType_t getObjType() const = 0;
   virtual SimOnnxCtx* getCtx() const = 0;
   virtual bool hasAttr(std::string key) const = 0;
-  virtual std::string getAttr(std::string key) const = 0;
+  virtual std::string getAttr(std::string key, std::string def) const = 0;
   virtual void setAttr(std::string key, std::string value) = 0;
 
  protected:
@@ -52,7 +52,13 @@ class Object : public IObject {
   ObjType_t getObjType() const override { return ObjType; }
   SimOnnxCtx* getCtx() const override { return ctx_; }
   bool hasAttr(std::string key) const override { return attrs.count(key) != 0; }
-  std::string getAttr(std::string key) const override { return attrs.at(key); }
+  std::string getAttr(std::string key, std::string def = "") const override {
+    if (attrs.count(key) != 0) {
+      return attrs.at(key);
+    } else {
+      return def;
+    }
+  }
   void setAttr(std::string key, std::string value) override {
     attrs[key] = value;
   }

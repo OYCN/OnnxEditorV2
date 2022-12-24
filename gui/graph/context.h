@@ -15,17 +15,32 @@
 #ifndef GUI_GRAPH_CONTEXT_H_
 #define GUI_GRAPH_CONTEXT_H_
 
+#include <QObject>
+
 #include "gui/config/display.h"
 #include "gui/config/ui.h"
 
 namespace gui {
 namespace graph {
 
-class Context {
+class Node;
+
+class Context : public QObject {
+  Q_OBJECT
+
  public:
+  explicit Context(QObject* parent = nullptr);
+  ~Context();
+
   gui::config::Ui ui;
   gui::config::Display display;
   QWidget* top_widget;
+
+ signals:
+  void nodeUpdateSignal(Node* node);
+
+ public:
+  void nodeUpdateSend(Node* node);
 };
 
 }  // namespace graph

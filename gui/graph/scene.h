@@ -34,18 +34,22 @@ class Scene : public QGraphicsScene {
   Q_OBJECT
 
  public:
-  explicit Scene(Context& cfg, QObject* parent = nullptr);
+  explicit Scene(Context& ctx, QObject* parent = nullptr);
 
  public:
   void refreshAll();
   Node* addNode(NodeHandle handle);
   Edge* addEdge(TensorHandle handle);
+  Edge* addEdge(const QString& name);
   void updateEdge();
   void updateEdge(const QString& name);
   void layout();
   void clear();
 
   void loadGraph(SimOnnxCtx* ctx);
+
+ public slots:
+  void nodeUpdateSlot(Node* node);
 
  private:
   SimOnnxCtx* graph_ctx_ = nullptr;
@@ -54,6 +58,8 @@ class Scene : public QGraphicsScene {
   QMap<QString, Edge*> edges_;
   QMap<QString, QSet<Node*>> edge_src_;
   QMap<QString, QSet<Node*>> edge_dst_;
+  QMap<Node*, QSet<QString>> node_inputs_;
+  QMap<Node*, QSet<QString>> node_outputs_;
 };
 
 }  // namespace graph

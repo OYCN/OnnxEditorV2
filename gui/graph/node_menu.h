@@ -32,12 +32,16 @@ class NodeMenu : public QMenu {
  private slots:
   void slot_reset_name();
   void slot_reset_op_type();
+  void slot_reset_inputs();
+  void slot_reset_outputs();
 
  private:
   Node* node_;
 
   QAction* reset_name_action_;
   QAction* reset_op_type_action_;
+  QAction* reset_inputs_action_;
+  QAction* reset_outputs_action_;
 };
 
 }  // namespace graph

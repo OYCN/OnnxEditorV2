@@ -38,8 +38,8 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
 
   // display outside border
   {
-    auto color = isSelected() ? ctx_.ui.node.mSelectedBoundarColor
-                              : ctx_.ui.node.mNormalBoundarColor;
+    auto color = isSelected() ? ctx_.ui.node.mSelectedBoundaryColor
+                              : ctx_.ui.node.mNormalBoundaryColor;
     auto width =
         mHovered ? ctx_.ui.node.mHoveredPenWidth : ctx_.ui.node.mPenWidth;
     QPen p(color, width);
@@ -187,6 +187,8 @@ void Node::refresh() {
   CHECK_NEAR(mAllRect.y(), 0, 1e-4);
   update();
 }
+
+void Node::ioUpdateSend() { ctx_.nodeUpdateSend(this); }
 
 QSet<QString> Node::getInputs() const {
   QSet<QString> ret;

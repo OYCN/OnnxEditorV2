@@ -23,6 +23,8 @@ namespace gui {
 class MainWindow;
 
 class Actions : public QObject {
+  Q_OBJECT
+
  public:
   explicit Actions(MainWindow* parent);
 

@@ -25,8 +25,10 @@ using FakeTensor_t = utils::simonnx::FakeTensor_t;
 namespace gui {
 namespace graph {
 
-Scene::Scene(Context& cfg, QObject* parent)
-    : gui_ctx_(cfg), QGraphicsScene{parent} {}
+Scene::Scene(Context& ctx, QObject* parent)
+    : gui_ctx_(ctx), QGraphicsScene{parent} {
+  connect(&gui_ctx_, &Context::nodeUpdateSignal, this, &Scene::nodeUpdateSlot);
+}
 
 void Scene::refreshAll() {}
 
@@ -39,6 +41,8 @@ Node* Scene::addNode(NodeHandle handle) {
 
   auto inputs = n->getInputs();
   auto outputs = n->getOutputs();
+  node_inputs_[n] = inputs;
+  node_outputs_[n] = outputs;
   for (const auto& v : n->getInputs()) {
     edge_dst_[v].insert(n);
   }
@@ -63,6 +67,21 @@ Edge* Scene::addEdge(TensorHandle handle) {
     VLOG(1) << "already exist, skip";
     return nullptr;
   }
+}
+
+Edge* Scene::addEdge(const QString& name) {
+  if (edges_.contains(name)) {
+    return nullptr;
+  }
+  FakeTensor_t args = {name.toStdString()};
+  auto e_handle = graph_ctx_->CreateTensorObj(args);
+  CHECK_NOTNULL(e_handle);
+  auto e = addEdge(e_handle);
+  if (e == nullptr) {
+    graph_ctx_->DeleteObj(e_handle);
+    LOG(FATAL) << "wht happened?";
+  }
+  return e;
 }
 
 void Scene::updateEdge() {
@@ -214,12 +233,43 @@ void Scene::loadGraph(SimOnnxCtx* ctx) {
   // auto create remainder edge
   for (auto e_name : edge_src_.keys()) {
     if (!edges_.contains(e_name)) {
-      FakeTensor_t args = {e_name.toStdString()};
-      auto e_handle = graph_ctx_->CreateTensorObj(args);
-      CHECK_NOTNULL(e_handle);
-      addEdge(e_handle);
+      CHECK_NOTNULL(addEdge(e_name));
     }
   }
+}
+
+void Scene::nodeUpdateSlot(Node* node) {
+  CHECK_NOTNULL(node);
+  auto ins = node->getInputs();
+  auto outs = node->getOutputs();
+  for (auto& in : ins) {
+    if (!edges_.contains(in)) {
+      addEdge(in);
+      edge_dst_[in].insert(node);
+      updateEdge(in);
+    }
+  }
+  for (auto& out : outs) {
+    if (!edges_.contains(out)) {
+      addEdge(out);
+      edge_src_[out].insert(node);
+      updateEdge(out);
+    }
+  }
+  for (auto& in : node_inputs_[node]) {
+    if (!ins.contains(in)) {
+      edge_dst_[in].remove(node);
+      updateEdge(in);
+    }
+  }
+  for (auto& out : node_outputs_[node]) {
+    if (!outs.contains(out)) {
+      edge_src_[out].remove(node);
+      updateEdge(out);
+    }
+  }
+  node_inputs_[node] = ins;
+  node_outputs_[node] = outs;
 }
 
 }  // namespace graph
