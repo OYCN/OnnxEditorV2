@@ -27,6 +27,18 @@ NodeObj* NodeObj::Create(SimOnnxCtx* ctx, NodeProtoPtr handle) {
   return new RealNodeObj(ctx, handle);
 }
 
+NodeObj* NodeObj::Create(SimOnnxCtx* ctx, ValueInfoProtoPtr handle,
+                         IONodeType type) {
+  if (type == kInputNode) {
+    return new InputNodeObj(ctx, handle);
+  }
+  if (type == kOutputNode) {
+    return new OutputNodeObj(ctx, handle);
+  }
+  LOG(FATAL) << "error type";
+  return nullptr;
+}
+
 std::string RealNodeObj::getName() { return handle_->name(); }
 
 bool RealNodeObj::setName(std::string name) {
@@ -73,6 +85,27 @@ bool RealNodeObj::setOutputs(const std::vector<std::string>& outputs) {
     *obj.Add() = n;
   }
   return true;
+}
+
+std::string IONodeObj::getName() { return handle_->name(); }
+
+bool IONodeObj::setName(std::string name) {
+  handle_->set_name(name);
+  return true;
+}
+
+std::vector<std::string> InputNodeObj::getOutputs() { return {getName()}; }
+
+bool InputNodeObj::setOutputs(const std::vector<std::string>& outputs) {
+  CHECK_EQ(outputs.size(), 1);
+  return setName(outputs[0]);
+}
+
+std::vector<std::string> OutputNodeObj::getInputs() { return {getName()}; }
+
+bool OutputNodeObj::setInputs(const std::vector<std::string>& inputs) {
+  CHECK_EQ(inputs.size(), 1);
+  return setName(inputs[0]);
 }
 
 }  // namespace simonnx

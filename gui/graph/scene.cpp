@@ -72,9 +72,11 @@ void Scene::updateEdge() {
 }
 
 void Scene::updateEdge(const QString& name) {
-  CHECK(edges_.contains(name));
-  CHECK(edge_dst_.contains(name));
-  CHECK(edge_src_.contains(name));
+  CHECK(edges_.contains(name)) << name.toStdString();
+  if (!edge_dst_.contains(name) && !edge_src_.contains(name)) {
+    LOG(INFO) << "Skip tensor which not used: " << name.toStdString();
+    return;
+  }
   QList<QPointF> src;
   VLOG(1) << "src size: " << name.toStdString() << " -> "
           << edge_src_[name].size();

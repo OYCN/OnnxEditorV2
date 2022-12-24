@@ -25,13 +25,15 @@
 
 namespace ONNX_NAMESPACE {
 class NodeProto;
-};
+class ValueInfoProto;
+};  // namespace ONNX_NAMESPACE
 
 namespace utils {
 namespace simonnx {
 
 using NodeObjBase = Object<ObjType_t::kNode>;
 using NodeProtoPtr = ::ONNX_NAMESPACE::NodeProto*;
+using ValueInfoProtoPtr = ::ONNX_NAMESPACE::ValueInfoProto*;
 
 class SimOnnxCtx;
 
@@ -46,6 +48,9 @@ class NodeObj : public NodeObjBase {
  public:
   static NodeObj* Create(SimOnnxCtx* ctx, FakeNode_t args);
   static NodeObj* Create(SimOnnxCtx* ctx, NodeProtoPtr handle);
+  enum IONodeType { kInputNode = 0, kOutputNode = 1 };
+  static NodeObj* Create(SimOnnxCtx* ctx, ValueInfoProtoPtr handle,
+                         IONodeType type);
 
  public:
   explicit NodeObj(SimOnnxCtx* ctx) : NodeObjBase(ctx) {}
@@ -99,6 +104,39 @@ class RealNodeObj : public NodeObj {
 
  private:
   NodeProtoPtr handle_;
+};
+
+class IONodeObj : public NodeObj {
+ public:
+  explicit IONodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
+      : NodeObj(ctx), handle_(handle) {
+    setAttr("writable", "true");
+  }
+  std::string getName() override;
+  bool setName(std::string name) override;
+
+ private:
+  ValueInfoProtoPtr handle_;
+};
+
+class InputNodeObj : public IONodeObj {
+ public:
+  explicit InputNodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
+      : IONodeObj(ctx, handle) {}
+  std::string getOpType() override { return "~::INPUT"; }
+  std::vector<std::string> getInputs() override { return {}; }
+  std::vector<std::string> getOutputs() override;
+  bool setOutputs(const std::vector<std::string>& outputs) override;
+};
+
+class OutputNodeObj : public IONodeObj {
+ public:
+  explicit OutputNodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
+      : IONodeObj(ctx, handle) {}
+  std::string getOpType() override { return "~::OUTPUT"; }
+  std::vector<std::string> getInputs() override;
+  bool setInputs(const std::vector<std::string>& inputs) override;
+  std::vector<std::string> getOutputs() override { return {}; }
 };
 
 }  // namespace simonnx
