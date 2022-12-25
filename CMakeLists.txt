@@ -20,7 +20,7 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC OFF)
+set(CMAKE_AUTOUIC ON)
 
 include_directories(${PROJECT_SOURCE_DIR})
 add_subdirectory(utils)

@@ -22,6 +22,8 @@
 
 #include "gui/graph/view.h"
 #include "gui/mainwindow.h"
+#include "gui/ui/dialog/txtlistsetdialog/txtlistsetdialog.h"
+#include "gui/ui/dialog/txtsetdialog/txtsetdialog.h"
 #include "utils/simonnx/context.h"
 
 using SimOnnxCtx = utils::simonnx::SimOnnxCtx;
@@ -63,18 +65,26 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
   menu_file_->addAction(act_file_save_as_);
   menu_file_->addAction(act_file_close_);
 
-  act_show_res_ = new QAction(parent);
-  act_show_res_->setText("Show res");
-  connect(act_show_res_, &QAction::triggered, this,
-          &Actions::act_show_res_callback);
+  menu_debug_ = parent->menuBar()->addMenu("Debug");
+
+  act_display_txt_set_dialog_ = new QAction(parent);
+  act_display_txt_set_dialog_->setText("Txt Set Dialog");
+  connect(act_display_txt_set_dialog_, &QAction::triggered, this,
+          &Actions::act_txt_set_dialog_exec_callback);
+  act_display_txt_list_set_dialog_ = new QAction(parent);
+  act_display_txt_list_set_dialog_->setText("Txt List Set Dialog");
+  connect(act_display_txt_list_set_dialog_, &QAction::triggered, this,
+          &Actions::act_txt_list_set_dialog_exec_callback);
+  menu_debug_ui_ = menu_debug_->addMenu("ui");
+  menu_debug_ui_->addAction(act_display_txt_set_dialog_);
+  menu_debug_ui_->addAction(act_display_txt_list_set_dialog_);
+
   act_random_graph_ = new QAction(parent);
   act_random_graph_->setText("Random Graph");
   connect(act_random_graph_, &QAction::triggered, this,
           &Actions::act_random_graph_callback);
-
-  menu_debug_ = parent->menuBar()->addMenu("Debug");
-  menu_debug_->addAction(act_show_res_);
-  menu_debug_->addAction(act_random_graph_);
+  menu_debug_graph_ = menu_debug_->addMenu("graph");
+  menu_debug_graph_->addAction(act_random_graph_);
 }
 
 void Actions::act_file_new_callback() {
@@ -131,7 +141,30 @@ void Actions::act_file_close_callback() {
   parent_->scene_->clear();
 }
 
-void Actions::act_show_res_callback() { LOG(INFO) << "act_show_res_callback"; }
+void Actions::act_txt_set_dialog_exec_callback() {
+  QString out = "input_data";
+  TxtSetDialog d("debug label:", out, parent_);
+  auto ret = d.exec();
+  if (ret == QDialog::Accepted) {
+    LOG(INFO) << "Accepted: " << out.toStdString();
+  } else {
+    LOG(INFO) << "Rejected";
+  }
+}
+
+void Actions::act_txt_list_set_dialog_exec_callback() {
+  QList<QString> out = {"in0", "in1", "in2"};
+  TxtListSetDialog d("debug label:", out, parent_);
+  auto ret = d.exec();
+  if (ret == QDialog::Accepted) {
+    LOG(INFO) << "Accepted:";
+    for (const auto& v : out) {
+      LOG(INFO) << v.toStdString();
+    }
+  } else {
+    LOG(INFO) << "Rejected";
+  }
+}
 
 void Actions::act_random_graph_callback() {
   LOG(INFO) << "act_random_graph_callback";

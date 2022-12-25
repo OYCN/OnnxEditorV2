@@ -1,6 +1,6 @@
 .DS_Store
 .vscode
+.cache
 build
-build_qt
-build_self
+build_*
 3rd_party/qtbase-release

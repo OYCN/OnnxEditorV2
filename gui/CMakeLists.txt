@@ -1,3 +1,4 @@
+add_subdirectory(ui)
 add_subdirectory(graph)
 
 add_library(gui OBJECT
@@ -13,6 +14,7 @@ target_link_libraries(gui
   Qt6::Core
   glog::glog
 
+  ui
   graph
   simonnx
 )
