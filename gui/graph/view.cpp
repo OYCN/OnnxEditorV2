@@ -42,13 +42,8 @@ View::View(QWidget *parent) : QGraphicsView{parent}, ctx_(this) {
   scene_ = new Scene(ctx_, this);
   setScene(scene_);
 
-  refreshAll();
-}
-
-void View::refreshAll() {
   setBackgroundBrush(ctx_.ui.view.mBackgroundColor);
   update();
-  scene_->refreshAll();
 }
 
 Scene *View::getScene() {

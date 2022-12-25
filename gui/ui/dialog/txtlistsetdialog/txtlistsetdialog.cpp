@@ -42,6 +42,7 @@ QListWidgetItem* TxtListSetDialog::addItem(const QString& name) {
   QListWidgetItem* item = new QListWidgetItem(name);
   item->setFlags(item->flags() | Qt::ItemIsEditable);
   ui->listWidget->addItem(item);
+  ui->listWidget->setCurrentItem(item);
   return item;
 }
 

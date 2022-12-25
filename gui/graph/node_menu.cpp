@@ -20,13 +20,15 @@
 #include <QMessageBox>
 
 #include "gui/graph/node.h"
+#include "gui/ui/dialog/txtlistsetdialog/txtlistsetdialog.h"
+#include "gui/ui/dialog/txtsetdialog/txtsetdialog.h"
 
 namespace gui {
 namespace graph {
 
 NodeMenu::NodeMenu(Node *node) : node_(node) {
   reset_name_action_ = this->addAction("reset name");
-  reset_op_type_action_ = this->addAction("reset op_yype");
+  reset_op_type_action_ = this->addAction("reset op_type");
   reset_inputs_action_ = this->addAction("reset inputs");
   reset_outputs_action_ = this->addAction("reset outputs");
   connect(reset_name_action_, &QAction::triggered, this,
@@ -50,12 +52,13 @@ void NodeMenu::updateStatus() {
 }
 
 void NodeMenu::slot_reset_name() {
-  bool bRet = false;
-  QString text = QInputDialog::getText(
-      nullptr, tr("Input"), tr("New name"), QLineEdit::Normal,
-      QString::fromStdString(node_->handle_->getName()), &bRet);
-  if (bRet && !text.isEmpty()) {
-    if (node_->handle_->setName(text.toStdString())) {
+  QString text = QString::fromStdString(node_->handle_->getName());
+  TxtSetDialog d("name:", text, node_->ctx_.top_widget);
+  auto ret = d.exec();
+  if (ret == QDialog::Accepted) {
+    if (text.isEmpty()) {
+      QMessageBox::critical(this, tr("Error"), tr("name is empty"));
+    } else if (node_->handle_->setName(text.toStdString())) {
       CHECK_EQ(text.toStdString(), node_->handle_->getName());
       node_->refresh();
     } else {
@@ -65,12 +68,13 @@ void NodeMenu::slot_reset_name() {
 }
 
 void NodeMenu::slot_reset_op_type() {
-  bool bRet = false;
-  QString text = QInputDialog::getText(
-      nullptr, tr("Input"), tr("New op_type"), QLineEdit::Normal,
-      QString::fromStdString(node_->handle_->getOpType()), &bRet);
-  if (bRet && !text.isEmpty()) {
-    if (node_->handle_->setOpType(text.toStdString())) {
+  QString text = QString::fromStdString(node_->handle_->getOpType());
+  TxtSetDialog d("op_type:", text, node_->ctx_.top_widget);
+  auto ret = d.exec();
+  if (ret == QDialog::Accepted) {
+    if (text.isEmpty()) {
+      QMessageBox::critical(this, tr("Error"), tr("op_type is empty"));
+    } else if (node_->handle_->setOpType(text.toStdString())) {
       CHECK_EQ(text.toStdString(), node_->handle_->getOpType());
       node_->refresh();
     } else {
@@ -80,15 +84,23 @@ void NodeMenu::slot_reset_op_type() {
 }
 
 void NodeMenu::slot_reset_inputs() {
-  LOG(INFO) << "slot_reset_inputs called";
-  // TODO(opluss): Display dialog
-  node_->ioUpdateSend();
+  QList<QString> out = node_->getInputs();
+  TxtListSetDialog d("inputs:", out, node_->ctx_.top_widget);
+  auto ret = d.exec();
+  if (ret == QDialog::Accepted) {
+    node_->getInputs(out);
+    node_->ioUpdateSend();
+  }
 }
 
 void NodeMenu::slot_reset_outputs() {
-  LOG(INFO) << "slot_reset_outputs called";
-  // TODO(opluss): Display dialog
-  node_->ioUpdateSend();
+  QList<QString> out = node_->getOutputs();
+  TxtListSetDialog d("outputs:", out, node_->ctx_.top_widget);
+  auto ret = d.exec();
+  if (ret == QDialog::Accepted) {
+    node_->getOutputs(out);
+    node_->ioUpdateSend();
+  }
 }
 
 }  // namespace graph

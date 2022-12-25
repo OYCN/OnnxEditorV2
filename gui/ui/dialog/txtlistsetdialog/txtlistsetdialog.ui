@@ -35,14 +35,17 @@
         <widget class="QListWidget" name="listWidget">
          <property name="styleSheet">
           <string notr="true">QListWidget::Item{
-    border:2px solid rgb(128,128,128);
+    border: 2px solid rgb(128,128,128);
 }
 QListWidget::Item:focus{
-    border:2px solid #FFA500;
+    border: 2px solid #FFA500;
+}
+QScrollBar{
+	width: 10px;
 }</string>
          </property>
          <property name="editTriggers">
-          <set>QAbstractItemView::DoubleClicked</set>
+          <set>QAbstractItemView::AllEditTriggers</set>
          </property>
          <property name="dragEnabled">
           <bool>true</bool>

@@ -37,7 +37,6 @@ class Scene : public QGraphicsScene {
   explicit Scene(Context& ctx, QObject* parent = nullptr);
 
  public:
-  void refreshAll();
   Node* addNode(NodeHandle handle);
   Edge* addEdge(TensorHandle handle);
   Edge* addEdge(const QString& name);

@@ -28,9 +28,8 @@ namespace graph {
 Scene::Scene(Context& ctx, QObject* parent)
     : gui_ctx_(ctx), QGraphicsScene{parent} {
   connect(&gui_ctx_, &Context::nodeUpdateSignal, this, &Scene::nodeUpdateSlot);
+  update();
 }
-
-void Scene::refreshAll() {}
 
 Node* Scene::addNode(NodeHandle handle) {
   auto n = new Node(gui_ctx_);
@@ -41,14 +40,15 @@ Node* Scene::addNode(NodeHandle handle) {
 
   auto inputs = n->getInputs();
   auto outputs = n->getOutputs();
-  node_inputs_[n] = inputs;
-  node_outputs_[n] = outputs;
+  node_inputs_[n] = QSet<QString>(inputs.begin(), inputs.end());
+  node_outputs_[n] = QSet<QString>(outputs.begin(), outputs.end());
   for (const auto& v : n->getInputs()) {
     edge_dst_[v].insert(n);
   }
   for (const auto& v : n->getOutputs()) {
     edge_src_[v].insert(n);
   }
+  update();
 
   return n;
 }
@@ -119,6 +119,7 @@ void Scene::updateEdge(const QString& name) {
     dst.push_back({pos.x() + rect.width() / 2, pos.y()});
   }
   edges_[name]->updateEdge(src, dst);
+  update();
 }
 
 void Scene::layout() {
@@ -240,11 +241,15 @@ void Scene::loadGraph(SimOnnxCtx* ctx) {
 
 void Scene::nodeUpdateSlot(Node* node) {
   CHECK_NOTNULL(node);
-  auto ins = node->getInputs();
-  auto outs = node->getOutputs();
+  auto ins_t = node->getInputs();
+  auto outs_t = node->getOutputs();
+  auto ins = QSet<QString>(ins_t.begin(), ins_t.end());
+  auto outs = QSet<QString>(outs_t.begin(), outs_t.end());
   for (auto& in : ins) {
     if (!edges_.contains(in)) {
       addEdge(in);
+    }
+    if (!node_inputs_[node].contains(in)) {
       edge_dst_[in].insert(node);
       updateEdge(in);
     }
@@ -252,6 +257,8 @@ void Scene::nodeUpdateSlot(Node* node) {
   for (auto& out : outs) {
     if (!edges_.contains(out)) {
       addEdge(out);
+    }
+    if (!node_outputs_[node].contains(out)) {
       edge_src_[out].insert(node);
       updateEdge(out);
     }
@@ -270,6 +277,10 @@ void Scene::nodeUpdateSlot(Node* node) {
   }
   node_inputs_[node] = ins;
   node_outputs_[node] = outs;
+
+  // without this emit, edge will be clear by other edge paint
+  // I don't know why
+  emit sceneRectChanged(sceneRect());
 }
 
 }  // namespace graph

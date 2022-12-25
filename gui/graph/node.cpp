@@ -190,20 +190,36 @@ void Node::refresh() {
 
 void Node::ioUpdateSend() { ctx_.nodeUpdateSend(this); }
 
-QSet<QString> Node::getInputs() const {
-  QSet<QString> ret;
+QList<QString> Node::getInputs() const {
+  QList<QString> ret;
   for (const auto &n : handle_->getInputs()) {
-    ret.insert(QString::fromStdString(n));
+    ret.append(QString::fromStdString(n));
   }
   return ret;
 }
 
-QSet<QString> Node::getOutputs() const {
-  QSet<QString> ret;
+bool Node::getInputs(QList<QString> inputs) {
+  std::vector<std::string> ins(inputs.size());
+  for (int i = 0; i < inputs.size(); i++) {
+    ins[i] = inputs[i].toStdString();
+  }
+  return handle_->setInputs(ins);
+}
+
+QList<QString> Node::getOutputs() const {
+  QList<QString> ret;
   for (const auto &n : handle_->getOutputs()) {
-    ret.insert(QString::fromStdString(n));
+    ret.append(QString::fromStdString(n));
   }
   return ret;
+}
+
+bool Node::getOutputs(QList<QString> outputs) {
+  std::vector<std::string> outs(outputs.size());
+  for (int i = 0; i < outputs.size(); i++) {
+    outs[i] = outputs[i].toStdString();
+  }
+  return handle_->setInputs(outs);
 }
 
 void Node::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {

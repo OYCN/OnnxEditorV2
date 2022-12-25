@@ -41,9 +41,6 @@ class View : public QGraphicsView {
   const Context& getCfg() const { return ctx_; }
   Scene* getScene();
 
- private:
-  void refreshAll();
-
  public Q_SLOTS:  // NOLINT
   void scaleUp();
   void scaleDown();

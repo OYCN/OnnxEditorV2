@@ -44,8 +44,10 @@ class Node : public QGraphicsItem {
   void bind(NodeHandle handle);
   void refresh();
   void ioUpdateSend();
-  QSet<QString> getInputs() const;
-  QSet<QString> getOutputs() const;
+  QList<QString> getInputs() const;
+  bool getInputs(QList<QString> inputs);
+  QList<QString> getOutputs() const;
+  bool getOutputs(QList<QString> outputs);
 
  public:
   QRectF boundingRect() const override;
