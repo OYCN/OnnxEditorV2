@@ -8,6 +8,7 @@ TxtSetDialog::TxtSetDialog(const QString& label, QString& input,
   ui->setupUi(this);
   ui->label->setText(label);
   ui->lineEdit->setText(input);
+  ui->label->adjustSize();
   connect(ui->buttonBox, &QDialogButtonBox::accepted, this,
           &TxtSetDialog::buttonAcceptedSlot);
 }

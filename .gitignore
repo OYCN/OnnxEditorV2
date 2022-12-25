@@ -1,6 +1,8 @@
 .DS_Store
 .vscode
 .cache
+*.user
 build
 build_*
+build-*
 3rd_party/qtbase-release
