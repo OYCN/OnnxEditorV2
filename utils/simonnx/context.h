@@ -61,26 +61,9 @@ class SimOnnxCtx {
   TensorHandle CreateTensorObj(_Args&&... args) {
     return CreateObj<TensorHandle, _Args...>(std::forward<_Args>(args)...);
   }
-  void DeleteObj(IObject* obj) {
-    std::unique_lock lock(mutex_);
-    if (obj->isDeleted() == false) {
-      obj->setDeleted(true);
-      auto objtype = obj->getObjType();
-      obj_free_ctx_[objtype].erase(obj->getIter());
-      obj_del_ctx_[objtype].emplace_back(obj);
-      obj->setIter(std::prev(obj_del_ctx_[objtype].end()));
-    }
-  }
-  void RestoreObj(IObject* obj) {
-    std::unique_lock lock(mutex_);
-    if (obj->isDeleted() == true) {
-      obj->setDeleted(false);
-      auto objtype = obj->getObjType();
-      obj_del_ctx_[objtype].erase(obj->getIter());
-      obj_free_ctx_[objtype].emplace_back(obj);
-      obj->setIter(std::prev(obj_free_ctx_[objtype].end()));
-    }
-  }
+  NodeHandle CreateNewNodeObj();
+  void DeleteObj(IObject* obj);
+  void RestoreObj(IObject* obj);
   template <typename _T>
   const std::vector<_T> getObjVec() {
     std::vector<_T> ret;
@@ -113,6 +96,7 @@ class SimOnnxCtx {
     ptr->setId(obj_free_ctx_[ObjType::ObjType].size());
     obj_free_ctx_[ObjType::ObjType].emplace_back(ptr);
     ptr->setIter(std::prev(obj_free_ctx_[ObjType::ObjType].end()));
+    ptr->setDeleted(false);
     return ptr;
   }
 

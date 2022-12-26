@@ -44,6 +44,36 @@ SimOnnxCtx::SimOnnxCtx() {
 }
 SimOnnxCtx::~SimOnnxCtx() { delete mp_; }
 
+NodeHandle SimOnnxCtx::CreateNewNodeObj() {
+  std::unique_lock lock(mutex_);
+  CHECK_NOTNULL(mp_);
+  auto nodes = mp_->mutable_graph()->mutable_node();
+  auto node_ptr = nodes->Add();
+  return CreateNodeObj(node_ptr);
+}
+
+void SimOnnxCtx::DeleteObj(IObject* obj) {
+  std::unique_lock lock(mutex_);
+  if (obj->isDeleted() == false) {
+    obj->setDeleted(true);
+    auto objtype = obj->getObjType();
+    obj_free_ctx_[objtype].erase(obj->getIter());
+    obj_del_ctx_[objtype].emplace_back(obj);
+    obj->setIter(std::prev(obj_del_ctx_[objtype].end()));
+  }
+}
+
+void SimOnnxCtx::RestoreObj(IObject* obj) {
+  std::unique_lock lock(mutex_);
+  if (obj->isDeleted() == true) {
+    obj->setDeleted(false);
+    auto objtype = obj->getObjType();
+    obj_del_ctx_[objtype].erase(obj->getIter());
+    obj_free_ctx_[objtype].emplace_back(obj);
+    obj->setIter(std::prev(obj_free_ctx_[objtype].end()));
+  }
+}
+
 void SimOnnxCtx::genRandomOnnx(int num) {
   LOCK;
   GOOGLE_PROTOBUF_VERIFY_VERSION;

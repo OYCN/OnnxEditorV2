@@ -85,7 +85,8 @@ void Node::bind(NodeHandle handle) {
 void Node::refresh() {
   auto op_type = QString::fromStdString(handle_->getOpType());
   auto name = QString::fromStdString(handle_->getName());
-  if (ctx_.display.node.hidden_op_type.contains(op_type)) {
+  if (ctx_.display.node.hidden_op_type.contains(op_type) ||
+      handle_->isDeleted()) {
     this->setVisible(false);
   } else {
     this->setVisible(true);
