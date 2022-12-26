@@ -48,4 +48,4 @@ class SceneMenu : public QMenu {
 }  // namespace graph
 }  // namespace gui
 
-#endif  // GUI_GRAPH_NODE_MENU_H_
+#endif  // GUI_GRAPH_SCENE_MENU_H_

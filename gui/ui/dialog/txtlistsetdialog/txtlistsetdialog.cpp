@@ -1,3 +1,17 @@
+/**
+ * @file txtlistsetdialog.cpp
+ * @brief
+ * @author opluss (opluss@qq.com)
+ *
+ * @copyright Copyright (c) 2022  opluss
+ *
+ * @par Modify log:
+ * <table>
+ * <tr><th>Date       <th>Version <th>Author  <th>Description
+ * <tr><td>2022-12-26 <td>1.0     <td>opluss     <td>Initial
+ * </table>
+ */
+
 #include "gui/ui/dialog/txtlistsetdialog/txtlistsetdialog.h"
 
 #include "gui/ui/dialog/txtlistsetdialog/ui_txtlistsetdialog.h"

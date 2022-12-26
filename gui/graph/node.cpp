@@ -19,7 +19,10 @@
 #include <QDebug>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QMenu>
+#include <QMessageBox>
 #include <QtGui/QPainter>
+
+#include "gui/ui/dialog/nodesummary/nodesummary.h"
 
 namespace gui {
 namespace graph {
@@ -264,7 +267,26 @@ void Node::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
 }
 
 void Node::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) {
-  // qDebug() << "Double click: " << this;
+  QString name = getName();
+  QString op_type = getOpType();
+  QList<QString> ins = getInputs();
+  QList<QString> outs = getOutputs();
+  NodeSummary d(name, op_type, ins, outs, ctx_.top_widget);
+  auto ret = d.exec();
+  if (ret == QDialog::Accepted) {
+    if (name.isEmpty()) {
+      QMessageBox::critical(ctx_.top_widget, "Error", "name is empty");
+    } else if (op_type.isEmpty()) {
+      QMessageBox::critical(ctx_.top_widget, "Error", "op_type is empty");
+    } else {
+      setOpType(op_type);
+      setName(name);
+      setInputs(ins);
+      setOutputs(outs);
+      refresh();
+      ioUpdateSend();
+    }
+  }
 }
 
 void Node::mousePressEvent(QGraphicsSceneMouseEvent *event) {

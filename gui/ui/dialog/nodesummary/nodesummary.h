@@ -1,5 +1,19 @@
-#ifndef NODESUMMARY_H
-#define NODESUMMARY_H
+/**
+ * @file nodesummary.h
+ * @brief
+ * @author opluss (opluss@qq.com)
+ *
+ * @copyright Copyright (c) 2022  opluss
+ *
+ * @par Modify log:
+ * <table>
+ * <tr><th>Date       <th>Version <th>Author  <th>Description
+ * <tr><td>2022-12-26 <td>1.0     <td>opluss     <td>Initial
+ * </table>
+ */
+
+#ifndef GUI_UI_DIALOG_NODESUMMARY_NODESUMMARY_H_
+#define GUI_UI_DIALOG_NODESUMMARY_NODESUMMARY_H_
 
 #include <QDialog>
 #include <QListWidgetItem>
@@ -31,4 +45,4 @@ class NodeSummary : public QDialog {
   QList<QString>& outputs;
 };
 
-#endif  // NODESUMMARY_H
+#endif  // GUI_UI_DIALOG_NODESUMMARY_NODESUMMARY_H_

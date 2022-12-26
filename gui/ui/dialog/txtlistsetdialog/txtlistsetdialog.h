@@ -1,5 +1,19 @@
-#ifndef TXTLISTSETDIALOG_H
-#define TXTLISTSETDIALOG_H
+/**
+ * @file txtlistsetdialog.h
+ * @brief 
+ * @author opluss (opluss@qq.com)
+ * 
+ * @copyright Copyright (c) 2022  opluss
+ * 
+ * @par Modify log:
+ * <table>
+ * <tr><th>Date       <th>Version <th>Author  <th>Description
+ * <tr><td>2022-12-26 <td>1.0     <td>opluss     <td>Initial
+ * </table>
+ */
+
+#ifndef GUI_UI_DIALOG_TXTLISTSETDIALOG_TXTLISTSETDIALOG_H_
+#define GUI_UI_DIALOG_TXTLISTSETDIALOG_TXTLISTSETDIALOG_H_
 
 #include <QDialog>
 #include <QListWidgetItem>
@@ -30,4 +44,4 @@ class TxtListSetDialog : public QDialog {
   QList<QString>& list;
 };
 
-#endif  // TXTLISTSETDIALOG_H
+#endif  // GUI_UI_DIALOG_TXTLISTSETDIALOG_TXTLISTSETDIALOG_H_

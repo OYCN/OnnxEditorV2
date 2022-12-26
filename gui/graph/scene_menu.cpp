@@ -16,7 +16,6 @@
 
 #include <glog/logging.h>
 
-#include <QInputDialog>
 #include <QMessageBox>
 
 #include "gui/graph/node.h"

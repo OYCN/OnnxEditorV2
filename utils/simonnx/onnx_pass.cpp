@@ -1,3 +1,17 @@
+/**
+ * @file onnx_pass.cpp
+ * @brief
+ * @author opluss (opluss@qq.com)
+ *
+ * @copyright Copyright (c) 2022  opluss
+ *
+ * @par Modify log:
+ * <table>
+ * <tr><th>Date       <th>Version <th>Author  <th>Description
+ * <tr><td>2022-12-26 <td>1.0     <td>opluss     <td>Initial
+ * </table>
+ */
+
 #include "utils/simonnx/onnx_pass.h"
 
 #include <onnx/onnx_pb.h>
@@ -29,7 +43,7 @@ bool OnnxPass::remove_deleted_node(SimOnnxCtx* ctx) {
 class TmpDesc : public utils::algorithm::toposort::GraphNode2EdgeDesc {
  public:
   template <typename _T>
-  TmpDesc(const _T& nodes) {
+  explicit TmpDesc(const _T& nodes) {
     n2i.resize(nodes.size());
     n2o.resize(nodes.size());
     size_t mi = 0;

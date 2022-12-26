@@ -1,5 +1,19 @@
-#ifndef TXTSETDIALOG_H
-#define TXTSETDIALOG_H
+/**
+ * @file txtsetdialog.h
+ * @brief
+ * @author opluss (opluss@qq.com)
+ *
+ * @copyright Copyright (c) 2022  opluss
+ *
+ * @par Modify log:
+ * <table>
+ * <tr><th>Date       <th>Version <th>Author  <th>Description
+ * <tr><td>2022-12-26 <td>1.0     <td>opluss     <td>Initial
+ * </table>
+ */
+
+#ifndef GUI_UI_DIALOG_TXTSETDIALOG_TXTSETDIALOG_H_
+#define GUI_UI_DIALOG_TXTSETDIALOG_TXTSETDIALOG_H_
 
 #include <QDialog>
 
@@ -23,4 +37,4 @@ class TxtSetDialog : public QDialog {
   QString& input;
 };
 
-#endif  // TXTSETDIALOG_H
+#endif  // GUI_UI_DIALOG_TXTSETDIALOG_TXTSETDIALOG_H_
