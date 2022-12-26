@@ -212,11 +212,9 @@ void Scene::clear() {
   nodes_.clear();
   edge_src_.clear();
   edge_dst_.clear();
+  node_inputs_.clear();
+  node_outputs_.clear();
   update();
-  if (graph_ctx_ != nullptr) {
-    graph_ctx_->reset();
-    graph_ctx_ = SimOnnxCtx::getSimOnnxCtx();
-  }
 }
 
 void Scene::loadGraph(SimOnnxCtx* ctx) {
