@@ -36,6 +36,7 @@ class Actions : public QObject {
 
   void act_txt_list_set_dialog_exec_callback();
   void act_txt_set_dialog_exec_callback();
+  void act_node_summary_dialog_exec_callback();
   void act_random_graph_callback();
 
  private:
@@ -51,6 +52,7 @@ class Actions : public QObject {
   QMenu* menu_debug_ui_;
   QAction* act_display_txt_set_dialog_;
   QAction* act_display_txt_list_set_dialog_;
+  QAction* act_display_node_summary_dialog_;
   QMenu* menu_debug_graph_;
   QAction* act_random_graph_;
 };

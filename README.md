@@ -8,7 +8,7 @@
  - [x] rename op type
  - [x] rename io name
  - [x] rename node io
- - [ ] add node
+ - [x] add node
  - [ ] remove node
  - [ ] add Input/Output
  - [ ] remove Input/Output

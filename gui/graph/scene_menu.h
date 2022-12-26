@@ -32,6 +32,8 @@ class SceneMenu : public QMenu {
 
  private slots:
   void slot_new_node();
+  void slot_new_input();
+  void slot_new_output();
 
  private:
   Scene* scene_;
@@ -39,6 +41,8 @@ class SceneMenu : public QMenu {
   QPointF pos_;
 
   QAction* new_node_action_;
+  QAction* new_input_action_;
+  QAction* new_output_action_;
 };
 
 }  // namespace graph

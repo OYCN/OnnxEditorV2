@@ -286,8 +286,12 @@ void Scene::nodeUpdateSlot(Node* node) {
 
 void Scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
   QGraphicsScene::contextMenuEvent(event);
+  if (event->isAccepted()) {
+    return;
+  }
   menu_.setPos(event->scenePos());
   menu_.exec(event->screenPos());
+  event->accept();
 }
 
 }  // namespace graph

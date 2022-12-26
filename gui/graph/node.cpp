@@ -248,7 +248,7 @@ bool Node::setOutputs(QList<QString> outputs) {
   for (int i = 0; i < outputs.size(); i++) {
     outs[i] = outputs[i].toStdString();
   }
-  return handle_->setInputs(outs);
+  return handle_->setOutputs(outs);
 }
 
 void Node::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
@@ -272,8 +272,10 @@ void Node::mousePressEvent(QGraphicsSceneMouseEvent *event) {
 }
 
 void Node::contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {
+  QGraphicsItem::contextMenuEvent(event);
   menu_.updateStatus();
   menu_.exec(event->screenPos());
+  event->accept();
 }
 
 }  // namespace graph

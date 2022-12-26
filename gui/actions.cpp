@@ -22,6 +22,7 @@
 
 #include "gui/graph/view.h"
 #include "gui/mainwindow.h"
+#include "gui/ui/dialog/nodesummary/nodesummary.h"
 #include "gui/ui/dialog/txtlistsetdialog/txtlistsetdialog.h"
 #include "gui/ui/dialog/txtsetdialog/txtsetdialog.h"
 #include "utils/simonnx/context.h"
@@ -75,9 +76,14 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
   act_display_txt_list_set_dialog_->setText("Txt List Set Dialog");
   connect(act_display_txt_list_set_dialog_, &QAction::triggered, this,
           &Actions::act_txt_list_set_dialog_exec_callback);
+  act_display_node_summary_dialog_ = new QAction(parent);
+  act_display_node_summary_dialog_->setText("Node Summary Dialog");
+  connect(act_display_node_summary_dialog_, &QAction::triggered, this,
+          &Actions::act_node_summary_dialog_exec_callback);
   menu_debug_ui_ = menu_debug_->addMenu("ui");
   menu_debug_ui_->addAction(act_display_txt_set_dialog_);
   menu_debug_ui_->addAction(act_display_txt_list_set_dialog_);
+  menu_debug_ui_->addAction(act_display_node_summary_dialog_);
 
   act_random_graph_ = new QAction(parent);
   act_random_graph_->setText("Random Graph");
@@ -159,6 +165,28 @@ void Actions::act_txt_list_set_dialog_exec_callback() {
   if (ret == QDialog::Accepted) {
     LOG(INFO) << "Accepted:";
     for (const auto& v : out) {
+      LOG(INFO) << v.toStdString();
+    }
+  } else {
+    LOG(INFO) << "Rejected";
+  }
+}
+
+void Actions::act_node_summary_dialog_exec_callback() {
+  QString name = "node name";
+  QString op_type = "node op type";
+  QList<QString> ins = {"in0", "in1", "in2"};
+  QList<QString> outs = {"out0", "out1"};
+  NodeSummary d(name, op_type, ins, outs, parent_);
+  auto ret = d.exec();
+  if (ret == QDialog::Accepted) {
+    LOG(INFO) << "Accepted:";
+    LOG(INFO) << name.toStdString();
+    LOG(INFO) << op_type.toStdString();
+    for (const auto& v : ins) {
+      LOG(INFO) << v.toStdString();
+    }
+    for (const auto& v : outs) {
       LOG(INFO) << v.toStdString();
     }
   } else {
