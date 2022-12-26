@@ -192,6 +192,9 @@ bool SimOnnxCtx::openOnnx(const std::string path) {
 
 bool SimOnnxCtx::saveOnnx(const std::string path, bool overwrite) {
   LOCK;
+  if (!OnnxPass::pass_all(this)) {
+    return false;
+  }
   GOOGLE_PROTOBUF_VERIFY_VERSION;
   if (fs::exists(path) && !overwrite) {
     errorfn_("Path already exist " + path);

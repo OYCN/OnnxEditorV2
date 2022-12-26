@@ -23,6 +23,7 @@
 
 #include "utils/algorithm/graph_desc.h"
 #include "utils/simonnx/node.h"
+#include "utils/simonnx/onnx_pass.h"
 #include "utils/simonnx/tensor.h"
 #include "utils/simonnx/treaty.h"
 
@@ -37,6 +38,8 @@ namespace simonnx {
 using ModelProtoPtr = ::ONNX_NAMESPACE::ModelProto*;
 
 class SimOnnxCtx {
+  friend class OnnxPass;
+
  public:
   SimOnnxCtx();
   ~SimOnnxCtx();
