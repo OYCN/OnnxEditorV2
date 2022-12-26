@@ -52,12 +52,6 @@ class SimOnnxCtx {
     return &getCtxMap().at(idx);
   }
 
-  static void DeleteObj(IObject* obj) {
-    static std::mutex mutex;
-    std::unique_lock lock(mutex);
-    obj->setDeleted(true);
-  }
-
  public:
   template <typename... _Args>
   NodeHandle CreateNodeObj(_Args&&... args) {
@@ -67,12 +61,32 @@ class SimOnnxCtx {
   TensorHandle CreateTensorObj(_Args&&... args) {
     return CreateObj<TensorHandle, _Args...>(std::forward<_Args>(args)...);
   }
+  void DeleteObj(IObject* obj) {
+    std::unique_lock lock(mutex_);
+    if (obj->isDeleted() == false) {
+      obj->setDeleted(true);
+      auto objtype = obj->getObjType();
+      obj_free_ctx_[objtype].erase(obj->getIter());
+      obj_del_ctx_[objtype].emplace_back(obj);
+      obj->setIter(std::prev(obj_del_ctx_[objtype].end()));
+    }
+  }
+  void RestoreObj(IObject* obj) {
+    std::unique_lock lock(mutex_);
+    if (obj->isDeleted() == true) {
+      obj->setDeleted(false);
+      auto objtype = obj->getObjType();
+      obj_del_ctx_[objtype].erase(obj->getIter());
+      obj_free_ctx_[objtype].emplace_back(obj);
+      obj->setIter(std::prev(obj_free_ctx_[objtype].end()));
+    }
+  }
   template <typename _T>
   const std::vector<_T> getObjVec() {
     std::vector<_T> ret;
     using ObjType = typename std::remove_pointer<_T>::type;
-    if (obj_ctx_.count(ObjType::ObjType), 1) {
-      for (const auto& o : obj_ctx_.at(ObjType::ObjType)) {
+    if (obj_free_ctx_.count(ObjType::ObjType), 1) {
+      for (const auto& o : obj_free_ctx_.at(ObjType::ObjType)) {
         ret.emplace_back(dynamic_cast<_T>(o));
       }
     }
@@ -96,8 +110,9 @@ class SimOnnxCtx {
     std::unique_lock lock(mutex_);
     using ObjType = typename std::remove_pointer<_Ret>::type;
     auto ptr = ObjType::Create(this, std::forward<_Args>(args)...);
-    ptr->setId(obj_ctx_[ObjType::ObjType].size());
-    obj_ctx_[ObjType::ObjType].emplace_back(ptr);
+    ptr->setId(obj_free_ctx_[ObjType::ObjType].size());
+    obj_free_ctx_[ObjType::ObjType].emplace_back(ptr);
+    ptr->setIter(std::prev(obj_free_ctx_[ObjType::ObjType].end()));
     return ptr;
   }
 
@@ -109,7 +124,8 @@ class SimOnnxCtx {
 
  private:
   std::mutex mutex_;
-  std::map<ObjType_t, std::list<IObject*>> obj_ctx_;
+  std::map<ObjType_t, std::list<IObject*>> obj_free_ctx_;
+  std::map<ObjType_t, std::list<IObject*>> obj_del_ctx_;
   ModelProtoPtr mp_;
   std::function<void(std::string)> infofn_;
   std::function<void(std::string)> errorfn_;

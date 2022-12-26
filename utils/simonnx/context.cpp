@@ -183,12 +183,20 @@ bool SimOnnxCtx::saveOnnx(const std::string path, bool overwrite) {
 
 void SimOnnxCtx::reset_impl() {
   LOG(INFO) << "SimOnnxCtx reset: " << this;
-  if (obj_ctx_.size() > 0) {
-    for (auto kv : obj_ctx_) {
-      for (auto ptr : obj_ctx_.at(kv.first)) {
+  if (obj_free_ctx_.size() > 0) {
+    for (auto kv : obj_free_ctx_) {
+      for (auto ptr : obj_free_ctx_.at(kv.first)) {
         delete ptr;
       }
-      obj_ctx_.at(kv.first).clear();
+      obj_free_ctx_.at(kv.first).clear();
+    }
+  }
+  if (obj_del_ctx_.size() > 0) {
+    for (auto kv : obj_del_ctx_) {
+      for (auto ptr : obj_del_ctx_.at(kv.first)) {
+        delete ptr;
+      }
+      obj_del_ctx_.at(kv.first).clear();
     }
   }
 }
