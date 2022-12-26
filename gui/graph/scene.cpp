@@ -16,6 +16,8 @@
 
 #include <glog/logging.h>
 
+#include <QGraphicsSceneContextMenuEvent>
+
 #include "gui/graph/edge.h"
 #include "gui/graph/node.h"
 #include "utils/algorithm/layout.h"
@@ -26,7 +28,8 @@ namespace gui {
 namespace graph {
 
 Scene::Scene(Context& ctx, QObject* parent)
-    : gui_ctx_(ctx), QGraphicsScene{parent} {
+    : gui_ctx_(ctx), QGraphicsScene{parent}, menu_(this) {
+  graph_ctx_ = SimOnnxCtx::getSimOnnxCtx();
   connect(&gui_ctx_, &Context::nodeUpdateSignal, this, &Scene::nodeUpdateSlot);
   update();
 }
@@ -212,7 +215,7 @@ void Scene::clear() {
   update();
   if (graph_ctx_ != nullptr) {
     graph_ctx_->reset();
-    graph_ctx_ = nullptr;
+    graph_ctx_ = SimOnnxCtx::getSimOnnxCtx();
   }
 }
 
@@ -281,6 +284,12 @@ void Scene::nodeUpdateSlot(Node* node) {
   // without this emit, edge will be clear by other edge paint
   // I don't know why
   emit sceneRectChanged(sceneRect());
+}
+
+void Scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
+  QGraphicsScene::contextMenuEvent(event);
+  menu_.setPos(event->scenePos());
+  menu_.exec(event->screenPos());
 }
 
 }  // namespace graph

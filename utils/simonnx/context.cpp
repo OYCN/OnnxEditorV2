@@ -45,15 +45,15 @@ SimOnnxCtx::SimOnnxCtx() {
 SimOnnxCtx::~SimOnnxCtx() { delete mp_; }
 
 NodeHandle SimOnnxCtx::CreateNewNodeObj() {
-  std::unique_lock lock(mutex_);
+  LOCK;
   CHECK_NOTNULL(mp_);
   auto nodes = mp_->mutable_graph()->mutable_node();
   auto node_ptr = nodes->Add();
-  return CreateNodeObj(node_ptr);
+  return CreateNodeObjImpl(node_ptr);
 }
 
 void SimOnnxCtx::DeleteObj(IObject* obj) {
-  std::unique_lock lock(mutex_);
+  LOCK;
   if (obj->isDeleted() == false) {
     obj->setDeleted(true);
     auto objtype = obj->getObjType();
@@ -64,7 +64,7 @@ void SimOnnxCtx::DeleteObj(IObject* obj) {
 }
 
 void SimOnnxCtx::RestoreObj(IObject* obj) {
-  std::unique_lock lock(mutex_);
+  LOCK;
   if (obj->isDeleted() == true) {
     obj->setDeleted(false);
     auto objtype = obj->getObjType();

@@ -22,6 +22,7 @@
 #include "gui/graph/context.h"
 #include "gui/graph/edge.h"
 #include "gui/graph/node.h"
+#include "gui/graph/scene_menu.h"
 #include "utils/algorithm/graph_desc.h"
 #include "utils/simonnx/context.h"
 
@@ -32,6 +33,8 @@ using SimOnnxCtx = utils::simonnx::SimOnnxCtx;
 
 class Scene : public QGraphicsScene {
   Q_OBJECT
+
+  friend class SceneMenu;
 
  public:
   explicit Scene(Context& ctx, QObject* parent = nullptr);
@@ -50,9 +53,15 @@ class Scene : public QGraphicsScene {
  public slots:
   void nodeUpdateSlot(Node* node);
 
+ protected:
+  void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+
  private:
   SimOnnxCtx* graph_ctx_ = nullptr;
   Context& gui_ctx_;
+
+  SceneMenu menu_;
+
   QList<Node*> nodes_;
   QMap<QString, Edge*> edges_;
   QMap<QString, QSet<Node*>> edge_src_;

@@ -191,6 +191,34 @@ void Node::refresh() {
 
 void Node::ioUpdateSend() { ctx_.nodeUpdateSend(this); }
 
+QString Node::getName() { return QString::fromStdString(handle_->getName()); }
+
+bool Node::setName(QString name) {
+  if (handle_->setName(name.toStdString())) {
+    if (name != getName()) {
+      LOG(FATAL) << "internal error";
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
+QString Node::getOpType() {
+  return QString::fromStdString(handle_->getOpType());
+}
+
+bool Node::setOpType(QString op_type) {
+  if (handle_->setOpType(op_type.toStdString())) {
+    if (op_type != getOpType()) {
+      LOG(FATAL) << "internal error";
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
 QList<QString> Node::getInputs() const {
   QList<QString> ret;
   for (const auto &n : handle_->getInputs()) {
@@ -199,7 +227,7 @@ QList<QString> Node::getInputs() const {
   return ret;
 }
 
-bool Node::getInputs(QList<QString> inputs) {
+bool Node::setInputs(QList<QString> inputs) {
   std::vector<std::string> ins(inputs.size());
   for (int i = 0; i < inputs.size(); i++) {
     ins[i] = inputs[i].toStdString();
@@ -215,7 +243,7 @@ QList<QString> Node::getOutputs() const {
   return ret;
 }
 
-bool Node::getOutputs(QList<QString> outputs) {
+bool Node::setOutputs(QList<QString> outputs) {
   std::vector<std::string> outs(outputs.size());
   for (int i = 0; i < outputs.size(); i++) {
     outs[i] = outputs[i].toStdString();

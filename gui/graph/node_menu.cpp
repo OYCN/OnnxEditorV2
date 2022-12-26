@@ -52,14 +52,13 @@ void NodeMenu::updateStatus() {
 }
 
 void NodeMenu::slot_reset_name() {
-  QString text = QString::fromStdString(node_->handle_->getName());
+  QString text = node_->getName();
   TxtSetDialog d("name:", text, node_->ctx_.top_widget);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
     if (text.isEmpty()) {
       QMessageBox::critical(this, tr("Error"), tr("name is empty"));
-    } else if (node_->handle_->setName(text.toStdString())) {
-      CHECK_EQ(text.toStdString(), node_->handle_->getName());
+    } else if (node_->setName(text)) {
       node_->refresh();
     } else {
       QMessageBox::critical(this, tr("Error"), tr("set name error"));
@@ -68,14 +67,13 @@ void NodeMenu::slot_reset_name() {
 }
 
 void NodeMenu::slot_reset_op_type() {
-  QString text = QString::fromStdString(node_->handle_->getOpType());
+  QString text = node_->getOpType();
   TxtSetDialog d("op_type:", text, node_->ctx_.top_widget);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
     if (text.isEmpty()) {
       QMessageBox::critical(this, tr("Error"), tr("op_type is empty"));
-    } else if (node_->handle_->setOpType(text.toStdString())) {
-      CHECK_EQ(text.toStdString(), node_->handle_->getOpType());
+    } else if (node_->setOpType(text)) {
       node_->refresh();
     } else {
       QMessageBox::critical(this, tr("Error"), tr("set op_type error"));
@@ -88,7 +86,7 @@ void NodeMenu::slot_reset_inputs() {
   TxtListSetDialog d("inputs:", out, node_->ctx_.top_widget);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
-    node_->getInputs(out);
+    node_->setInputs(out);
     node_->ioUpdateSend();
   }
 }
@@ -98,7 +96,7 @@ void NodeMenu::slot_reset_outputs() {
   TxtListSetDialog d("outputs:", out, node_->ctx_.top_widget);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
-    node_->getOutputs(out);
+    node_->setOutputs(out);
     node_->ioUpdateSend();
   }
 }

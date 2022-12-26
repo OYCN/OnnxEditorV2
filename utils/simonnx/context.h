@@ -55,11 +55,13 @@ class SimOnnxCtx {
  public:
   template <typename... _Args>
   NodeHandle CreateNodeObj(_Args&&... args) {
-    return CreateObj<NodeHandle, _Args...>(std::forward<_Args>(args)...);
+    std::unique_lock lock(mutex_);
+    return CreateNodeObjImpl<_Args...>(std::forward<_Args>(args)...);
   }
   template <typename... _Args>
   TensorHandle CreateTensorObj(_Args&&... args) {
-    return CreateObj<TensorHandle, _Args...>(std::forward<_Args>(args)...);
+    std::unique_lock lock(mutex_);
+    return CreateTensorObjImpl<_Args...>(std::forward<_Args>(args)...);
   }
   NodeHandle CreateNewNodeObj();
   void DeleteObj(IObject* obj);
@@ -89,8 +91,7 @@ class SimOnnxCtx {
 
  private:
   template <typename _Ret, typename... _Args>
-  _Ret CreateObj(_Args&&... args) {
-    std::unique_lock lock(mutex_);
+  _Ret CreateObjImpl(_Args&&... args) {
     using ObjType = typename std::remove_pointer<_Ret>::type;
     auto ptr = ObjType::Create(this, std::forward<_Args>(args)...);
     ptr->setId(obj_free_ctx_[ObjType::ObjType].size());
@@ -98,6 +99,14 @@ class SimOnnxCtx {
     ptr->setIter(std::prev(obj_free_ctx_[ObjType::ObjType].end()));
     ptr->setDeleted(false);
     return ptr;
+  }
+  template <typename... _Args>
+  NodeHandle CreateNodeObjImpl(_Args&&... args) {
+    return CreateObjImpl<NodeHandle, _Args...>(std::forward<_Args>(args)...);
+  }
+  template <typename... _Args>
+  TensorHandle CreateTensorObjImpl(_Args&&... args) {
+    return CreateObjImpl<TensorHandle, _Args...>(std::forward<_Args>(args)...);
   }
 
   static std::map<size_t, SimOnnxCtx>& getCtxMap() {
