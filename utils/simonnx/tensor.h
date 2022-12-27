@@ -41,7 +41,7 @@ struct FakeTensor_t {
 class TensorObj : public TensorObjBase {
  public:
   static TensorObj* Create(SimOnnxCtx* ctx, FakeTensor_t args);
-  static TensorObj* Create(SimOnnxCtx* ctx, TensorProtoPtr handle);
+  // static TensorObj* Create(SimOnnxCtx* ctx, TensorProtoPtr handle);
   static TensorObj* Create(SimOnnxCtx* ctx, ValueInfoProtoPtr handle);
 
  public:
@@ -71,9 +71,11 @@ class FakeTensorObj : public TensorObj {
 class InitTensorObj : public TensorObj {
  public:
   explicit InitTensorObj(SimOnnxCtx* ctx, TensorProtoPtr handle)
-      : TensorObj(ctx), handle_(handle) {}
+      : TensorObj(ctx), handle_(handle) {
+    setAttr("setName", "false");
+  }
   std::string getName() override;
-  bool setName(std::string name) override;
+  // bool setName(std::string name) override;
 
  protected:
   bool destroyHandle() override;
@@ -85,9 +87,11 @@ class InitTensorObj : public TensorObj {
 class ValueTensorObj : public TensorObj {
  public:
   explicit ValueTensorObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
-      : TensorObj(ctx), handle_(handle) {}
+      : TensorObj(ctx), handle_(handle) {
+    setAttr("setName", "false");
+  }
   std::string getName() override;
-  bool setName(std::string name) override;
+  // bool setName(std::string name) override;
 
  protected:
   bool destroyHandle() override;

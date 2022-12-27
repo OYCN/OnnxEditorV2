@@ -24,26 +24,26 @@ namespace simonnx {
 TensorObj* TensorObj::Create(SimOnnxCtx* ctx, FakeTensor_t args) {
   return new FakeTensorObj(ctx, args);
 }
-TensorObj* TensorObj::Create(SimOnnxCtx* ctx, TensorProtoPtr handle) {
-  return new InitTensorObj(ctx, handle);
-}
+// TensorObj* TensorObj::Create(SimOnnxCtx* ctx, TensorProtoPtr handle) {
+//   return new InitTensorObj(ctx, handle);
+// }
 TensorObj* TensorObj::Create(SimOnnxCtx* ctx, ValueInfoProtoPtr handle) {
   return new ValueTensorObj(ctx, handle);
 }
 
 std::string InitTensorObj::getName() { return handle_->name(); }
-bool InitTensorObj::setName(std::string name) {
-  handle_->set_name(name);
-  return true;
-}
+// bool InitTensorObj::setName(std::string name) {
+//   handle_->set_name(name);
+//   return true;
+// }
 
 bool InitTensorObj::destroyHandle() { return getCtx()->destroyHandle(handle_); }
 
 std::string ValueTensorObj::getName() { return handle_->name(); }
-bool ValueTensorObj::setName(std::string name) {
-  handle_->set_name(name);
-  return true;
-}
+// bool ValueTensorObj::setName(std::string name) {
+//   handle_->set_name(name);
+//   return true;
+// }
 
 bool ValueTensorObj::destroyHandle() {
   return getCtx()->destroyHandle(handle_);

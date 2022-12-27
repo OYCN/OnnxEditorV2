@@ -213,26 +213,25 @@ bool SimOnnxCtx::openOnnx(const std::string path) {
   }
   for (size_t i = 0; i < proto_initializers.size(); i++) {
     auto init_ptr = mp_->mutable_graph()->mutable_initializer(i);
-    if (create(init_ptr)) {
-      FakeNode_t args = {"::initializer::", "", {}, {init_ptr->name()}};
-      SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(args);
-    }
+    // if (create(init_ptr)) {
+    FakeNode_t args = {"::initializer::", "", {}, {init_ptr->name()}};
+    SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(args);
+    // }
   }
   int input_num = 0;
   for (size_t i = 0; i < proto_inputs.size(); i++) {
     auto input_ptr = mp_->mutable_graph()->mutable_input(i);
-    if (create(input_ptr)) {
-      SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(input_ptr,
-                                                 NodeObj::kInputNode);
-      input_num++;
-    }
+    // if (create(input_ptr)) {
+    SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(input_ptr, NodeObj::kInputNode);
+    input_num++;
+    // }
   }
   for (size_t i = 0; i < proto_outputs.size(); i++) {
     auto output_ptr = mp_->mutable_graph()->mutable_output(i);
-    if (create(output_ptr)) {
-      SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(output_ptr,
-                                                 NodeObj::kOutputNode);
-    }
+    // if (create(output_ptr)) {
+    SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(output_ptr,
+                                               NodeObj::kOutputNode);
+    // }
   }
   for (size_t i = 0; i < proto_value.size(); i++) {
     auto value_ptr = mp_->mutable_graph()->mutable_value_info(i);

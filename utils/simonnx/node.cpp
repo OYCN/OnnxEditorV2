@@ -116,5 +116,12 @@ bool OutputNodeObj::setInputs(const std::vector<std::string>& inputs) {
 
 bool OutputNodeObj::destroyHandle() { return getCtx()->destroyHandle(handle_); }
 
+bool InitNodeObj::setOutputs(const std::vector<std::string>& outputs) {
+  CHECK_EQ(outputs.size(), 1);
+  return setName(outputs[0]);
+}
+
+bool InitNodeObj::destroyHandle() { return getCtx()->destroyHandle(handle_); }
+
 }  // namespace simonnx
 }  // namespace utils

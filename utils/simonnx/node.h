@@ -27,6 +27,7 @@
 namespace ONNX_NAMESPACE {
 class NodeProto;
 class ValueInfoProto;
+class TensorProto;
 };  // namespace ONNX_NAMESPACE
 
 namespace utils {
@@ -35,6 +36,7 @@ namespace simonnx {
 using NodeObjBase = Object<ObjType_t::kNode>;
 using NodeProtoPtr = ::ONNX_NAMESPACE::NodeProto*;
 using ValueInfoProtoPtr = ::ONNX_NAMESPACE::ValueInfoProto*;
+using TensorProtoPtr = ::ONNX_NAMESPACE::TensorProto*;
 
 class SimOnnxCtx;
 
@@ -52,6 +54,7 @@ class NodeObj : public NodeObjBase {
   enum IONodeType { kInputNode = 0, kOutputNode = 1 };
   static NodeObj* Create(SimOnnxCtx* ctx, ValueInfoProtoPtr handle,
                          IONodeType type);
+  static NodeObj* Create(SimOnnxCtx* ctx, TensorProtoPtr handle);
 
  public:
   explicit NodeObj(SimOnnxCtx* ctx) : NodeObjBase(ctx) {}
@@ -155,6 +158,27 @@ class OutputNodeObj : public IONodeObj {
 
  protected:
   bool destroyHandle() override;
+};
+
+class InitNodeObj : public NodeObj {
+ public:
+  explicit InitNodeObj(SimOnnxCtx* ctx, TensorProtoPtr handle)
+      : NodeObj(ctx), handle_(handle) {
+    setAttr("setOpType", "false");
+    setAttr("setInputs", "false");
+  }
+  std::string getName() override;
+  bool setName(std::string name) override;
+  std::string getOpType() override { return TREATY_INIT_OP_TYPE; }
+  std::vector<std::string> getInputs() override { return {}; }
+  std::vector<std::string> getOutputs() override { return {getName()}; }
+  bool setOutputs(const std::vector<std::string>& outputs) override;
+
+ protected:
+  bool destroyHandle() override;
+
+ private:
+  TensorProtoPtr handle_;
 };
 
 }  // namespace simonnx
