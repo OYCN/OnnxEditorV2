@@ -17,6 +17,7 @@
 #include <glog/logging.h>
 
 #include <QGraphicsSceneContextMenuEvent>
+#include <QKeyEvent>
 
 #include "gui/graph/edge.h"
 #include "gui/graph/node.h"
@@ -242,10 +243,15 @@ void Scene::loadGraph(SimOnnxCtx* ctx) {
 
 void Scene::nodeUpdateSlot(Node* node) {
   CHECK_NOTNULL(node);
-  auto ins_t = node->getInputs();
-  auto outs_t = node->getOutputs();
-  auto ins = QSet<QString>(ins_t.begin(), ins_t.end());
-  auto outs = QSet<QString>(outs_t.begin(), outs_t.end());
+  node->refresh();
+  QSet<QString> ins;
+  QSet<QString> outs;
+  if (node->isVisible()) {
+    auto ins_t = node->getInputs();
+    auto outs_t = node->getOutputs();
+    ins = QSet<QString>(ins_t.begin(), ins_t.end());
+    outs = QSet<QString>(outs_t.begin(), outs_t.end());
+  }
   for (auto& in : ins) {
     if (!edges_.contains(in)) {
       addEdge(in);
@@ -292,6 +298,28 @@ void Scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
   menu_.setPos(event->scenePos());
   menu_.exec(event->screenPos());
   event->accept();
+}
+
+void Scene::keyPressEvent(QKeyEvent* event) {
+  QGraphicsScene::keyPressEvent(event);
+  if (event->isAccepted()) {
+    return;
+  }
+  switch (event->key()) {
+    case Qt::Key_Delete:
+    case Qt::Key_Backspace: {
+      auto items = selectedItems();
+      for (auto& _item : items) {
+        auto item = dynamic_cast<GraphItemBase*>(_item);
+        if (item->getItemType() == GraphItemType::kNode) {
+          item->setDeleted(true);
+        }
+      }
+      break;
+    }
+    default:
+      break;
+  }
 }
 
 }  // namespace graph

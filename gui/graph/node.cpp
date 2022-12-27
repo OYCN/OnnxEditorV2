@@ -89,7 +89,7 @@ void Node::refresh() {
   auto op_type = QString::fromStdString(handle_->getOpType());
   auto name = QString::fromStdString(handle_->getName());
   if (ctx_.display.node.hidden_op_type.contains(op_type) ||
-      handle_->isDeleted()) {
+      getDeleted()) {
     this->setVisible(false);
   } else {
     this->setVisible(true);
@@ -252,6 +252,21 @@ bool Node::setOutputs(QList<QString> outputs) {
     outs[i] = outputs[i].toStdString();
   }
   return handle_->setOutputs(outs);
+}
+
+void Node::setDeleted(bool del) {
+  if (del != getDeleted()) {
+    if (del) {
+      handle_->getCtx()->DeleteObj(handle_);
+    } else {
+      handle_->getCtx()->RestoreObj(handle_);
+    }
+    ioUpdateSend();
+  }
+}
+
+bool Node::getDeleted() const {
+  return handle_->isDeleted();
 }
 
 void Node::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {

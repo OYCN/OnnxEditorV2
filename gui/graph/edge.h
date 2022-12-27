@@ -18,6 +18,7 @@
 #include <QGraphicsItem>
 
 #include "gui/graph/context.h"
+#include "gui/graph/item.h"
 #include "utils/simonnx/context.h"
 
 namespace gui {
@@ -25,13 +26,19 @@ namespace graph {
 
 using TensorHandle = utils::simonnx::TensorHandle;
 
-class Edge : public QGraphicsItem {
+class Edge : public GraphItemBase {
  public:
   explicit Edge(Context& cfg);
 
   void bind(TensorHandle handle);
   void updateEdge(const QList<QPointF>& src, const QList<QPointF>& dst);
   QString getName() const;
+
+  void setDeleted(bool del) override;
+  bool getDeleted() const override;
+  GraphItemType getItemType() const override {
+    return GraphItemType::kEdge;
+  }
 
  protected:
   QRectF boundingRect() const override;

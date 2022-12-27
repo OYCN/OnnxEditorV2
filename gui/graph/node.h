@@ -20,6 +20,7 @@
 #include <QSet>
 
 #include "gui/graph/context.h"
+#include "gui/graph/item.h"
 #include "gui/graph/node_menu.h"
 #include "utils/simonnx/context.h"
 
@@ -28,7 +29,7 @@ namespace graph {
 
 using NodeHandle = utils::simonnx::NodeHandle;
 
-class Node : public QGraphicsItem {
+class Node : public GraphItemBase {
   friend class NodeMenu;
 
  public:
@@ -52,6 +53,12 @@ class Node : public QGraphicsItem {
   bool setInputs(QList<QString> inputs);
   QList<QString> getOutputs() const;
   bool setOutputs(QList<QString> outputs);
+
+  void setDeleted(bool del) override;
+  bool getDeleted() const override;
+  GraphItemType getItemType() const override {
+    return GraphItemType::kNode;
+  }
 
  public:
   QRectF boundingRect() const override;

@@ -149,6 +149,21 @@ QString Edge::getName() const {
   return QString::fromStdString(handle_->getName());
 }
 
+void Edge::setDeleted(bool del) {
+  LOG(ERROR) << "edge is not deletable";
+  // if (del != getDeleted()) {
+  //   if (del) {
+  //     handle_->getCtx()->DeleteObj(handle_);
+  //   } else {
+  //     handle_->getCtx()->RestoreObj(handle_);
+  //   }
+  // }
+}
+
+bool Edge::getDeleted() const {
+  return handle_->isDeleted();
+}
+
 void Edge::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
   // qDebug() << "Enter hover";
   mHovered = true;

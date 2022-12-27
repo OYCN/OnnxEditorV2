@@ -55,6 +55,7 @@ class Scene : public QGraphicsScene {
 
  protected:
   void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+  void keyPressEvent(QKeyEvent* event) override;
 
  private:
   SimOnnxCtx* graph_ctx_ = nullptr;
