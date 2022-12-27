@@ -10,7 +10,9 @@
  - [x] rename node io
  - [x] add node
  - [x] remove node
- - [ ] add Input/Output
- - [ ] remove Input/Output
+ - [x] remove Input/Output
+ - [ ] add/edit Input/Output
+    - [ ] display & edit dim
  - [ ] add constant value
- - [ ] modify attribute
+    - [ ] display & edit data
+ - [ ] display & edit attribute
