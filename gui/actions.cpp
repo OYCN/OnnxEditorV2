@@ -26,76 +26,86 @@
 #include "gui/ui/dialog/txtlistsetdialog/txtlistsetdialog.h"
 #include "gui/ui/dialog/txtsetdialog/txtsetdialog.h"
 #include "utils/simonnx/context.h"
+#include "utils/simonnx/onnx_pass.h"
 
 using SimOnnxCtx = utils::simonnx::SimOnnxCtx;
 
 namespace gui {
 
 Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
-  act_file_new_ = new QAction(parent);
-  act_file_new_->setText("New File");
-  act_file_new_->setStatusTip("Create a new onnx file");
-  act_file_new_->setShortcut(QKeySequence("Ctrl+n"));
-  connect(act_file_new_, &QAction::triggered, this,
-          &Actions::act_file_new_callback);
+  menu_file_ = addMenu("File");
+  menu_debug_ = addMenu("Debug");
+  menu_debug_ui_ = addMenu("ui", menu_debug_);
+  menu_debug_graph_ = addMenu("graph", menu_debug_);
 
-  act_file_open_ = new QAction(parent);
-  act_file_open_->setText("Open File");
-  act_file_open_->setStatusTip("Open an exist onnx file");
-  act_file_open_->setShortcut(QKeySequence("Ctrl+o"));
-  connect(act_file_open_, &QAction::triggered, this,
-          &Actions::act_file_open_callback);
+  {
+    auto act =
+        addAction(menu_file_, "New File", [&]() { parent_->scene_->clear(); });
+    act->setStatusTip("Create a new onnx file");
+    act->setShortcut(QKeySequence("Ctrl+n"));
+  }
+  {
+    auto act =
+        addAction(menu_file_, "Open File", [&]() { act_file_open_callback(); });
+    act->setStatusTip("Open an exist onnx file");
+    act->setShortcut(QKeySequence("Ctrl+o"));
+  }
+  {
+    auto act =
+        addAction(menu_file_, "Save as", [&]() { act_file_save_a_callback(); });
+    act->setStatusTip("Save this onnx file as new file");
+    act->setShortcut(QKeySequence("Ctrl+e"));
+  }
+  {
+    auto act =
+        addAction(menu_file_, "Close", [&]() { parent_->scene_->clear(); });
+    act->setStatusTip("Close this file");
+    act->setShortcut(QKeySequence("Ctrl+w"));
+  }
 
-  act_file_save_as_ = new QAction(parent);
-  act_file_save_as_->setText("Save as");
-  act_file_save_as_->setStatusTip("Save this onnx file as new file");
-  act_file_save_as_->setShortcut(QKeySequence("Ctrl+e"));
-  connect(act_file_save_as_, &QAction::triggered, this,
-          &Actions::act_file_save_a_callback);
+  addAction(menu_debug_ui_, "Txt Set Dialog",
+            [&]() { act_txt_set_dialog_exec_callback(); });
+  addAction(menu_debug_ui_, "Txt List Set Dialog",
+            [&]() { act_txt_list_set_dialog_exec_callback(); });
+  addAction(menu_debug_ui_, "Node Summary Dialog",
+            [&]() { act_node_summary_dialog_exec_callback(); });
 
-  act_file_close_ = new QAction(parent);
-  act_file_close_->setText("Close");
-  act_file_close_->setStatusTip("Close this file");
-  act_file_close_->setShortcut(QKeySequence("Ctrl+w"));
-  connect(act_file_close_, &QAction::triggered, this,
-          &Actions::act_file_close_callback);
-
-  menu_file_ = parent->menuBar()->addMenu("File");
-  menu_file_->addAction(act_file_new_);
-  menu_file_->addAction(act_file_open_);
-  menu_file_->addAction(act_file_save_as_);
-  menu_file_->addAction(act_file_close_);
-
-  menu_debug_ = parent->menuBar()->addMenu("Debug");
-
-  act_display_txt_set_dialog_ = new QAction(parent);
-  act_display_txt_set_dialog_->setText("Txt Set Dialog");
-  connect(act_display_txt_set_dialog_, &QAction::triggered, this,
-          &Actions::act_txt_set_dialog_exec_callback);
-  act_display_txt_list_set_dialog_ = new QAction(parent);
-  act_display_txt_list_set_dialog_->setText("Txt List Set Dialog");
-  connect(act_display_txt_list_set_dialog_, &QAction::triggered, this,
-          &Actions::act_txt_list_set_dialog_exec_callback);
-  act_display_node_summary_dialog_ = new QAction(parent);
-  act_display_node_summary_dialog_->setText("Node Summary Dialog");
-  connect(act_display_node_summary_dialog_, &QAction::triggered, this,
-          &Actions::act_node_summary_dialog_exec_callback);
-  menu_debug_ui_ = menu_debug_->addMenu("ui");
-  menu_debug_ui_->addAction(act_display_txt_set_dialog_);
-  menu_debug_ui_->addAction(act_display_txt_list_set_dialog_);
-  menu_debug_ui_->addAction(act_display_node_summary_dialog_);
-
-  act_random_graph_ = new QAction(parent);
-  act_random_graph_->setText("Random Graph");
-  connect(act_random_graph_, &QAction::triggered, this,
-          &Actions::act_random_graph_callback);
-  menu_debug_graph_ = menu_debug_->addMenu("graph");
-  menu_debug_graph_->addAction(act_random_graph_);
+  addAction(menu_debug_graph_, "Random Graph",
+            [&]() { act_random_graph_callback(); });
+  addAction(menu_debug_graph_, "pass delete", [&]() {
+    if (!utils::simonnx::OnnxPass::remove_deleted_obj(
+            SimOnnxCtx::getSimOnnxCtx())) {
+      QMessageBox::critical(parent_, tr("Pass Error"), tr("pass delete error"),
+                            QMessageBox::Ok);
+    }
+  });
+  addAction(menu_debug_graph_, "pass topo sort", [&]() {
+    if (!utils::simonnx::OnnxPass::node_topo_sort(
+            SimOnnxCtx::getSimOnnxCtx())) {
+      QMessageBox::critical(parent_, tr("Pass Error"), tr("pass delete error"),
+                            QMessageBox::Ok);
+    }
+  });
+  addAction(menu_debug_graph_, "reload graph",
+            [&]() { parent_->scene_->loadGraph(SimOnnxCtx::getSimOnnxCtx()); });
+  addAction(menu_debug_graph_, "layout", [&]() { parent_->scene_->layout(); });
 }
 
-void Actions::act_file_new_callback() {
-  LOG(INFO) << "act_file_new_callback";
-  parent_->scene_->clear();
+QMenu* Actions::addMenu(const QString& label, QMenu* menu) {
+  if (menu == nullptr) {
+    return parent_->menuBar()->addMenu(label);
+  } else {
+    return menu->addMenu(label);
+  }
+}
+
+QAction* Actions::addAction(QMenu* menu, const QString& label,
+                            std::function<void()> f) {
+  auto act = new QAction(parent_);
+  act->setText(label);
+  connect(act, &QAction::triggered, this, f);
+  menu->addAction(act);
+  return act;
 }
 
 void Actions::act_file_open_callback() {
@@ -140,11 +150,6 @@ void Actions::act_file_save_a_callback() {
   if (!ret) {
     return;
   }
-}
-
-void Actions::act_file_close_callback() {
-  LOG(INFO) << "act_file_close_callback";
-  parent_->scene_->clear();
 }
 
 void Actions::act_txt_set_dialog_exec_callback() {

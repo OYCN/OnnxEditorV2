@@ -17,6 +17,7 @@
 
 #include <QAction>
 #include <QMainWindow>
+#include <functional>
 
 namespace gui {
 
@@ -28,11 +29,14 @@ class Actions : public QObject {
  public:
   explicit Actions(MainWindow* parent);
 
+ private:
+  QMenu* addMenu(const QString& label, QMenu* menu = nullptr);
+  QAction* addAction(QMenu* menu, const QString& label,
+                     std::function<void()> f);
+
  private slots:
-  void act_file_new_callback();
   void act_file_open_callback();
   void act_file_save_a_callback();
-  void act_file_close_callback();
 
   void act_txt_list_set_dialog_exec_callback();
   void act_txt_set_dialog_exec_callback();
@@ -55,6 +59,7 @@ class Actions : public QObject {
   QAction* act_display_node_summary_dialog_;
   QMenu* menu_debug_graph_;
   QAction* act_random_graph_;
+  QAction* act_pass_delete_obj_;
 };
 
 }  // namespace gui

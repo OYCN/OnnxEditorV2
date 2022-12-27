@@ -61,6 +61,9 @@ class FakeTensorObj : public TensorObj {
   }
   std::string getName() override { return faked_.fake_name; }
 
+ protected:
+  bool destroyHandle() override { return true; }
+
  private:
   FakeTensor_t faked_;
 };
@@ -72,6 +75,9 @@ class InitTensorObj : public TensorObj {
   std::string getName() override;
   bool setName(std::string name) override;
 
+ protected:
+  bool destroyHandle() override;
+
  private:
   TensorProtoPtr handle_;
 };
@@ -82,6 +88,9 @@ class ValueTensorObj : public TensorObj {
       : TensorObj(ctx), handle_(handle) {}
   std::string getName() override;
   bool setName(std::string name) override;
+
+ protected:
+  bool destroyHandle() override;
 
  private:
   ValueInfoProtoPtr handle_;

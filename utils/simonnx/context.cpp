@@ -74,6 +74,64 @@ void SimOnnxCtx::RestoreObj(IObject* obj) {
   }
 }
 
+template <>
+bool SimOnnxCtx::destroyHandle(IObject* obj) {
+  return obj->destroyHandle();
+}
+
+template <typename RPT, typename VT>
+bool delFromRepeatProto(RPT rp, VT handle) {
+  for (auto iter = rp->begin(); iter != rp->end();) {
+    if (&(*iter) == handle) {
+      iter = rp->erase(iter);
+      VLOG(1) << "delete success";
+      return true;
+    } else {
+      iter++;
+    }
+  }
+  return false;
+}
+
+template <>
+bool SimOnnxCtx::destroyHandle(NodeProtoPtr handle) {
+  VLOG(1) << "delete NodeProtoPtr";
+  auto nodes = mp_->mutable_graph()->mutable_node();
+  if (delFromRepeatProto(nodes, handle)) {
+    return true;
+  } else {
+    LOG(ERROR) << "delete NodeProtoPtr failed @" << handle;
+    return false;
+  }
+}
+
+template <>
+bool SimOnnxCtx::destroyHandle(TensorProtoPtr handle) {
+  LOG(INFO) << "delete TensorProtoPtr";
+  auto inits = mp_->mutable_graph()->mutable_initializer();
+  if (delFromRepeatProto(inits, handle)) {
+    return true;
+  } else {
+    LOG(ERROR) << "delete TensorProtoPtr failed @" << handle;
+    return false;
+  }
+}
+
+template <>
+bool SimOnnxCtx::destroyHandle(ValueInfoProtoPtr handle) {
+  LOG(INFO) << "delete ValueInfoProtoPtr";
+  auto ins = mp_->mutable_graph()->mutable_input();
+  auto outs = mp_->mutable_graph()->mutable_output();
+  auto vals = mp_->mutable_graph()->mutable_value_info();
+  if (delFromRepeatProto(ins, handle) || delFromRepeatProto(outs, handle) ||
+      delFromRepeatProto(vals, handle)) {
+    return true;
+  } else {
+    LOG(ERROR) << "delete ValueInfoProtoPtr failed @" << handle;
+    return false;
+  }
+}
+
 void SimOnnxCtx::genRandomOnnx(int num) {
   LOCK;
   GOOGLE_PROTOBUF_VERIFY_VERSION;

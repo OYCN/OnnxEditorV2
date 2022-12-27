@@ -43,6 +43,7 @@ class IObject {
   virtual void setId(size_t id) = 0;
   virtual void setIter(std::list<IObject*>::iterator iter) = 0;
   virtual void setDeleted(bool deleted) = 0;
+  virtual bool destroyHandle() = 0;
 };
 
 template <ObjType_t _OT>

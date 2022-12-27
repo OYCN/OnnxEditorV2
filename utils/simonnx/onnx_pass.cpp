@@ -25,8 +25,12 @@
 namespace utils {
 namespace simonnx {
 
-bool OnnxPass::remove_useless_tensor(SimOnnxCtx* ctx) {
-  // TODO(opluss): Impl
+bool OnnxPass::remove_deleted_obj(SimOnnxCtx* ctx) {
+  for (auto& kv : ctx->obj_del_ctx_) {
+    for (auto& v : kv.second) {
+      ctx->destroyHandle(v);
+    }
+  };
   return true;
 }
 
@@ -35,7 +39,7 @@ bool OnnxPass::remove_useless_node(SimOnnxCtx* ctx) {
   return true;
 }
 
-bool OnnxPass::remove_deleted_node(SimOnnxCtx* ctx) {
+bool OnnxPass::remove_useless_tensor(SimOnnxCtx* ctx) {
   // TODO(opluss): Impl
   return true;
 }

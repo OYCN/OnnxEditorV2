@@ -16,6 +16,8 @@
 
 #include <onnx/onnx_pb.h>
 
+#include "utils/simonnx/context.h"
+
 namespace utils {
 namespace simonnx {
 
@@ -35,10 +37,16 @@ bool InitTensorObj::setName(std::string name) {
   return true;
 }
 
+bool InitTensorObj::destroyHandle() { return getCtx()->destroyHandle(handle_); }
+
 std::string ValueTensorObj::getName() { return handle_->name(); }
 bool ValueTensorObj::setName(std::string name) {
   handle_->set_name(name);
   return true;
+}
+
+bool ValueTensorObj::destroyHandle() {
+  return getCtx()->destroyHandle(handle_);
 }
 
 }  // namespace simonnx

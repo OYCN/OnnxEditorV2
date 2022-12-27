@@ -74,12 +74,16 @@ class SimOnnxCtx {
     std::vector<_T> ret;
     using ObjType = typename std::remove_pointer<_T>::type;
     if (obj_free_ctx_.count(ObjType::ObjType), 1) {
-      for (const auto& o : obj_free_ctx_.at(ObjType::ObjType)) {
-        ret.emplace_back(dynamic_cast<_T>(o));
+      if (obj_free_ctx_.count(ObjType::ObjType) != 0) {
+        for (const auto& o : obj_free_ctx_.at(ObjType::ObjType)) {
+          ret.emplace_back(dynamic_cast<_T>(o));
+        }
       }
     }
     return ret;
   }
+  template <typename T>
+  bool destroyHandle(T handle);
 
   void genRandomOnnx(int num);
   bool openOnnx(const std::string path);
@@ -111,7 +115,6 @@ class SimOnnxCtx {
   TensorHandle CreateTensorObjImpl(_Args&&... args) {
     return CreateObjImpl<TensorHandle, _Args...>(std::forward<_Args>(args)...);
   }
-
   static std::map<size_t, SimOnnxCtx>& getCtxMap() {
     static std::map<size_t, SimOnnxCtx> ctxes;
     return ctxes;

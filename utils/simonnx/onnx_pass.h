@@ -24,14 +24,14 @@ class OnnxPass {
  public:
   static bool pass_all(SimOnnxCtx* ctx) {
     bool ret = true;
-    ret = ret && remove_deleted_node(ctx);
+    ret = ret && remove_deleted_obj(ctx);
     ret = ret && node_topo_sort(ctx);
     return ret;
   }
 
-  static bool remove_useless_tensor(SimOnnxCtx* ctx);
+  static bool remove_deleted_obj(SimOnnxCtx* ctx);
   static bool remove_useless_node(SimOnnxCtx* ctx);
-  static bool remove_deleted_node(SimOnnxCtx* ctx);
+  static bool remove_useless_tensor(SimOnnxCtx* ctx);
   static bool node_topo_sort(SimOnnxCtx* ctx);
 };
 

@@ -87,6 +87,9 @@ class FakeNodeObj : public NodeObj {
   std::vector<std::string> getInputs() override { return faked_.fake_inputs; }
   std::vector<std::string> getOutputs() override { return faked_.fake_outputs; }
 
+ protected:
+  bool destroyHandle() override { return true; }
+
  private:
   FakeNode_t faked_;
 };
@@ -104,6 +107,9 @@ class RealNodeObj : public NodeObj {
   std::vector<std::string> getOutputs() override;
   bool setOutputs(const std::vector<std::string>& outputs) override;
 
+ protected:
+  bool destroyHandle() override;
+
  private:
   NodeProtoPtr handle_;
 };
@@ -117,7 +123,7 @@ class IONodeObj : public NodeObj {
   std::string getName() override;
   bool setName(std::string name) override;
 
- private:
+ protected:
   ValueInfoProtoPtr handle_;
 };
 
@@ -131,6 +137,9 @@ class InputNodeObj : public IONodeObj {
   std::vector<std::string> getInputs() override { return {}; }
   std::vector<std::string> getOutputs() override;
   bool setOutputs(const std::vector<std::string>& outputs) override;
+
+ protected:
+  bool destroyHandle() override;
 };
 
 class OutputNodeObj : public IONodeObj {
@@ -143,6 +152,9 @@ class OutputNodeObj : public IONodeObj {
   std::vector<std::string> getInputs() override;
   bool setInputs(const std::vector<std::string>& inputs) override;
   std::vector<std::string> getOutputs() override { return {}; }
+
+ protected:
+  bool destroyHandle() override;
 };
 
 }  // namespace simonnx

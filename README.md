@@ -9,7 +9,7 @@
  - [x] rename io name
  - [x] rename node io
  - [x] add node
- - [ ] remove node
+ - [x] remove node
  - [ ] add Input/Output
  - [ ] remove Input/Output
  - [ ] add constant value
