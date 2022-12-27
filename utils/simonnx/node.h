@@ -122,6 +122,8 @@ class IONodeObj : public NodeObj {
   explicit IONodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
       : NodeObj(ctx), handle_(handle) {
     setAttr("setOpType", "false");
+    setAttr("setInputs", "false");
+    setAttr("setOutputs", "false");
   }
   std::string getName() override;
   bool setName(std::string name) override;
@@ -134,12 +136,12 @@ class InputNodeObj : public IONodeObj {
  public:
   explicit InputNodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
       : IONodeObj(ctx, handle) {
-    setAttr("setInputs", "false");
+    // setAttr("setInputs", "false");
   }
   std::string getOpType() override { return TREATY_INPUT_OP_TYPE; }
   std::vector<std::string> getInputs() override { return {}; }
   std::vector<std::string> getOutputs() override;
-  bool setOutputs(const std::vector<std::string>& outputs) override;
+  // bool setOutputs(const std::vector<std::string>& outputs) override;
 
  protected:
   bool destroyHandle() override;
@@ -149,11 +151,11 @@ class OutputNodeObj : public IONodeObj {
  public:
   explicit OutputNodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
       : IONodeObj(ctx, handle) {
-    setAttr("setOutputs", "false");
+    // setAttr("setOutputs", "false");
   }
   std::string getOpType() override { return TREATY_OUTPUT_OP_TYPE; }
   std::vector<std::string> getInputs() override;
-  bool setInputs(const std::vector<std::string>& inputs) override;
+  // bool setInputs(const std::vector<std::string>& inputs) override;
   std::vector<std::string> getOutputs() override { return {}; }
 
  protected:
@@ -166,13 +168,14 @@ class InitNodeObj : public NodeObj {
       : NodeObj(ctx), handle_(handle) {
     setAttr("setOpType", "false");
     setAttr("setInputs", "false");
+    setAttr("setOutputs", "false");
   }
   std::string getName() override;
   bool setName(std::string name) override;
   std::string getOpType() override { return TREATY_INIT_OP_TYPE; }
   std::vector<std::string> getInputs() override { return {}; }
   std::vector<std::string> getOutputs() override { return {getName()}; }
-  bool setOutputs(const std::vector<std::string>& outputs) override;
+  // bool setOutputs(const std::vector<std::string>& outputs) override;
 
  protected:
   bool destroyHandle() override;

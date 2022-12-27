@@ -100,26 +100,26 @@ bool IONodeObj::setName(std::string name) {
 
 std::vector<std::string> InputNodeObj::getOutputs() { return {getName()}; }
 
-bool InputNodeObj::setOutputs(const std::vector<std::string>& outputs) {
-  CHECK_EQ(outputs.size(), 1);
-  return setName(outputs[0]);
-}
+// bool InputNodeObj::setOutputs(const std::vector<std::string>& outputs) {
+//   CHECK_EQ(outputs.size(), 1);
+//   return setName(outputs[0]);
+// }
 
 bool InputNodeObj::destroyHandle() { return getCtx()->destroyHandle(handle_); }
 
 std::vector<std::string> OutputNodeObj::getInputs() { return {getName()}; }
 
-bool OutputNodeObj::setInputs(const std::vector<std::string>& inputs) {
-  CHECK_EQ(inputs.size(), 1);
-  return setName(inputs[0]);
-}
+// bool OutputNodeObj::setInputs(const std::vector<std::string>& inputs) {
+//   CHECK_EQ(inputs.size(), 1);
+//   return setName(inputs[0]);
+// }
 
 bool OutputNodeObj::destroyHandle() { return getCtx()->destroyHandle(handle_); }
 
-bool InitNodeObj::setOutputs(const std::vector<std::string>& outputs) {
-  CHECK_EQ(outputs.size(), 1);
-  return setName(outputs[0]);
-}
+// bool InitNodeObj::setOutputs(const std::vector<std::string>& outputs) {
+//   CHECK_EQ(outputs.size(), 1);
+//   return setName(outputs[0]);
+// }
 
 bool InitNodeObj::destroyHandle() { return getCtx()->destroyHandle(handle_); }
 
