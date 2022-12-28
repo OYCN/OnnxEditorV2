@@ -11,6 +11,8 @@ parse_args ()
 {
   DOCKER_MODE="dynamic"
   PKG_DIR=""
+  DOCKER_ARG="-it"
+  CCACHE_DIR=""
   while [ "$#" -gt 0 ]; do
       CURRENT_OPT="$1"
       case "$1" in
@@ -25,6 +27,8 @@ parse_args ()
       -r|--release)
           BUILD_TYPE="Release"
           ;;
+      --debug)
+          ;;
       --pkg)
           shift
           PKG_DIR="${1}"
@@ -33,8 +37,15 @@ parse_args ()
           shift
           BUILD_DIR="${1}"
           ;;
+      --ccache-dir)
+          shift
+          CCACHE_DIR="${1}"
+          ;;
       --static)
           DOCKER_MODE="static"
+          ;;
+      --ci)
+          DOCKER_ARG=""
           ;;
       *)
         UNKNOWN_OPT="yes"
@@ -64,11 +75,12 @@ then
     CMD_BASE="${CMD_BASE} && ${PKG_CMD}"
 fi
 
-CMD=(docker run --rm -it \
+CMD=(docker run --rm ${DOCKER_ARG} \
   -v ${CODE_DIR}:/ws \
   -v /:/hostfs \
   --env SELF_TMP=${BUILD_DIR} \
   --env BUILD_TYPE=${BUILD_TYPE} \
+  --env CCACHE_DIR=${CCACHE_DIR} \
   opluss/onnxeditor:"${DOCKER_MODE}-${OS_NAME}-${OS_VER}-$(get_arch)" \
   bash -c "\"${CMD_BASE}\""
   )

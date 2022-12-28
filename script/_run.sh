@@ -13,7 +13,7 @@ echo ${APPDIR}
 cd ${APPDIR}
 
 LD_BIN=$(find . | grep "ld-linux-.*\.so\.2" | head -n 1)
-
 echo ${LD_BIN}
-
 LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH ${LD_BIN} ${APPDIR}/main
+
+# LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH ${APPDIR}/main

@@ -1,5 +1,5 @@
 {
-  "image": "docker.io/opluss/onnxeditor:ubuntu-20.04-amd64",
+  "image": "docker.io/opluss/onnxeditor:static-ubuntu-20.04-amd64",
   "features": {
   }
 }

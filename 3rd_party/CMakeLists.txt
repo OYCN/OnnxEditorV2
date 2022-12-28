@@ -1,4 +1,6 @@
 if (NOT TARGET ogdf)
+  set(OGDF_HAS_MALLINFO2 OFF)
+  set(OGDF_SSE3_EXTENSIONS OFF)
   add_subdirectory(ogdf EXCLUDE_FROM_ALL)
 endif()
 if (NOT TARGET protobuf)

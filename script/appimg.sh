@@ -35,4 +35,4 @@ then
   wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
 fi
 chmod +x appimagetool-x86_64.AppImage
-appimagetool-x86_64.AppImage OnnxEditor.AppDir
+./appimagetool-x86_64.AppImage OnnxEditor.AppDir
