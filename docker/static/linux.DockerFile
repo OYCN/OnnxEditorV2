@@ -23,3 +23,4 @@ FROM common
 WORKDIR /ws
 COPY --from=qtlib /qtlib /qtlib
 ENV QT_LIB /qtlib
+ENV STATIC "on"

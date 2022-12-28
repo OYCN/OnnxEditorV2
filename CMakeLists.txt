@@ -42,3 +42,5 @@ target_link_libraries(
     
     gui
 )
+
+install(TARGETS main DESTINATION bin COMPONENT binaries)

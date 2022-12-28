@@ -6,3 +6,6 @@ build
 build_*
 build-*
 3rd_party/qtbase-release
+release
+*.AppImage
+*.AppDir

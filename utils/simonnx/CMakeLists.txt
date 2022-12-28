@@ -11,4 +11,5 @@ target_link_libraries(simonnx
   glog::glog
   magic_enum::magic_enum
   external_ogdf
+  utils_algorithm
 )
