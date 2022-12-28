@@ -29,6 +29,9 @@ class Actions : public QObject {
  public:
   explicit Actions(MainWindow* parent);
 
+ public:
+  void updateStatus();
+
  private:
   QMenu* addMenu(const QString& label, QMenu* menu = nullptr);
   QAction* addAction(QMenu* menu, const QString& label,
@@ -46,20 +49,9 @@ class Actions : public QObject {
  private:
   MainWindow* parent_;
 
-  QMenu* menu_file_;
-  QAction* act_file_new_;
-  QAction* act_file_open_;
-  QAction* act_file_save_as_;
-  QAction* act_file_close_;
-
-  QMenu* menu_debug_;
-  QMenu* menu_debug_ui_;
-  QAction* act_display_txt_set_dialog_;
-  QAction* act_display_txt_list_set_dialog_;
-  QAction* act_display_node_summary_dialog_;
-  QMenu* menu_debug_graph_;
-  QAction* act_random_graph_;
-  QAction* act_pass_delete_obj_;
+  QAction* act_dump2gml_;
+  QAction* act_dump2svg_;
+  QAction* act_dump2dot_;
 };
 
 }  // namespace gui

@@ -12,4 +12,5 @@ target_link_libraries(utils_algorithm
   magic_enum::magic_enum
 
   external_ogdf
+  external_graphviz
 )

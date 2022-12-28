@@ -25,3 +25,6 @@
 [submodule "3rd_party/ogdf"]
 	path = 3rd_party/ogdf
 	url = https://github.com/ogdf/ogdf.git
+[submodule "3rd_party/graphviz"]
+	path = 3rd_party/graphviz
+	url = https://gitlab.com/graphviz/graphviz.git

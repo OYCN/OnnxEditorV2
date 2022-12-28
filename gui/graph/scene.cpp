@@ -126,11 +126,7 @@ void Scene::updateEdge(const QString& name) {
   update();
 }
 
-void Scene::layout() {
-  using utils::algorithm::desc::GraphNode2NodeDescTmp;
-  using utils::algorithm::layout::Layout;
-  using utils::algorithm::layout::LayoutAlgorithm_t;
-
+QPair<Scene::GraphNode2NodeDescTmp, QList<Node*>> Scene::cvt2Desc() {
   std::map<const Node*, size_t> node2idx;
   QList<Node*> idx2node;
   for (auto node : nodes_) {
@@ -182,13 +178,50 @@ void Scene::layout() {
     }
   }
 
-  LOG(INFO) << " === Graph Summary Before Layout === ";
+  LOG(INFO) << " === Graph Summary === ";
   LOG(INFO) << "\t root num:\t" << g_roots.size();
   LOG(INFO) << "\t node num:\t" << g_len;
   LOG(INFO) << "\t single node num:\t" << s_single.size();
 
-  GraphNode2NodeDescTmp g(g_len, g_outputs, g_inputs, g_whs, g_roots);
-  auto ret = Layout::layout(&g, LayoutAlgorithm_t::kOGDF);
+  return {
+      Scene::GraphNode2NodeDescTmp(g_len, g_outputs, g_inputs, g_whs, g_roots),
+      idx2node};
+}
+
+void Scene::dump(QString path) {
+  using utils::algorithm::layout::Layout;
+  using utils::algorithm::layout::LayoutAlgorithm_t;
+  auto g = cvt2Desc().first;
+  LayoutAlgorithm_t algo = LayoutAlgorithm_t::kOGDF;
+  auto type_str = gui_ctx_.display.view.layout.toLower();
+  if (type_str == "ogdf") {
+    algo = LayoutAlgorithm_t::kOGDF;
+  } else if (type_str == "graphviz") {
+    algo = LayoutAlgorithm_t::kGraphviz;
+  } else {
+    LOG(ERROR) << "unsupport layout algorithm, fallback to ogdf";
+  }
+  Layout::dump(&g, algo, path.toStdString());
+}
+
+void Scene::layout() {
+  using utils::algorithm::layout::Layout;
+  using utils::algorithm::layout::LayoutAlgorithm_t;
+
+  auto dsc = cvt2Desc();
+  auto& g = dsc.first;
+  auto& idx2node = dsc.second;
+
+  LayoutAlgorithm_t algo = LayoutAlgorithm_t::kOGDF;
+  auto type_str = gui_ctx_.display.view.layout.toLower();
+  if (type_str == "ogdf") {
+    algo = LayoutAlgorithm_t::kOGDF;
+  } else if (type_str == "graphviz") {
+    algo = LayoutAlgorithm_t::kGraphviz;
+  } else {
+    LOG(ERROR) << "unsupport layout algorithm, fallback to ogdf";
+  }
+  auto ret = Layout::layout(&g, algo);
   CHECK_EQ(ret.getLen(), idx2node.size());
   for (size_t i = 0; i < ret.getLen(); i++) {
     auto pos = ret.getNodePos(i);

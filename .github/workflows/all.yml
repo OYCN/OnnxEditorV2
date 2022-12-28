@@ -1,0 +1,67 @@
+name: All
+
+on:
+  push:
+    branches: [ "master", "ci-*"]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  # BUILD_TYPE: release
+  BUILD_TYPE: debug
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+
+      - name: restore ccache
+        id: build
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/ccache
+          key: ccache-${{ runner.os }}-${{ runner.arch }}-${{ env.BUILD_TYPE }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: build and pkg
+        run: |
+          ls
+          cd ${{github.workspace}}
+          ./script/_build_in_docker.sh --os-version 20.04 --${{ env.BUILD_TYPE }} --static --pkg ./release --ci --ccache-dir ./ccache
+
+      - name: upload collected artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: files-${{ env.BUILD_TYPE }}
+          path: ${{github.workspace}}/release
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: download collected artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: files-${{ env.BUILD_TYPE }}
+          path: ${{github.workspace}}/release
+
+      - name: gen AppImage
+        run: |
+          ls
+          chmod -R +x release/*
+          sudo add-apt-repository universe
+          sudo apt install -y libfuse2
+          cd ${{github.workspace}}
+          ./script/appimg.sh ./release
+
+      - name: upload AppImage artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: AppImages-${{ env.BUILD_TYPE }}
+          path: ${{github.workspace}}/OnnxEditor-*.AppImage

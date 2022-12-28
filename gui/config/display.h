@@ -25,6 +25,8 @@ namespace config {
 struct Display {
   // for view
   struct View {
+    // QString layout = "ogdf";
+    QString layout = "graphviz";
   } view;
 
   // for node
