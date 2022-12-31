@@ -6,7 +6,7 @@ CODE_DIR=$(cd "$(dirname "${0}")/../"; pwd)
 
 if [[ $# == "0" ]]
 then
-  ${CODE_DIR}/script/_build_in_docker.sh --os-version 20.04 --static
+  ${CODE_DIR}/script/_build_in_docker.sh --os-version 20.04 --static --ccache-dir ./ccache
 else
   ${CODE_DIR}/script/_build_in_docker.sh $@
 fi

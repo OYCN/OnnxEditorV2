@@ -38,7 +38,7 @@ class View : public QGraphicsView {
  public:
   void expand(qreal f);
   void center();
-  const Context& getCfg() const { return ctx_; }
+  const Context& getCtx() const { return ctx_; }
   Scene* getScene();
 
  public Q_SLOTS:  // NOLINT

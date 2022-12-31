@@ -46,6 +46,7 @@ class Scene : public QGraphicsScene {
   void updateEdge();
   void updateEdge(const QString& name);
   void layout();
+  void dump(QString path);
   void clear();
 
   void loadGraph(SimOnnxCtx* ctx);
@@ -56,6 +57,10 @@ class Scene : public QGraphicsScene {
  protected:
   void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;
+
+ private:
+  using GraphNode2NodeDescTmp = utils::algorithm::desc::GraphNode2NodeDescTmp;
+  QPair<GraphNode2NodeDescTmp, QList<Node*>> cvt2Desc();
 
  private:
   SimOnnxCtx* graph_ctx_ = nullptr;

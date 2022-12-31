@@ -18,5 +18,7 @@ apt-get install -y cmake
 apt install -y gcc g++ ninja-build ccache
 apt install -y libgl-dev libglu-dev 'libxcb*-dev' libx11-xcb-dev libxkbcommon-x11-dev libpcre2-dev libz-dev libfreetype6-dev libpng-dev libjpeg-dev libsqlite3-dev libharfbuzz-dev libb2-dev libdouble-conversion-dev
 apt install -y libmd4c-dev
+# graphviz
+apt install -y bison flex git
 
 rm -rf /var/lib/apt/lists/*

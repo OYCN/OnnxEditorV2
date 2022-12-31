@@ -26,15 +26,18 @@ namespace layout {
 using GraphNode2NodeDesc = desc::GraphNode2NodeDesc;
 using GraphNode2LayoutDescTmp = desc::GraphNode2LayoutDescTmp;
 
-enum class LayoutAlgorithm_t { kOGDF };
+enum class LayoutAlgorithm_t { kOGDF = 0, kGraphviz };
 
 class Layout {
  public:
   static GraphNode2LayoutDescTmp layout(const GraphNode2NodeDesc* g,
                                         LayoutAlgorithm_t t);
+  static void dump(const GraphNode2NodeDesc* g, LayoutAlgorithm_t t,
+                   std::string out);
 
  private:
   static GraphNode2LayoutDescTmp layout_ogdf(const GraphNode2NodeDesc* g);
+  static GraphNode2LayoutDescTmp layout_graphviz(const GraphNode2NodeDesc* g);
 };
 
 }  // namespace layout

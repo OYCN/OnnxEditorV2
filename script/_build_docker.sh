@@ -148,7 +148,7 @@ check_args
 
 if [ "${UPLOAD}" = "yes" ]
 then
-  CMD+=( "&&" docker push "${DOCKER_PREFIX}:${TAG}" )
+  UPLOAD_CMD="docker push ${DOCKER_PREFIX}:${TAG}"
 fi
 
 echo "${CMD[*]}"
@@ -162,4 +162,5 @@ then
   then
     bash -c "${CMD[*]}"
   fi
+  bash -c "${UPLOAD_CMD}"
 fi

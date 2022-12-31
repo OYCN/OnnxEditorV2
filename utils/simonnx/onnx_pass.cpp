@@ -30,7 +30,7 @@ bool OnnxPass::remove_deleted_obj(SimOnnxCtx* ctx) {
     for (auto& v : kv.second) {
       ctx->destroyHandle(v);
     }
-  };
+  }
   return true;
 }
 
