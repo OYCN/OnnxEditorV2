@@ -2,7 +2,7 @@ name: All
 
 on:
   push:
-    branches: [ "master", "dev-ci", "release-*"]
+    branches: [ "master", "dev-ci"]
     tags: "v*.*.*"
   pull_request:
     branches: [ "master" ]
