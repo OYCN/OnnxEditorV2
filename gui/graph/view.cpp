@@ -168,6 +168,10 @@ void View::scaleDown() {
   double const step = 1.2;
   double const factor = std::pow(step, -1.0);
 
+  QTransform t = transform();
+
+  if (t.m11() < 0.15) return;
+
   scale(factor, factor);
 }
 
