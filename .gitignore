@@ -10,3 +10,4 @@ release
 *.AppImage
 *.AppDir
 ccache
+!*.sh
