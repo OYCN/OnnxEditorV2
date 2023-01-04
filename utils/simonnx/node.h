@@ -127,6 +127,10 @@ class IONodeObj : public NodeObj {
   }
   std::string getName() override;
   bool setName(std::string name) override;
+  std::vector<int64_t> getDim();
+  bool setDim(const std::vector<int64_t>& dims);
+  std::string getDataType();
+  bool setDataType(const std::string& datatype);
 
  protected:
   ValueInfoProtoPtr handle_;
