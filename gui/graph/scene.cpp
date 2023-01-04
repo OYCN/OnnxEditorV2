@@ -204,7 +204,7 @@ void Scene::dump(QString path) {
   Layout::dump(&g, algo, path.toStdString());
 }
 
-void Scene::layout() {
+QRectF Scene::layout() {
   using utils::algorithm::layout::Layout;
   using utils::algorithm::layout::LayoutAlgorithm_t;
 
@@ -223,13 +223,53 @@ void Scene::layout() {
   }
   auto ret = Layout::layout(&g, algo);
   CHECK_EQ(ret.getLen(), idx2node.size());
+  qreal t, b, l, r;
+  {
+    auto pos = ret.getNodePos(1);
+    auto rect = idx2node[1]->boundingRect();
+    l = pos.x - rect.width() / 2;
+    r = pos.x + rect.width() / 2;
+    t = pos.y - rect.height() / 2;
+    b = pos.y + rect.height() / 2;
+  }
+  for (size_t i = 1; i < ret.getLen(); i++) {
+    auto pos = ret.getNodePos(i);
+    auto rect = idx2node[i]->boundingRect();
+    qreal x0 = pos.x - rect.width() / 2;
+    qreal x1 = pos.x + rect.width() / 2;
+    qreal y0 = pos.y - rect.height() / 2;
+    qreal y1 = pos.y + rect.height() / 2;
+    if (x0 < l) {
+      l = x0;
+    }
+    if (x1 > r) {
+      r = x1;
+    }
+    if (y0 < t) {
+      t = y0;
+    }
+    if (y1 > b) {
+      b = y1;
+    }
+  }
+  // qDebug() << "l: " << l;
+  // qDebug() << "r: " << r;
+  // qDebug() << "t: " << t;
+  // qDebug() << "b: " << b;
+  QRectF global_rect(0, 0, r - l, b - t);
+  qreal x_off = 0 - l;
+  qreal y_off = 0 - t;
+  // qDebug() << "x_off: " << x_off;
+  // qDebug() << "y_off: " << y_off;
   for (size_t i = 0; i < ret.getLen(); i++) {
     auto pos = ret.getNodePos(i);
     auto rect = idx2node[i]->boundingRect();
-    idx2node[i]->setPos(pos.x - rect.width() / 2, pos.y - rect.height() / 2);
+    idx2node[i]->setPos(pos.x - rect.width() / 2 + x_off,
+                        pos.y - rect.height() / 2 + y_off);
+    // idx2node[i]->setPos(pos.x, pos.y);
   }
   updateEdge();
-
+  return global_rect;
   // utils::algorithm::external::ogdf::toSvg(&g, "debugs.svg", true);
 }
 

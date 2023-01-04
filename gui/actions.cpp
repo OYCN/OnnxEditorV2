@@ -150,9 +150,12 @@ void Actions::act_file_open_callback() {
     return;
   }
   parent_->scene_->loadGraph(SimOnnxCtx::getSimOnnxCtx());
-  parent_->scene_->layout();
-  parent_->view_->expand(5);
-  parent_->view_->center();
+  auto rect = parent_->scene_->layout();
+  rect.adjust(0, -50, 0, 50);
+  // qDebug() << rect;
+  parent_->view_->setSceneRect(rect);
+  parent_->view_->setScale(1.5);
+  parent_->view_->centertop();
 }
 
 void Actions::act_file_save_a_callback() {
@@ -226,9 +229,11 @@ void Actions::act_random_graph_callback() {
   parent_->scene_->clear();
   SimOnnxCtx::getSimOnnxCtx()->genRandomOnnx(50);
   parent_->scene_->loadGraph(SimOnnxCtx::getSimOnnxCtx());
-  parent_->scene_->layout();
-  parent_->view_->expand(5);
-  parent_->view_->center();
+  auto rect = parent_->scene_->layout();
+  rect.adjust(0, -50, 0, 50);
+  parent_->view_->setSceneRect(rect);
+  parent_->view_->setScale(1.5);
+  parent_->view_->centertop();
 }
 
 }  // namespace gui
