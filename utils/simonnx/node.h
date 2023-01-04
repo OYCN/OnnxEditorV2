@@ -84,6 +84,7 @@ class FakeNodeObj : public NodeObj {
     setAttr("setOpType", "false");
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
+    setAttr("setDim", "false");
   }
   std::string getName() override { return faked_.fake_name; }
   std::string getOpType() override { return faked_.fake_op_type; }
@@ -100,7 +101,13 @@ class FakeNodeObj : public NodeObj {
 class RealNodeObj : public NodeObj {
  public:
   explicit RealNodeObj(SimOnnxCtx* ctx, NodeProtoPtr handle)
-      : NodeObj(ctx), handle_(handle) {}
+      : NodeObj(ctx), handle_(handle) {
+    setAttr("setName", "true");
+    setAttr("setOpType", "true");
+    setAttr("setInputs", "true");
+    setAttr("setOutputs", "true");
+    setAttr("setDim", "false");
+  }
   std::string getName() override;
   bool setName(std::string name) override;
   std::string getOpType() override;
@@ -121,9 +128,11 @@ class IONodeObj : public NodeObj {
  public:
   explicit IONodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
       : NodeObj(ctx), handle_(handle) {
+    setAttr("setName", "true");
     setAttr("setOpType", "false");
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
+    setAttr("setDim", "true");
   }
   std::string getName() override;
   bool setName(std::string name) override;
@@ -140,7 +149,11 @@ class InputNodeObj : public IONodeObj {
  public:
   explicit InputNodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
       : IONodeObj(ctx, handle) {
-    // setAttr("setInputs", "false");
+    setAttr("setName", "true");
+    setAttr("setOpType", "false");
+    setAttr("setInputs", "false");
+    setAttr("setOutputs", "false");
+    setAttr("setDim", "true");
   }
   std::string getOpType() override { return TREATY_INPUT_OP_TYPE; }
   std::vector<std::string> getInputs() override { return {}; }
@@ -170,9 +183,11 @@ class InitNodeObj : public NodeObj {
  public:
   explicit InitNodeObj(SimOnnxCtx* ctx, TensorProtoPtr handle)
       : NodeObj(ctx), handle_(handle) {
+    setAttr("setName", "true");
     setAttr("setOpType", "false");
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
+    setAttr("setDim", "false");
   }
   std::string getName() override;
   bool setName(std::string name) override;
