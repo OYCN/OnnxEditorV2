@@ -37,13 +37,18 @@ class View : public QGraphicsView {
 
  public:
   void expand(qreal f);
+  void expandAbs(qreal w, qreal h);
   void center();
+  void centertop();
   const Context& getCtx() const { return ctx_; }
   Scene* getScene();
 
  public Q_SLOTS:  // NOLINT
   void scaleUp();
   void scaleDown();
+  void scaleExtremeUp();
+  void scaleExtremeDown();
+  void setScale(qreal scale);
 
  protected:
   void wheelEvent(QWheelEvent* event) override;

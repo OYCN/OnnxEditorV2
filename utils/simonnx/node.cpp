@@ -17,6 +17,8 @@
 #include <glog/logging.h>
 #include <onnx/onnx_pb.h>
 
+// #include <magic_enum.hpp>
+
 #include "utils/simonnx/context.h"
 
 namespace utils {
@@ -96,6 +98,82 @@ std::string IONodeObj::getName() { return handle_->name(); }
 bool IONodeObj::setName(std::string name) {
   handle_->set_name(name);
   return true;
+}
+
+std::vector<int64_t> IONodeObj::getDim() {
+  std::vector<int64_t> ret;
+  if (!handle_->has_type()) {
+    return ret;
+  }
+  auto& type = handle_->type();
+  if (!type.has_tensor_type()) {
+    return ret;
+  }
+  auto& tensor_type = type.tensor_type();
+  if (!tensor_type.has_shape()) {
+    return ret;
+  }
+  auto& shape = tensor_type.shape();
+  auto& dims = shape.dim();
+  for (auto& dim : dims) {
+    CHECK_EQ(ONNX_NAMESPACE::TensorShapeProto::Dimension::kDimValue,
+             dim.value_case());
+    ret.emplace_back(dim.dim_value());
+  }
+  return ret;
+}
+
+bool IONodeObj::setDim(const std::vector<int64_t>& in_dims) {
+  auto type = handle_->mutable_type();
+  auto tensor_type = type->mutable_tensor_type();
+  auto shape = tensor_type->mutable_shape();
+  shape->clear_dim();
+  auto dims = shape->mutable_dim();
+  for (auto& in_dim : in_dims) {
+    auto d = dims->Add();
+    d->set_dim_value(in_dim);
+  }
+  return true;
+}
+
+std::string IONodeObj::getDataType() {
+  std::string ret;
+  if (!handle_->has_type()) {
+    return ret;
+  }
+  auto& type = handle_->type();
+  if (!type.has_tensor_type()) {
+    return ret;
+  }
+  auto& tensor_type = type.tensor_type();
+  if (!tensor_type.has_elem_type()) {
+    return ret;
+  }
+  CHECK(ONNX_NAMESPACE::TensorProto::DataType_IsValid(tensor_type.elem_type()));
+  auto t = static_cast<ONNX_NAMESPACE::TensorProto::DataType>(tensor_type.elem_type());
+  return ONNX_NAMESPACE::TensorProto::DataType_Name(t);
+  // auto t = magic_enum::enum_cast<ONNX_NAMESPACE::TensorProto_DataType>(
+  //     static_cast<int>(tensor_type.elem_type()));
+  // if (!t.has_value()) {
+  //   return ret;
+  // }
+  // return magic_enum::enum_name(t.value());
+}
+
+bool IONodeObj::setDataType(const std::string& datatype) {
+  ONNX_NAMESPACE::TensorProto::DataType dt;
+  if (!ONNX_NAMESPACE::TensorProto::DataType_Parse(datatype, &dt)) {
+    return false;
+  }
+  handle_->mutable_type()->mutable_tensor_type()->set_elem_type(dt);
+  return true;
+  // auto dt = magic_enum::enum_cast<ONNX_NAMESPACE::TensorProto_DataType>(datatype);
+  // if (!dt.has_value()) {
+  //   return false;
+  // }
+  // handle_->mutable_type()->mutable_tensor_type()->set_elem_type(
+  //     magic_enum::enum_integer(dt));
+  // return true;
 }
 
 std::vector<std::string> InputNodeObj::getOutputs() { return {getName()}; }

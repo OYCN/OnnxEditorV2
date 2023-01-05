@@ -27,10 +27,11 @@ namespace gui {
 namespace graph {
 
 NodeMenu::NodeMenu(Node *node) : node_(node) {
-  reset_name_action_ = this->addAction("reset name");
-  reset_op_type_action_ = this->addAction("reset op_type");
-  reset_inputs_action_ = this->addAction("reset inputs");
-  reset_outputs_action_ = this->addAction("reset outputs");
+  reset_name_action_ = this->addAction("edit name");
+  reset_op_type_action_ = this->addAction("edit op_type");
+  reset_inputs_action_ = this->addAction("edit inputs");
+  reset_outputs_action_ = this->addAction("edit outputs");
+  reset_dim_action_ = this->addAction("edit dim");
   connect(reset_name_action_, &QAction::triggered, this,
           &NodeMenu::slot_reset_name);
   connect(reset_op_type_action_, &QAction::triggered, this,
@@ -39,16 +40,19 @@ NodeMenu::NodeMenu(Node *node) : node_(node) {
           &NodeMenu::slot_reset_inputs);
   connect(reset_outputs_action_, &QAction::triggered, this,
           &NodeMenu::slot_reset_outputs);
+  connect(reset_dim_action_, &QAction::triggered, this,
+          &NodeMenu::slot_reset_dim);
 }
 
 void NodeMenu::updateStatus() {
-  auto if_disable = [&](std::string field) {
-    return node_->handle_->getAttr(field, "") != "false";
+  auto if_enable = [&](std::string field) {
+    return node_->handle_->getAttr(field, "false") == "true";
   };
-  reset_name_action_->setEnabled(if_disable("setName"));
-  reset_op_type_action_->setEnabled(if_disable("setOpType"));
-  reset_inputs_action_->setEnabled(if_disable("setInputs"));
-  reset_outputs_action_->setEnabled(if_disable("setOutputs"));
+  reset_name_action_->setEnabled(if_enable("setName"));
+  reset_op_type_action_->setEnabled(if_enable("setOpType"));
+  reset_inputs_action_->setEnabled(if_enable("setInputs"));
+  reset_outputs_action_->setEnabled(if_enable("setOutputs"));
+  reset_dim_action_->setEnabled(if_enable("setDim"));
 }
 
 void NodeMenu::slot_reset_name() {
@@ -98,6 +102,43 @@ void NodeMenu::slot_reset_outputs() {
   if (ret == QDialog::Accepted) {
     node_->setOutputs(out);
     node_->ioUpdateSend();
+  }
+}
+
+void NodeMenu::slot_reset_dim() {
+  auto dim = node_->getDim();
+  QString dim_str;
+  for (size_t i = 0; i < dim.size(); i++) {
+    dim_str += QString::number(dim[i]);
+    if (i < (dim.size() - 1)) {
+      dim_str += ", ";
+    }
+  }
+  TxtSetDialog d("dim:", dim_str, node_->ctx_.top_widget);
+  auto ret = d.exec();
+  if (ret == QDialog::Accepted) {
+    dim_str = dim_str.replace(" ", "");
+    bool valid = dim_str.size() >= 2;
+    dim.clear();
+    if (valid) {
+      for (auto d_str : dim_str.split(",")) {
+        dim.append(d_str.toLongLong(&valid));
+        if (!valid) {
+          LOG(ERROR) << "err when parsing \"" << d_str.toStdString() << "\"";
+          break;
+        }
+      }
+    }
+    if (!valid) {
+      QMessageBox::critical(this, tr("Error"),
+                            tr("need valid dim, e.g. `b, c, h, w`"));
+    } else {
+      if (node_->setDim(dim)) {
+        node_->refresh();
+      } else {
+        QMessageBox::critical(this, tr("Error"), tr("set op_type error"));
+      }
+    }
   }
 }
 

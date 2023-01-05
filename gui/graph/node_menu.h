@@ -34,6 +34,7 @@ class NodeMenu : public QMenu {
   void slot_reset_op_type();
   void slot_reset_inputs();
   void slot_reset_outputs();
+  void slot_reset_dim();
 
  private:
   Node* node_;
@@ -42,6 +43,7 @@ class NodeMenu : public QMenu {
   QAction* reset_op_type_action_;
   QAction* reset_inputs_action_;
   QAction* reset_outputs_action_;
+  QAction* reset_dim_action_;
 };
 
 }  // namespace graph

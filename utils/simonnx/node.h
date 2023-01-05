@@ -84,6 +84,8 @@ class FakeNodeObj : public NodeObj {
     setAttr("setOpType", "false");
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
+    setAttr("setDim", "false");
+    setAttr("NodeType", "FakeNode");
   }
   std::string getName() override { return faked_.fake_name; }
   std::string getOpType() override { return faked_.fake_op_type; }
@@ -100,7 +102,14 @@ class FakeNodeObj : public NodeObj {
 class RealNodeObj : public NodeObj {
  public:
   explicit RealNodeObj(SimOnnxCtx* ctx, NodeProtoPtr handle)
-      : NodeObj(ctx), handle_(handle) {}
+      : NodeObj(ctx), handle_(handle) {
+    setAttr("setName", "true");
+    setAttr("setOpType", "true");
+    setAttr("setInputs", "true");
+    setAttr("setOutputs", "true");
+    setAttr("setDim", "false");
+    setAttr("NodeType", "RealNode");
+  }
   std::string getName() override;
   bool setName(std::string name) override;
   std::string getOpType() override;
@@ -121,12 +130,19 @@ class IONodeObj : public NodeObj {
  public:
   explicit IONodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
       : NodeObj(ctx), handle_(handle) {
+    setAttr("setName", "true");
     setAttr("setOpType", "false");
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
+    setAttr("setDim", "true");
+    setAttr("NodeType", "IONode");
   }
   std::string getName() override;
   bool setName(std::string name) override;
+  std::vector<int64_t> getDim();
+  bool setDim(const std::vector<int64_t>& dims);
+  std::string getDataType();
+  bool setDataType(const std::string& datatype);
 
  protected:
   ValueInfoProtoPtr handle_;
@@ -135,9 +151,7 @@ class IONodeObj : public NodeObj {
 class InputNodeObj : public IONodeObj {
  public:
   explicit InputNodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
-      : IONodeObj(ctx, handle) {
-    // setAttr("setInputs", "false");
-  }
+      : IONodeObj(ctx, handle) {}
   std::string getOpType() override { return TREATY_INPUT_OP_TYPE; }
   std::vector<std::string> getInputs() override { return {}; }
   std::vector<std::string> getOutputs() override;
@@ -150,9 +164,7 @@ class InputNodeObj : public IONodeObj {
 class OutputNodeObj : public IONodeObj {
  public:
   explicit OutputNodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
-      : IONodeObj(ctx, handle) {
-    // setAttr("setOutputs", "false");
-  }
+      : IONodeObj(ctx, handle) {}
   std::string getOpType() override { return TREATY_OUTPUT_OP_TYPE; }
   std::vector<std::string> getInputs() override;
   // bool setInputs(const std::vector<std::string>& inputs) override;
@@ -166,9 +178,12 @@ class InitNodeObj : public NodeObj {
  public:
   explicit InitNodeObj(SimOnnxCtx* ctx, TensorProtoPtr handle)
       : NodeObj(ctx), handle_(handle) {
+    setAttr("setName", "true");
     setAttr("setOpType", "false");
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
+    setAttr("setDim", "false");
+    setAttr("NodeType", "InitNode");
   }
   std::string getName() override;
   bool setName(std::string name) override;

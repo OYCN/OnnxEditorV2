@@ -45,7 +45,7 @@ class Scene : public QGraphicsScene {
   Edge* addEdge(const QString& name);
   void updateEdge();
   void updateEdge(const QString& name);
-  void layout();
+  QPair<QRectF, QPointF> layout();
   void dump(QString path);
   void clear();
 

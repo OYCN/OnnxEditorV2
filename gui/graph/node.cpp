@@ -88,8 +88,7 @@ void Node::bind(NodeHandle handle) {
 void Node::refresh() {
   auto op_type = QString::fromStdString(handle_->getOpType());
   auto name = QString::fromStdString(handle_->getName());
-  if (ctx_.display.node.hidden_op_type.contains(op_type) ||
-      getDeleted()) {
+  if (ctx_.display.node.hidden_op_type.contains(op_type) || getDeleted()) {
     this->setVisible(false);
   } else {
     this->setVisible(true);
@@ -254,6 +253,27 @@ bool Node::setOutputs(QList<QString> outputs) {
   return handle_->setOutputs(outs);
 }
 
+QList<int64_t> Node::getDim() const {
+  if (handle_->getAttr("setDim") == "true") {
+    CHECK_EQ(handle_->getAttr("NodeType"), "IONode");
+    auto ionode_handle = dynamic_cast<utils::simonnx::IONodeObj *>(handle_);
+    auto dim = ionode_handle->getDim();
+    return QList(dim.begin(), dim.end());
+  } else {
+    return {};
+  }
+}
+
+bool Node::setDim(QList<int64_t> dim) {
+  if (handle_->getAttr("setDim") == "true") {
+    CHECK_EQ(handle_->getAttr("NodeType"), "IONode");
+    auto ionode_handle = dynamic_cast<utils::simonnx::IONodeObj *>(handle_);
+    return ionode_handle->setDim({dim.begin(), dim.end()});
+  } else {
+    return false;
+  }
+}
+
 void Node::setDeleted(bool del) {
   if (del != getDeleted()) {
     if (del) {
@@ -265,9 +285,7 @@ void Node::setDeleted(bool del) {
   }
 }
 
-bool Node::getDeleted() const {
-  return handle_->isDeleted();
-}
+bool Node::getDeleted() const { return handle_->isDeleted(); }
 
 void Node::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
   // qDebug() << "Enter hover";

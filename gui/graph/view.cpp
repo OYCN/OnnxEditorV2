@@ -31,7 +31,7 @@ namespace graph {
 View::View(QWidget *parent) : QGraphicsView{parent}, ctx_(this) {
   setDragMode(QGraphicsView::ScrollHandDrag);
   setRenderHint(QPainter::Antialiasing);
-  // setMouseTracking(true);
+
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
@@ -175,6 +175,25 @@ void View::scaleDown() {
   scale(factor, factor);
 }
 
+void View::scaleExtremeUp() {
+  QTransform t = transform();
+  do {
+    scaleUp();
+  } while (t != transform());
+}
+
+void View::scaleExtremeDown() {
+  QTransform t = transform();
+  do {
+    scaleDown();
+  } while (t != transform());
+}
+
+void View::setScale(qreal scale) {
+  QTransform t(scale, 0, 0, scale, 0, 0);
+  setTransform(t);
+}
+
 void View::expand(qreal f) {
   QRectF rectTmp = scene()->sceneRect();
   QPointF ptTopLeft = rectTmp.topLeft();
@@ -188,11 +207,32 @@ void View::expand(qreal f) {
   update();
 }
 
+void View::expandAbs(qreal w, qreal h) {
+  QRectF rectTmp = scene()->sceneRect();
+  QPointF ptTopLeft = rectTmp.topLeft();
+  QPointF ptBottomRight = rectTmp.bottomRight();
+  QPointF ptW_H = QPointF(w, h);
+  ptTopLeft -= ptW_H;
+  ptBottomRight += ptW_H;
+  rectTmp.setTopLeft(ptTopLeft);
+  rectTmp.setBottomRight(ptBottomRight);
+  scene()->setSceneRect(rectTmp);
+  update();
+}
+
 void View::center() {
   QScrollBar *hBar = horizontalScrollBar();
   QScrollBar *vBar = verticalScrollBar();
   hBar->setValue(hBar->minimum() + (hBar->maximum() - hBar->minimum()) / 2);
   vBar->setValue(vBar->minimum() + (vBar->maximum() - vBar->minimum()) / 2);
+  update();
+}
+
+void View::centertop() {
+  QScrollBar *hBar = horizontalScrollBar();
+  QScrollBar *vBar = verticalScrollBar();
+  hBar->setValue(hBar->minimum() + (hBar->maximum() - hBar->minimum()) / 2);
+  vBar->setValue(vBar->minimum());
   update();
 }
 

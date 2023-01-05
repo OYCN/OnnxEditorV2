@@ -11,8 +11,8 @@
  - [x] add node
  - [x] remove node
  - [x] remove Input/Output
- - [ ] add/edit Input/Output
-    - [ ] display & edit dim
+ - [x] add/edit Input/Output
+    - [x] display & edit dim
  - [ ] add constant value
     - [ ] display & edit data
  - [ ] display & edit attribute
