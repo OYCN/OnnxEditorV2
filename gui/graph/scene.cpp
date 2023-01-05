@@ -204,7 +204,7 @@ void Scene::dump(QString path) {
   Layout::dump(&g, algo, path.toStdString());
 }
 
-QRectF Scene::layout() {
+QPair<QRectF, QPointF> Scene::layout() {
   using utils::algorithm::layout::Layout;
   using utils::algorithm::layout::LayoutAlgorithm_t;
 
@@ -223,6 +223,7 @@ QRectF Scene::layout() {
   }
   auto ret = Layout::layout(&g, algo);
   CHECK_EQ(ret.getLen(), idx2node.size());
+  // all graph
   qreal t, b, l, r;
   {
     auto pos = ret.getNodePos(1);
@@ -261,15 +262,21 @@ QRectF Scene::layout() {
   qreal y_off = 0 - t;
   // qDebug() << "x_off: " << x_off;
   // qDebug() << "y_off: " << y_off;
+  // the first rank
+  QPointF pt(0, 0);
   for (size_t i = 0; i < ret.getLen(); i++) {
     auto pos = ret.getNodePos(i);
     auto rect = idx2node[i]->boundingRect();
-    idx2node[i]->setPos(pos.x - rect.width() / 2 + x_off,
-                        pos.y - rect.height() / 2 + y_off);
+    auto x = pos.x - rect.width() / 2 + x_off;
+    auto y = pos.y - rect.height() / 2 + y_off;
+    if (pt == QPointF(0, 0) && abs(y) < 0.1) {
+      pt = QPointF(pos.x + x_off, pos.y + y_off);
+    }
+    idx2node[i]->setPos(x, y);
     // idx2node[i]->setPos(pos.x, pos.y);
   }
   updateEdge();
-  return global_rect;
+  return {global_rect, pt};
   // utils::algorithm::external::ogdf::toSvg(&g, "debugs.svg", true);
 }
 

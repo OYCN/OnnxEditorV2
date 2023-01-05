@@ -144,18 +144,25 @@ void Actions::act_file_open_callback() {
     QMessageBox::critical(parent_, tr("Open Error"), tr(msg.c_str()),
                           QMessageBox::Ok);
   });
-  bool ret = SimOnnxCtx::getSimOnnxCtx()->openOnnx(fileName.toStdString());
-  SimOnnxCtx::getSimOnnxCtx()->resetErrorFn();
-  if (!ret) {
-    return;
+  {
+    bool ret = SimOnnxCtx::getSimOnnxCtx()->openOnnx(fileName.toStdString());
+    SimOnnxCtx::getSimOnnxCtx()->resetErrorFn();
+    if (!ret) {
+      return;
+    }
   }
   parent_->scene_->loadGraph(SimOnnxCtx::getSimOnnxCtx());
-  auto rect = parent_->scene_->layout();
-  rect.adjust(0, -50, 0, 50);
-  // qDebug() << rect;
-  parent_->view_->setSceneRect(rect);
-  parent_->view_->setScale(1.5);
-  parent_->view_->centertop();
+  {
+    auto ret = parent_->scene_->layout();
+    auto rect = ret.first;
+    auto pt = ret.second;
+    rect.adjust(0, -50, 0, 50);
+    // qDebug() << rect;
+    parent_->view_->setSceneRect(rect);
+    parent_->view_->setScale(1.5);
+    parent_->view_->centerOn(pt);
+    // parent_->view_->centertop();
+  }
 }
 
 void Actions::act_file_save_a_callback() {
@@ -229,11 +236,14 @@ void Actions::act_random_graph_callback() {
   parent_->scene_->clear();
   SimOnnxCtx::getSimOnnxCtx()->genRandomOnnx(50);
   parent_->scene_->loadGraph(SimOnnxCtx::getSimOnnxCtx());
-  auto rect = parent_->scene_->layout();
+  auto ret = parent_->scene_->layout();
+  auto rect = ret.first;
+  auto pt = ret.second;
   rect.adjust(0, -50, 0, 50);
   parent_->view_->setSceneRect(rect);
   parent_->view_->setScale(1.5);
-  parent_->view_->centertop();
+  parent_->view_->centerOn(pt);
+  // parent_->view_->centertop();
 }
 
 }  // namespace gui
