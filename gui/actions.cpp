@@ -100,7 +100,7 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
 
 void Actions::updateStatus() {
   auto type_str = parent_->view_->getCtx().display.view.layout.toLower();
-  auto allowed = [&](QVector<QString> list) {
+  auto allowed = [&](QList<QString> list) {
     for (const auto& v : list) {
       if (v == type_str) {
         return true;

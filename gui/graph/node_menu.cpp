@@ -105,7 +105,42 @@ void NodeMenu::slot_reset_outputs() {
   }
 }
 
-void NodeMenu::slot_reset_dim() {}
+void NodeMenu::slot_reset_dim() {
+  auto dim = node_->getDim();
+  QString dim_str;
+  for (size_t i = 0; i < dim.size(); i++) {
+    dim_str += QString::number(dim[i]);
+    if (i < (dim.size() - 1)) {
+      dim_str += ", ";
+    }
+  }
+  TxtSetDialog d("dim:", dim_str, node_->ctx_.top_widget);
+  auto ret = d.exec();
+  if (ret == QDialog::Accepted) {
+    dim_str = dim_str.replace(" ", "");
+    bool valid = dim_str.size() >= 2;
+    dim.clear();
+    if (valid) {
+      for (auto d_str : dim_str.split(",")) {
+        dim.append(d_str.toLongLong(&valid));
+        if (!valid) {
+          LOG(ERROR) << "err when parsing \"" << d_str.toStdString() << "\"";
+          break;
+        }
+      }
+    }
+    if (!valid) {
+      QMessageBox::critical(this, tr("Error"),
+                            tr("need valid dim, e.g. `b, c, h, w`"));
+    } else {
+      if (node_->setDim(dim)) {
+        node_->refresh();
+      } else {
+        QMessageBox::critical(this, tr("Error"), tr("set op_type error"));
+      }
+    }
+  }
+}
 
 }  // namespace graph
 }  // namespace gui

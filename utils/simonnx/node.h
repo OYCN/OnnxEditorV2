@@ -85,6 +85,7 @@ class FakeNodeObj : public NodeObj {
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
     setAttr("setDim", "false");
+    setAttr("NodeType", "FakeNode");
   }
   std::string getName() override { return faked_.fake_name; }
   std::string getOpType() override { return faked_.fake_op_type; }
@@ -107,6 +108,7 @@ class RealNodeObj : public NodeObj {
     setAttr("setInputs", "true");
     setAttr("setOutputs", "true");
     setAttr("setDim", "false");
+    setAttr("NodeType", "RealNode");
   }
   std::string getName() override;
   bool setName(std::string name) override;
@@ -133,6 +135,7 @@ class IONodeObj : public NodeObj {
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
     setAttr("setDim", "true");
+    setAttr("NodeType", "IONode");
   }
   std::string getName() override;
   bool setName(std::string name) override;
@@ -148,13 +151,7 @@ class IONodeObj : public NodeObj {
 class InputNodeObj : public IONodeObj {
  public:
   explicit InputNodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
-      : IONodeObj(ctx, handle) {
-    setAttr("setName", "true");
-    setAttr("setOpType", "false");
-    setAttr("setInputs", "false");
-    setAttr("setOutputs", "false");
-    setAttr("setDim", "true");
-  }
+      : IONodeObj(ctx, handle) {}
   std::string getOpType() override { return TREATY_INPUT_OP_TYPE; }
   std::vector<std::string> getInputs() override { return {}; }
   std::vector<std::string> getOutputs() override;
@@ -167,9 +164,7 @@ class InputNodeObj : public IONodeObj {
 class OutputNodeObj : public IONodeObj {
  public:
   explicit OutputNodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
-      : IONodeObj(ctx, handle) {
-    // setAttr("setOutputs", "false");
-  }
+      : IONodeObj(ctx, handle) {}
   std::string getOpType() override { return TREATY_OUTPUT_OP_TYPE; }
   std::vector<std::string> getInputs() override;
   // bool setInputs(const std::vector<std::string>& inputs) override;
@@ -188,6 +183,7 @@ class InitNodeObj : public NodeObj {
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
     setAttr("setDim", "false");
+    setAttr("NodeType", "InitNode");
   }
   std::string getName() override;
   bool setName(std::string name) override;

@@ -16,6 +16,7 @@
 #define GUI_GRAPH_NODE_H_
 
 #include <QGraphicsItem>
+#include <QList>
 #include <QObject>
 #include <QSet>
 
@@ -53,12 +54,12 @@ class Node : public GraphItemBase {
   bool setInputs(QList<QString> inputs);
   QList<QString> getOutputs() const;
   bool setOutputs(QList<QString> outputs);
+  QList<int64_t> getDim() const;
+  bool setDim(QList<int64_t> dim);
 
   void setDeleted(bool del) override;
   bool getDeleted() const override;
-  GraphItemType getItemType() const override {
-    return GraphItemType::kNode;
-  }
+  GraphItemType getItemType() const override { return GraphItemType::kNode; }
 
  public:
   QRectF boundingRect() const override;
