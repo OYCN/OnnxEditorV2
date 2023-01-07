@@ -15,11 +15,9 @@
 #include "utils/simonnx/context.h"
 
 #include <glog/logging.h>
-#include <onnx/onnx_pb.h>
 
 #include <cstdio>
-#include <filesystem>
-#include <fstream>
+#include <set>
 #include <thread>  // NOLINT [build/c++11]
 #include <utility>
 
@@ -28,27 +26,26 @@
 namespace utils {
 namespace simonnx {
 
-namespace fs = std::filesystem;
-
 #define LOCK                                           \
   do {                                                 \
     VLOG(1) << "lock @" << std::this_thread::get_id(); \
     std::unique_lock lock(mutex_);                     \
   } while (0)
 
-SimOnnxCtx::SimOnnxCtx() {
-  mp_ = new ::ONNX_NAMESPACE::ModelProto();
+SimOnnxCtx::SimOnnxCtx(backend::BackendType type) {
+  bkctx_ = backend::IBackendCtx::createCtx(type);
   resetDebugFn();
   resetInfoFn();
   resetErrorFn();
 }
-SimOnnxCtx::~SimOnnxCtx() { delete mp_; }
+SimOnnxCtx::~SimOnnxCtx() {}
 
 NodeHandle SimOnnxCtx::CreateNewNodeObj() {
   LOCK;
-  CHECK_NOTNULL(mp_);
-  auto nodes = mp_->mutable_graph()->mutable_node();
-  auto node_ptr = nodes->Add();
+  CHECK_NOTNULL(bkctx_);
+  auto graph = bkctx_->graph();
+  auto node_ptr = graph->add_node();
+  CHECK_NOTNULL(node_ptr);
   return CreateNodeObjImpl(node_ptr);
 }
 
@@ -74,67 +71,8 @@ void SimOnnxCtx::RestoreObj(IObject* obj) {
   }
 }
 
-template <>
-bool SimOnnxCtx::destroyHandle(IObject* obj) {
-  return obj->destroyHandle();
-}
-
-template <typename RPT, typename VT>
-bool delFromRepeatProto(RPT rp, VT handle) {
-  for (auto iter = rp->begin(); iter != rp->end();) {
-    if (&(*iter) == handle) {
-      iter = rp->erase(iter);
-      VLOG(1) << "delete success";
-      return true;
-    } else {
-      iter++;
-    }
-  }
-  return false;
-}
-
-template <>
-bool SimOnnxCtx::destroyHandle(NodeProtoPtr handle) {
-  VLOG(1) << "delete NodeProtoPtr";
-  auto nodes = mp_->mutable_graph()->mutable_node();
-  if (delFromRepeatProto(nodes, handle)) {
-    return true;
-  } else {
-    LOG(ERROR) << "delete NodeProtoPtr failed @" << handle;
-    return false;
-  }
-}
-
-template <>
-bool SimOnnxCtx::destroyHandle(TensorProtoPtr handle) {
-  LOG(INFO) << "delete TensorProtoPtr";
-  auto inits = mp_->mutable_graph()->mutable_initializer();
-  if (delFromRepeatProto(inits, handle)) {
-    return true;
-  } else {
-    LOG(ERROR) << "delete TensorProtoPtr failed @" << handle;
-    return false;
-  }
-}
-
-template <>
-bool SimOnnxCtx::destroyHandle(ValueInfoProtoPtr handle) {
-  LOG(INFO) << "delete ValueInfoProtoPtr";
-  auto ins = mp_->mutable_graph()->mutable_input();
-  auto outs = mp_->mutable_graph()->mutable_output();
-  auto vals = mp_->mutable_graph()->mutable_value_info();
-  if (delFromRepeatProto(ins, handle) || delFromRepeatProto(outs, handle) ||
-      delFromRepeatProto(vals, handle)) {
-    return true;
-  } else {
-    LOG(ERROR) << "delete ValueInfoProtoPtr failed @" << handle;
-    return false;
-  }
-}
-
 void SimOnnxCtx::genRandomOnnx(int num) {
   LOCK;
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
   reset_impl();
   auto g = utils::algorithm::external::ogdf::genRandomGraph(num, num);
 
@@ -172,103 +110,76 @@ void SimOnnxCtx::genRandomOnnx(int num) {
 
 bool SimOnnxCtx::openOnnx(const std::string path) {
   LOCK;
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
   reset_impl();
-  if (!fs::exists(path)) {
-    errorfn_("Path invalid " + path);
+  if (!bkctx_->loadFile(path)) {
     return false;
   }
-  if (fs::is_directory(path)) {
-    errorfn_("Path is not a file " + path);
-    return false;
+  std::set<std::string> name_set;
+  auto graph = bkctx_->graph();
+  auto nodes = graph->node();
+  auto inits = graph->initializer();
+  auto inputs = graph->input();
+  auto outputs = graph->output();
+  auto value_infoes = graph->value_info();
+  for (auto n : nodes) {
+    SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(n);
   }
-  std::ifstream fin(path, std::ios::in | std::ios::binary);
-  if (!fin.good()) {
-    errorfn_("Could not open file " + path);
-    return false;
-  }
-  if (!mp_->ParseFromIstream(&fin)) {
-    errorfn_("proto parse error");
-    return false;
-  }
-  std::set<std::string> tensor_set;
-  auto create = [&](auto proto_ptr) {
-    if (tensor_set.count(proto_ptr->name()) == 0) {
-      tensor_set.insert(proto_ptr->name());
-      SimOnnxCtx::getSimOnnxCtx()->CreateTensorObj(proto_ptr);
-      return true;
+  for (auto i : inits) {
+    if (name_set.count(i->name()) == 0) {
+      FakeNode_t args = {"::initializer::", "", {}, {i->name()}};
+      SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(args);
+      name_set.insert(i->name());
+      VLOG(1) << "inits add: " << i->name();
     } else {
-      return false;
+      LOG(ERROR) << "duplicated name in inits: " << i->name();
     }
-  };
-  auto& proto_nodes = mp_->graph().node();
-  auto& proto_initializers = mp_->graph().initializer();
-  auto& proto_inputs = mp_->graph().input();
-  auto& proto_outputs = mp_->graph().output();
-  auto& proto_value = mp_->graph().value_info();
-  for (size_t i = 0; i < proto_nodes.size(); i++) {
-    auto& node = proto_nodes[i];
-    auto node_ptr = mp_->mutable_graph()->mutable_node(i);
-    SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(node_ptr);
-  }
-  for (size_t i = 0; i < proto_initializers.size(); i++) {
-    auto init_ptr = mp_->mutable_graph()->mutable_initializer(i);
-    // if (create(init_ptr)) {
-    FakeNode_t args = {"::initializer::", "", {}, {init_ptr->name()}};
-    SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(args);
-    // }
   }
   int input_num = 0;
-  for (size_t i = 0; i < proto_inputs.size(); i++) {
-    auto input_ptr = mp_->mutable_graph()->mutable_input(i);
-    // if (create(input_ptr)) {
-    SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(input_ptr, NodeObj::kInputNode);
-    input_num++;
-    // }
+  for (auto i : inputs) {
+    if (name_set.count(i->name()) == 0) {
+      SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(i, NodeObj::kInputNode);
+      name_set.insert(i->name());
+      input_num++;
+      VLOG(1) << "inputs add: " << i->name();
+    } else {
+      LOG(ERROR) << "duplicated name in inputs: " << i->name();
+    }
   }
-  for (size_t i = 0; i < proto_outputs.size(); i++) {
-    auto output_ptr = mp_->mutable_graph()->mutable_output(i);
-    // if (create(output_ptr)) {
-    SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(output_ptr,
-                                               NodeObj::kOutputNode);
-    // }
+  for (auto o : outputs) {
+    if (name_set.count(o->name()) == 0) {
+      name_set.insert(o->name());
+      SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(o, NodeObj::kOutputNode);
+      VLOG(1) << "outputs add: " << o->name();
+    } else {
+      LOG(ERROR) << "duplicated name in outputs: " << o->name();
+    }
   }
-  for (size_t i = 0; i < proto_value.size(); i++) {
-    auto value_ptr = mp_->mutable_graph()->mutable_value_info(i);
-    create(value_ptr);
+  for (auto v : value_infoes) {
+    if (name_set.count(v->name()) == 0) {
+      name_set.insert(v->name());
+      SimOnnxCtx::getSimOnnxCtx()->CreateTensorObj(v);
+      VLOG(1) << "value_infoes add: " << v->name();
+    } else {
+      LOG(ERROR) << "duplicated name in value_infoes: " << v->name();
+    }
   }
 
   LOG(INFO) << " === Graph Summary After Read === ";
   LOG(INFO) << "\t Input num:\t" << input_num;
-  LOG(INFO) << "\t Output num:\t" << proto_outputs.size();
-  LOG(INFO) << "\t Node num:\t" << proto_nodes.size();
-  LOG(INFO) << "\t Initializer num:\t" << proto_initializers.size();
-  LOG(INFO) << "\t ValueInfo num:\t" << proto_value.size();
+  LOG(INFO) << "\t Output num:\t" << outputs.size();
+  LOG(INFO) << "\t Node num:\t" << nodes.size();
+  LOG(INFO) << "\t Initializer num:\t" << inits.size();
+  LOG(INFO) << "\t ValueInfo num:\t" << value_infoes.size();
   return true;
 }
 
 bool SimOnnxCtx::saveOnnx(const std::string path, bool overwrite) {
   LOCK;
-  if (!OnnxPass::pass_all(this)) {
+  // remove deleted node obj
+  if (!applyDeletedObj()) {
     return false;
   }
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-  if (fs::exists(path) && !overwrite) {
-    errorfn_("Path already exist " + path);
-    return false;
-  }
-  if (fs::is_directory(path)) {
-    errorfn_("Path is a directory" + path);
-    return false;
-  }
-  std::ofstream fout(path, std::ios::out | std::ios::binary);
-  if (!fout.good()) {
-    errorfn_("Could not open file " + path);
-    return false;
-  } else {
-    bool ret = mp_->SerializeToOstream(&fout);
-    return ret;
-  }
+  return bkctx_->saveFile(path, overwrite);
 }
 
 void SimOnnxCtx::reset_impl() {
@@ -294,6 +205,19 @@ void SimOnnxCtx::reset() {
   LOCK;
   reset_impl();
 }
+
+bool SimOnnxCtx::applyDeletedObj() {
+  for (auto& kv : obj_del_ctx_) {
+    for (auto& v : kv.second) {
+      if (!v->destroyHandle()) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool SimOnnxCtx::ctxPass(PassType type) { return bkctx_->pass(type); }
 
 void SimOnnxCtx::setDebugFn(std::function<void(std::string)> fn) {
   LOCK;

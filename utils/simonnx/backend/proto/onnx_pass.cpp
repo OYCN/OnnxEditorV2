@@ -12,7 +12,7 @@
  * </table>
  */
 
-#include "utils/simonnx/onnx_pass.h"
+#include "utils/simonnx/backend/proto/onnx_pass.h"
 
 #include <onnx/onnx_pb.h>
 
@@ -20,26 +20,18 @@
 #include <string>
 
 #include "utils/algorithm/topo_sort.h"
-#include "utils/simonnx/context.h"
 
 namespace utils {
 namespace simonnx {
+namespace backend {
+namespace proto {
 
-bool OnnxPass::remove_deleted_obj(SimOnnxCtx* ctx) {
-  for (auto& kv : ctx->obj_del_ctx_) {
-    for (auto& v : kv.second) {
-      ctx->destroyHandle(v);
-    }
-  }
-  return true;
-}
-
-bool OnnxPass::remove_useless_node(SimOnnxCtx* ctx) {
+bool OnnxPass::remove_useless_node(ModelProtoPtr mp) {
   // TODO(opluss): Impl
   return true;
 }
 
-bool OnnxPass::remove_useless_tensor(SimOnnxCtx* ctx) {
+bool OnnxPass::remove_useless_tensor(ModelProtoPtr mp) {
   // TODO(opluss): Impl
   return true;
 }
@@ -76,8 +68,8 @@ class TmpDesc : public utils::algorithm::toposort::GraphNode2EdgeDesc {
   std::vector<std::vector<size_t>> n2o;
 };
 
-bool OnnxPass::node_topo_sort(SimOnnxCtx* ctx) {
-  auto nodes = ctx->mp_->mutable_graph()->mutable_node();
+bool OnnxPass::node_topo_sort(ModelProtoPtr mp) {
+  auto nodes = mp->mutable_graph()->mutable_node();
   TmpDesc td(*nodes);
   std::vector<size_t> idxes;
   if (!utils::algorithm::toposort::toposort(td, idxes)) {
@@ -94,5 +86,7 @@ bool OnnxPass::node_topo_sort(SimOnnxCtx* ctx) {
   return true;
 }
 
+}  // namespace proto
+}  // namespace backend
 }  // namespace simonnx
 }  // namespace utils

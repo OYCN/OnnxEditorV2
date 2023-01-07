@@ -37,13 +37,13 @@ class IObject {
   virtual bool hasAttr(std::string key) const = 0;
   virtual std::string getAttr(std::string key, std::string def) const = 0;
   virtual void setAttr(std::string key, std::string value) = 0;
+  virtual bool destroyHandle() = 0;
 
  protected:
   friend class SimOnnxCtx;
   virtual void setId(size_t id) = 0;
   virtual void setIter(std::list<IObject*>::iterator iter) = 0;
   virtual void setDeleted(bool deleted) = 0;
-  virtual bool destroyHandle() = 0;
 };
 
 template <ObjType_t _OT>

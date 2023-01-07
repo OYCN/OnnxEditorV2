@@ -26,9 +26,9 @@
 #include "gui/ui/dialog/txtlistsetdialog/txtlistsetdialog.h"
 #include "gui/ui/dialog/txtsetdialog/txtsetdialog.h"
 #include "utils/simonnx/context.h"
-#include "utils/simonnx/onnx_pass.h"
 
 using SimOnnxCtx = utils::simonnx::SimOnnxCtx;
+using PassType = utils::simonnx::PassType;
 
 namespace gui {
 
@@ -74,17 +74,21 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
   addAction(menu_debug_graph, "Random Graph",
             [&]() { act_random_graph_callback(); });
   addAction(menu_debug_graph, "pass delete", [&]() {
-    if (!utils::simonnx::OnnxPass::remove_deleted_obj(
-            SimOnnxCtx::getSimOnnxCtx())) {
+    if (!SimOnnxCtx::getSimOnnxCtx()->applyDeletedObj()) {
       QMessageBox::critical(parent_, tr("Pass Error"), tr("pass delete error"),
                             QMessageBox::Ok);
+    } else {
+      QMessageBox::information(parent_, tr("Done"), tr("Pass Done"),
+                               QMessageBox::Ok);
     }
   });
   addAction(menu_debug_graph, "pass topo sort", [&]() {
-    if (!utils::simonnx::OnnxPass::node_topo_sort(
-            SimOnnxCtx::getSimOnnxCtx())) {
+    if (!SimOnnxCtx::getSimOnnxCtx()->ctxPass(PassType::kTopoSort)) {
       QMessageBox::critical(parent_, tr("Pass Error"), tr("pass delete error"),
                             QMessageBox::Ok);
+    } else {
+      QMessageBox::information(parent_, tr("Done"), tr("Pass Done"),
+                               QMessageBox::Ok);
     }
   });
   addAction(menu_debug_graph, "reload graph",

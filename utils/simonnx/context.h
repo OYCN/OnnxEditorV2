@@ -22,33 +22,28 @@
 #include <type_traits>
 
 #include "utils/algorithm/graph_desc.h"
+#include "utils/simonnx/backend/backend.h"
 #include "utils/simonnx/node.h"
-#include "utils/simonnx/onnx_pass.h"
 #include "utils/simonnx/tensor.h"
 #include "utils/simonnx/treaty.h"
-
-namespace ONNX_NAMESPACE {
-class ModelProto;
-class GraphProto;
-};  // namespace ONNX_NAMESPACE
 
 namespace utils {
 namespace simonnx {
 
-using ModelProtoPtr = ::ONNX_NAMESPACE::ModelProto*;
+using BackendType = backend::BackendType;
+using PassType = backend::PassType;
 
 class SimOnnxCtx {
-  friend class OnnxPass;
-
  public:
-  SimOnnxCtx();
+  explicit SimOnnxCtx(BackendType type);
   ~SimOnnxCtx();
 
-  static SimOnnxCtx* createSimOnnxCtx() {
+  static SimOnnxCtx* createSimOnnxCtx(BackendType type = BackendType::kProto) {
     static std::mutex mutex;
     std::unique_lock lock(mutex);
     static size_t idx = 0;
-    auto ptr = &getCtxMap()[idx];
+    getCtxMap().emplace(idx, type);
+    auto ptr = getSimOnnxCtx(idx++);
     return ptr;
   }
   static SimOnnxCtx* getSimOnnxCtx(size_t idx = 0) {
@@ -82,13 +77,13 @@ class SimOnnxCtx {
     }
     return ret;
   }
-  template <typename T>
-  bool destroyHandle(T handle);
 
   void genRandomOnnx(int num);
   bool openOnnx(const std::string path);
   bool saveOnnx(const std::string path, bool overwrite);
   void reset();
+  bool applyDeletedObj();
+  bool ctxPass(PassType type);
   void setDebugFn(std::function<void(std::string)> fn);
   void setInfoFn(std::function<void(std::string)> fn);
   void setErrorFn(std::function<void(std::string)> fn);
@@ -125,7 +120,7 @@ class SimOnnxCtx {
   std::mutex mutex_;
   std::map<ObjType_t, std::list<IObject*>> obj_free_ctx_;
   std::map<ObjType_t, std::list<IObject*>> obj_del_ctx_;
-  ModelProtoPtr mp_;
+  std::shared_ptr<backend::IBackendCtx> bkctx_;
   std::function<void(std::string)> infofn_;
   std::function<void(std::string)> errorfn_;
   std::function<void(std::string)> debugfn_;
