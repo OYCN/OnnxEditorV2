@@ -1,3 +1,17 @@
+/**
+ * @file iosummary.cpp
+ * @brief 
+ * @author opluss (opluss@qq.com)
+ * 
+ * @copyright Copyright (c) 2023  opluss
+ * 
+ * @par Modify log:
+ * <table>
+ * <tr><th>Date       <th>Version <th>Author  <th>Description
+ * <tr><td>2023-01-07 <td>1.0     <td>opluss     <td>Initial
+ * </table>
+ */
+
 #include "gui/ui/dialog/iosummary/iosummary.h"
 
 #include <QPair>

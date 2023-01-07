@@ -12,6 +12,9 @@
  * </table>
  */
 
+#ifndef GUI_UI_DIALOG_HELPER_H_
+#define GUI_UI_DIALOG_HELPER_H_
+
 #include <QList>
 #include <QPair>
 #include <QString>
@@ -41,3 +44,5 @@ inline QPair<bool, QList<int64_t>> str2dim(QString dim_str) {
   }
   return {valid, dim};
 }
+
+#endif  // GUI_UI_DIALOG_HELPER_H_

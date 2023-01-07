@@ -1,5 +1,19 @@
-#ifndef IOSUMMARY_H
-#define IOSUMMARY_H
+/**
+ * @file iosummary.h
+ * @brief
+ * @author opluss (opluss@qq.com)
+ *
+ * @copyright Copyright (c) 2023  opluss
+ *
+ * @par Modify log:
+ * <table>
+ * <tr><th>Date       <th>Version <th>Author  <th>Description
+ * <tr><td>2023-01-07 <td>1.0     <td>opluss     <td>Initial
+ * </table>
+ */
+
+#ifndef GUI_UI_DIALOG_IOSUMMARY_IOSUMMARY_H_
+#define GUI_UI_DIALOG_IOSUMMARY_IOSUMMARY_H_
 
 #include <QDialog>
 #include <QList>
@@ -28,4 +42,4 @@ class IOSummary : public QDialog {
   QList<int64_t>* dim;
 };
 
-#endif  // IOSUMMARY_H
+#endif  // GUI_UI_DIALOG_IOSUMMARY_IOSUMMARY_H_
