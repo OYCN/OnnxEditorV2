@@ -11,4 +11,5 @@ target_link_libraries(bk_proto
   PUBLIC
   onnx
   glog::glog
+  utils_algorithm
 )
