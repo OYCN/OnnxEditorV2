@@ -1,6 +1,16 @@
 # OnnxEditor
 
 > Developing
+> You can download runable file from release
+> OR in the action artifacts
+> OR build on your computer
+>
+> Not we just support ubuntu in actions
+> After testing, it can work on ubuntu 20.04 and 22.04
+>
+> Now, we do not recommend to use it to build onnx from scratch
+>
+> Please save it frequently to prevent lost your modifications due to program FATAL
 
 # TODO List
 
@@ -16,3 +26,9 @@
  - [ ] add constant value
     - [ ] display & edit data
  - [ ] display & edit attribute
+
+# Known Bug
+
+ - Some obj is null in initial state
+ - Not limit the empty name of node/io
+ - UI about edit IO in node will display error in light mode
