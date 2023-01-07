@@ -80,6 +80,7 @@ class FakeNodeObj : public NodeObj {
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
     setAttr("setDim", "false");
+    setAttr("setDataType", "false");
     setAttr("NodeType", "FakeNode");
   }
   std::string getName() override { return faked_.fake_name; }
@@ -101,6 +102,7 @@ class RealNodeObj : public NodeObj {
     setAttr("setInputs", "true");
     setAttr("setOutputs", "true");
     setAttr("setDim", "false");
+    setAttr("setDataType", "false");
     setAttr("NodeType", "RealNode");
   }
   std::string getName() override;
@@ -126,6 +128,7 @@ class IONodeObj : public NodeObj {
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
     setAttr("setDim", "true");
+    setAttr("setDataType", "true");
     setAttr("NodeType", "IONode");
   }
   std::string getName() override;
@@ -170,6 +173,7 @@ class InitNodeObj : public NodeObj {
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
     setAttr("setDim", "false");
+    setAttr("setDataType", "false");
     setAttr("NodeType", "InitNode");
   }
   std::string getName() override;

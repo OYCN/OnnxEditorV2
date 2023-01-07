@@ -32,6 +32,7 @@ namespace simonnx {
 
 using BackendType = backend::BackendType;
 using PassType = backend::PassType;
+using IONodeType = NodeObj::IONodeType;
 
 class SimOnnxCtx {
  public:
@@ -62,6 +63,7 @@ class SimOnnxCtx {
     return CreateTensorObjImpl<_Args...>(std::forward<_Args>(args)...);
   }
   NodeHandle CreateNewNodeObj();
+  NodeHandle CreateNewIOObj(IONodeType type);
   void DeleteObj(IObject* obj);
   void RestoreObj(IObject* obj);
   template <typename _T>
@@ -84,12 +86,6 @@ class SimOnnxCtx {
   void reset();
   bool applyDeletedObj();
   bool ctxPass(PassType type);
-  void setDebugFn(std::function<void(std::string)> fn);
-  void setInfoFn(std::function<void(std::string)> fn);
-  void setErrorFn(std::function<void(std::string)> fn);
-  void resetDebugFn();
-  void resetInfoFn();
-  void resetErrorFn();
 
  private:
   template <typename _Ret, typename... _Args>
@@ -121,9 +117,6 @@ class SimOnnxCtx {
   std::map<ObjType_t, std::list<IObject*>> obj_free_ctx_;
   std::map<ObjType_t, std::list<IObject*>> obj_del_ctx_;
   std::shared_ptr<backend::IBackendCtx> bkctx_;
-  std::function<void(std::string)> infofn_;
-  std::function<void(std::string)> errorfn_;
-  std::function<void(std::string)> debugfn_;
 };
 
 using SimOnnxCtxHandle = SimOnnxCtx*;

@@ -1,10 +1,10 @@
 /**
  * @file txtlistsetdialog.h
- * @brief 
+ * @brief
  * @author opluss (opluss@qq.com)
- * 
+ *
  * @copyright Copyright (c) 2022  opluss
- * 
+ *
  * @par Modify log:
  * <table>
  * <tr><th>Date       <th>Version <th>Author  <th>Description
@@ -26,7 +26,7 @@ class TxtListSetDialog : public QDialog {
   Q_OBJECT
 
  public:
-  explicit TxtListSetDialog(const QString& label, QList<QString>& list,
+  explicit TxtListSetDialog(const QString& label, QList<QString>* list,
                             QWidget* parent = nullptr);
   ~TxtListSetDialog();
 
@@ -41,7 +41,7 @@ class TxtListSetDialog : public QDialog {
 
  private:
   Ui::TxtListSetDialog* ui;
-  QList<QString>& list;
+  QList<QString>* list;
 };
 
 #endif  // GUI_UI_DIALOG_TXTLISTSETDIALOG_TXTLISTSETDIALOG_H_

@@ -64,58 +64,54 @@ const std::vector<SBackendNode>& ProtoBackendGraph::node() const {
   return node_;
 }
 SBackendNode ProtoBackendGraph::add_node() {
-  // TODO(oPluss): impl
-  return nullptr;
+  node_.emplace_back(
+      std::make_shared<ProtoBackendNode>(this, handle_->mutable_node()->Add()));
+  return node_.back();
 }
-bool ProtoBackendGraph::del_node(SBackendNode node) {
-  // TODO(oPluss): impl
-  return false;
-}
+bool ProtoBackendGraph::del_node(SBackendNode node) { return node->destroy(); }
 const std::vector<SBackendValueInfo>& ProtoBackendGraph::input() const {
   return input_;
 }
 SBackendValueInfo ProtoBackendGraph::add_input() {
-  // TODO(oPluss): impl
-  return nullptr;
+  input_.emplace_back(std::make_shared<ProtoBackendValueInfo>(
+      this, handle_->mutable_input()->Add()));
+  return input_.back();
 }
 bool ProtoBackendGraph::del_input(SBackendValueInfo input) {
-  // TODO(oPluss): impl
-  return false;
+  return input->destroy();
 }
 const std::vector<SBackendValueInfo>& ProtoBackendGraph::output() const {
   return output_;
 }
 SBackendValueInfo ProtoBackendGraph::add_output() {
-  // TODO(oPluss): impl
-  return nullptr;
+  output_.emplace_back(std::make_shared<ProtoBackendValueInfo>(
+      this, handle_->mutable_output()->Add()));
+  return output_.back();
 }
 bool ProtoBackendGraph::del_output(SBackendValueInfo value_info) {
-  // TODO(oPluss): impl
-  return false;
+  return value_info->destroy();
 }
 const std::vector<SBackendTensor>& ProtoBackendGraph::initializer() const {
-  // TODO(oPluss): impl
   return init_;
 }
 SBackendTensor ProtoBackendGraph::add_initializer() {
-  // TODO(oPluss): impl
-  return nullptr;
+  init_.emplace_back(std::make_shared<ProtoBackendTensor>(
+      this, handle_->mutable_initializer()->Add()));
+  return init_.back();
 }
 bool ProtoBackendGraph::del_initializer(SBackendTensor tensor) {
-  // TODO(oPluss): impl
-  return false;
+  return tensor->destroy();
 }
 const std::vector<SBackendValueInfo>& ProtoBackendGraph::value_info() const {
-  // TODO(oPluss): impl
   return value_info_;
 }
 SBackendValueInfo ProtoBackendGraph::add_value_info() {
-  // TODO(oPluss): impl
-  return nullptr;
+  value_info_.emplace_back(std::make_shared<ProtoBackendValueInfo>(
+      this, handle_->mutable_value_info()->Add()));
+  return value_info_.back();
 }
 bool ProtoBackendGraph::del_value_info(SBackendValueInfo value_info) {
-  // TODO(oPluss): impl
-  return false;
+  return value_info->destroy();
 }
 
 }  // namespace proto

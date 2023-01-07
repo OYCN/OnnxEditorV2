@@ -22,6 +22,7 @@
 #include <utility>
 
 #include "utils/algorithm/external/ogdf/ogdf_proxy.h"
+#include "utils/simonnx/backend/backend.h"
 
 namespace utils {
 namespace simonnx {
@@ -34,9 +35,7 @@ namespace simonnx {
 
 SimOnnxCtx::SimOnnxCtx(backend::BackendType type) {
   bkctx_ = backend::IBackendCtx::createCtx(type);
-  resetDebugFn();
-  resetInfoFn();
-  resetErrorFn();
+  CHECK(bkctx_);
 }
 SimOnnxCtx::~SimOnnxCtx() {}
 
@@ -44,9 +43,31 @@ NodeHandle SimOnnxCtx::CreateNewNodeObj() {
   LOCK;
   CHECK_NOTNULL(bkctx_);
   auto graph = bkctx_->graph();
+  CHECK_NOTNULL(graph);
   auto node_ptr = graph->add_node();
   CHECK_NOTNULL(node_ptr);
   return CreateNodeObjImpl(node_ptr);
+}
+
+NodeHandle SimOnnxCtx::CreateNewIOObj(IONodeType type) {
+  LOCK;
+  CHECK_NOTNULL(bkctx_);
+  auto graph = bkctx_->graph();
+  CHECK_NOTNULL(graph);
+  SBackendValueInfo io_ptr = nullptr;
+  switch (type) {
+    case IONodeType::kInputNode:
+      io_ptr = graph->add_input();
+      break;
+    case IONodeType::kOutputNode:
+      io_ptr = graph->add_output();
+      break;
+    default:
+      LOG(FATAL) << "type error";
+      break;
+  }
+  CHECK_NOTNULL(io_ptr);
+  return CreateNodeObjImpl(io_ptr, type);
 }
 
 void SimOnnxCtx::DeleteObj(IObject* obj) {
@@ -116,6 +137,7 @@ bool SimOnnxCtx::openOnnx(const std::string path) {
   }
   std::set<std::string> name_set;
   auto graph = bkctx_->graph();
+  CHECK_NOTNULL(graph);
   auto nodes = graph->node();
   auto inits = graph->initializer();
   auto inputs = graph->input();
@@ -218,31 +240,6 @@ bool SimOnnxCtx::applyDeletedObj() {
 }
 
 bool SimOnnxCtx::ctxPass(PassType type) { return bkctx_->pass(type); }
-
-void SimOnnxCtx::setDebugFn(std::function<void(std::string)> fn) {
-  LOCK;
-  debugfn_ = fn;
-}
-void SimOnnxCtx::setInfoFn(std::function<void(std::string)> fn) {
-  LOCK;
-  infofn_ = fn;
-}
-void SimOnnxCtx::setErrorFn(std::function<void(std::string)> fn) {
-  LOCK;
-  errorfn_ = fn;
-}
-void SimOnnxCtx::resetDebugFn() {
-  LOCK;
-  debugfn_ = [](std::string msg) { VLOG(1) << msg; };
-}
-void SimOnnxCtx::resetInfoFn() {
-  LOCK;
-  infofn_ = [](std::string msg) { LOG(INFO) << msg; };
-}
-void SimOnnxCtx::resetErrorFn() {
-  LOCK;
-  errorfn_ = [](std::string msg) { LOG(ERROR) << msg; };
-}
 
 }  // namespace simonnx
 }  // namespace utils

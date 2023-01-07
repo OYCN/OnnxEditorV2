@@ -44,6 +44,7 @@ class Actions : public QObject {
   void act_txt_list_set_dialog_exec_callback();
   void act_txt_set_dialog_exec_callback();
   void act_node_summary_dialog_exec_callback();
+  void act_io_summary_dialog_exec_callback();
   void act_random_graph_callback();
 
  private:

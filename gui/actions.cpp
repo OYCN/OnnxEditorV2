@@ -22,6 +22,7 @@
 
 #include "gui/graph/view.h"
 #include "gui/mainwindow.h"
+#include "gui/ui/dialog/iosummary/iosummary.h"
 #include "gui/ui/dialog/nodesummary/nodesummary.h"
 #include "gui/ui/dialog/txtlistsetdialog/txtlistsetdialog.h"
 #include "gui/ui/dialog/txtsetdialog/txtsetdialog.h"
@@ -70,16 +71,18 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
             [&]() { act_txt_list_set_dialog_exec_callback(); });
   addAction(menu_debug_ui, "Node Summary Dialog",
             [&]() { act_node_summary_dialog_exec_callback(); });
+  addAction(menu_debug_ui, "IO Summary Dialog",
+            [&]() { act_io_summary_dialog_exec_callback(); });
 
   addAction(menu_debug_graph, "Random Graph",
             [&]() { act_random_graph_callback(); });
   addAction(menu_debug_graph, "pass delete", [&]() {
     if (!SimOnnxCtx::getSimOnnxCtx()->applyDeletedObj()) {
-      QMessageBox::critical(parent_, tr("Pass Error"), tr("pass delete error"),
+      QMessageBox::critical(parent_, tr("Error"), tr("apply deleted obj error"),
                             QMessageBox::Ok);
     } else {
-      QMessageBox::information(parent_, tr("Done"), tr("Pass Done"),
-                               QMessageBox::Ok);
+      QMessageBox::information(parent_, tr("Done"),
+                               tr("apply deleted obj Done"), QMessageBox::Ok);
     }
   });
   addAction(menu_debug_graph, "pass topo sort", [&]() {
@@ -144,14 +147,11 @@ void Actions::act_file_open_callback() {
   // onnx2graph will reset ctx, if not switch ctx obj, we will clear scene
   // before process it
   parent_->scene_->clear();
-  SimOnnxCtx::getSimOnnxCtx()->setErrorFn([&](std::string msg) {
-    QMessageBox::critical(parent_, tr("Open Error"), tr(msg.c_str()),
-                          QMessageBox::Ok);
-  });
   {
     bool ret = SimOnnxCtx::getSimOnnxCtx()->openOnnx(fileName.toStdString());
-    SimOnnxCtx::getSimOnnxCtx()->resetErrorFn();
     if (!ret) {
+      QMessageBox::critical(parent_, tr("Open Error"), tr("open failed"),
+                            QMessageBox::Ok);
       return;
     }
   }
@@ -176,21 +176,18 @@ void Actions::act_file_save_a_callback() {
   if (fileName.isEmpty()) {
     return;
   }
-  SimOnnxCtx::getSimOnnxCtx()->setErrorFn([&](std::string msg) {
-    QMessageBox::critical(parent_, tr("Save Error"), tr(msg.c_str()),
-                          QMessageBox::Ok);
-  });
   bool ret =
       SimOnnxCtx::getSimOnnxCtx()->saveOnnx(fileName.toStdString(), true);
-  SimOnnxCtx::getSimOnnxCtx()->resetErrorFn();
   if (!ret) {
+    QMessageBox::critical(parent_, tr("Save Error"), tr("save failed"),
+                          QMessageBox::Ok);
     return;
   }
 }
 
 void Actions::act_txt_set_dialog_exec_callback() {
   QString out = "input_data";
-  TxtSetDialog d("debug label:", out, parent_);
+  TxtSetDialog d("debug label:", &out, parent_);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
     LOG(INFO) << "Accepted: " << out.toStdString();
@@ -201,7 +198,7 @@ void Actions::act_txt_set_dialog_exec_callback() {
 
 void Actions::act_txt_list_set_dialog_exec_callback() {
   QList<QString> out = {"in0", "in1", "in2"};
-  TxtListSetDialog d("debug label:", out, parent_);
+  TxtListSetDialog d("debug label:", &out, parent_);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
     LOG(INFO) << "Accepted:";
@@ -218,7 +215,7 @@ void Actions::act_node_summary_dialog_exec_callback() {
   QString op_type = "node op type";
   QList<QString> ins = {"in0", "in1", "in2"};
   QList<QString> outs = {"out0", "out1"};
-  NodeSummary d(name, op_type, ins, outs, parent_);
+  NodeSummary d(&name, &op_type, &ins, &outs, parent_);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
     LOG(INFO) << "Accepted:";
@@ -229,6 +226,24 @@ void Actions::act_node_summary_dialog_exec_callback() {
     }
     for (const auto& v : outs) {
       LOG(INFO) << v.toStdString();
+    }
+  } else {
+    LOG(INFO) << "Rejected";
+  }
+}
+
+void Actions::act_io_summary_dialog_exec_callback() {
+  QString name = "io name";
+  QString type = "????";
+  QList<int64_t> dim = {1, 2, 3};
+  IOSummary d("io node", &name, &type, &dim, parent_);
+  auto ret = d.exec();
+  if (ret == QDialog::Accepted) {
+    LOG(INFO) << "Accepted:";
+    LOG(INFO) << name.toStdString();
+    LOG(INFO) << type.toStdString();
+    for (const auto& v : dim) {
+      LOG(INFO) << v;
     }
   } else {
     LOG(INFO) << "Rejected";

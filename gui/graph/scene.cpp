@@ -95,6 +95,10 @@ void Scene::updateEdge() {
 }
 
 void Scene::updateEdge(const QString& name) {
+  if (name.size() == 0) {
+    LOG(INFO) << "Got empty edge name, skip update";
+    return;
+  }
   CHECK(edges_.contains(name)) << name.toStdString();
   if (!edge_dst_.contains(name) && !edge_src_.contains(name)) {
     LOG(INFO) << "Skip tensor which not used: " << name.toStdString();
@@ -334,7 +338,8 @@ void Scene::nodeUpdateSlot(Node* node) {
   }
   for (auto& in : ins) {
     if (!edges_.contains(in)) {
-      addEdge(in);
+      auto e = addEdge(in);
+      CHECK_NOTNULL(e);
     }
     if (!node_inputs_[node].contains(in)) {
       edge_dst_[in].insert(node);
@@ -343,7 +348,8 @@ void Scene::nodeUpdateSlot(Node* node) {
   }
   for (auto& out : outs) {
     if (!edges_.contains(out)) {
-      addEdge(out);
+      auto e = addEdge(out);
+      CHECK_NOTNULL(e);
     }
     if (!node_outputs_[node].contains(out)) {
       edge_src_[out].insert(node);

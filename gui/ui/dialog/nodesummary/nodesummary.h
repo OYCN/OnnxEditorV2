@@ -26,8 +26,8 @@ class NodeSummary : public QDialog {
   Q_OBJECT
 
  public:
-  explicit NodeSummary(QString& name, QString& op_type, QList<QString>& inputs,
-                       QList<QString>& outputs, QWidget* parent = nullptr);
+  explicit NodeSummary(QString* name, QString* op_type, QList<QString>* inputs,
+                       QList<QString>* outputs, QWidget* parent = nullptr);
   ~NodeSummary();
 
  public slots:
@@ -39,10 +39,10 @@ class NodeSummary : public QDialog {
 
  private:
   Ui::NodeSummary* ui;
-  QString& name;
-  QString& op_type;
-  QList<QString>& inputs;
-  QList<QString>& outputs;
+  QString* name;
+  QString* op_type;
+  QList<QString>* inputs;
+  QList<QString>* outputs;
 };
 
 #endif  // GUI_UI_DIALOG_NODESUMMARY_NODESUMMARY_H_

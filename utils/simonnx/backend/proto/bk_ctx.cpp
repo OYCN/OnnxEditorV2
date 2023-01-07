@@ -52,6 +52,7 @@ bool ProtoBackendCtx::loadFile(const std::string& path) {
     LOG(ERROR) << "proto parse error";
     return false;
   }
+  mp_->graph();
   graph_ = std::make_shared<ProtoBackendGraph>(this, mp_->mutable_graph());
   return true;
 }
@@ -91,6 +92,9 @@ bool ProtoBackendCtx::pass(PassType type) {
       break;
     case PassType::kAll:
       return OnnxPass::pass_all(mp_);
+      break;
+    case PassType::kTopoSort:
+      return OnnxPass::node_topo_sort(mp_);
       break;
     default:
       LOG(ERROR) << "unsupport pass type";
