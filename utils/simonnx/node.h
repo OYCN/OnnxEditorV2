@@ -21,22 +21,17 @@
 #include <string>
 #include <vector>
 
+#include "utils/simonnx/backend/backend.h"
 #include "utils/simonnx/object.h"
 #include "utils/simonnx/treaty.h"
-
-namespace ONNX_NAMESPACE {
-class NodeProto;
-class ValueInfoProto;
-class TensorProto;
-};  // namespace ONNX_NAMESPACE
 
 namespace utils {
 namespace simonnx {
 
 using NodeObjBase = Object<ObjType_t::kNode>;
-using NodeProtoPtr = ::ONNX_NAMESPACE::NodeProto*;
-using ValueInfoProtoPtr = ::ONNX_NAMESPACE::ValueInfoProto*;
-using TensorProtoPtr = ::ONNX_NAMESPACE::TensorProto*;
+using SBackendNode = backend::SBackendNode;
+using SBackendValueInfo = backend::SBackendValueInfo;
+using SBackendTensor = backend::SBackendTensor;
 
 class SimOnnxCtx;
 
@@ -50,11 +45,11 @@ struct FakeNode_t {
 class NodeObj : public NodeObjBase {
  public:
   static NodeObj* Create(SimOnnxCtx* ctx, FakeNode_t args);
-  static NodeObj* Create(SimOnnxCtx* ctx, NodeProtoPtr handle);
+  static NodeObj* Create(SimOnnxCtx* ctx, SBackendNode handle);
   enum IONodeType { kInputNode = 0, kOutputNode = 1 };
-  static NodeObj* Create(SimOnnxCtx* ctx, ValueInfoProtoPtr handle,
+  static NodeObj* Create(SimOnnxCtx* ctx, SBackendValueInfo handle,
                          IONodeType type);
-  static NodeObj* Create(SimOnnxCtx* ctx, TensorProtoPtr handle);
+  static NodeObj* Create(SimOnnxCtx* ctx, SBackendTensor handle);
 
  public:
   explicit NodeObj(SimOnnxCtx* ctx) : NodeObjBase(ctx) {}
@@ -85,14 +80,13 @@ class FakeNodeObj : public NodeObj {
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
     setAttr("setDim", "false");
+    setAttr("setDataType", "false");
     setAttr("NodeType", "FakeNode");
   }
   std::string getName() override { return faked_.fake_name; }
   std::string getOpType() override { return faked_.fake_op_type; }
   std::vector<std::string> getInputs() override { return faked_.fake_inputs; }
   std::vector<std::string> getOutputs() override { return faked_.fake_outputs; }
-
- protected:
   bool destroyHandle() override { return true; }
 
  private:
@@ -101,13 +95,14 @@ class FakeNodeObj : public NodeObj {
 
 class RealNodeObj : public NodeObj {
  public:
-  explicit RealNodeObj(SimOnnxCtx* ctx, NodeProtoPtr handle)
+  explicit RealNodeObj(SimOnnxCtx* ctx, SBackendNode handle)
       : NodeObj(ctx), handle_(handle) {
     setAttr("setName", "true");
     setAttr("setOpType", "true");
     setAttr("setInputs", "true");
     setAttr("setOutputs", "true");
     setAttr("setDim", "false");
+    setAttr("setDataType", "false");
     setAttr("NodeType", "RealNode");
   }
   std::string getName() override;
@@ -118,23 +113,22 @@ class RealNodeObj : public NodeObj {
   bool setInputs(const std::vector<std::string>& inputs) override;
   std::vector<std::string> getOutputs() override;
   bool setOutputs(const std::vector<std::string>& outputs) override;
-
- protected:
   bool destroyHandle() override;
 
  private:
-  NodeProtoPtr handle_;
+  SBackendNode handle_;
 };
 
 class IONodeObj : public NodeObj {
  public:
-  explicit IONodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
+  explicit IONodeObj(SimOnnxCtx* ctx, SBackendValueInfo handle)
       : NodeObj(ctx), handle_(handle) {
     setAttr("setName", "true");
     setAttr("setOpType", "false");
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
     setAttr("setDim", "true");
+    setAttr("setDataType", "true");
     setAttr("NodeType", "IONode");
   }
   std::string getName() override;
@@ -145,44 +139,41 @@ class IONodeObj : public NodeObj {
   bool setDataType(const std::string& datatype);
 
  protected:
-  ValueInfoProtoPtr handle_;
+  SBackendValueInfo handle_;
 };
 
 class InputNodeObj : public IONodeObj {
  public:
-  explicit InputNodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
+  explicit InputNodeObj(SimOnnxCtx* ctx, SBackendValueInfo handle)
       : IONodeObj(ctx, handle) {}
   std::string getOpType() override { return TREATY_INPUT_OP_TYPE; }
   std::vector<std::string> getInputs() override { return {}; }
   std::vector<std::string> getOutputs() override;
   // bool setOutputs(const std::vector<std::string>& outputs) override;
-
- protected:
   bool destroyHandle() override;
 };
 
 class OutputNodeObj : public IONodeObj {
  public:
-  explicit OutputNodeObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
+  explicit OutputNodeObj(SimOnnxCtx* ctx, SBackendValueInfo handle)
       : IONodeObj(ctx, handle) {}
   std::string getOpType() override { return TREATY_OUTPUT_OP_TYPE; }
   std::vector<std::string> getInputs() override;
   // bool setInputs(const std::vector<std::string>& inputs) override;
   std::vector<std::string> getOutputs() override { return {}; }
-
- protected:
   bool destroyHandle() override;
 };
 
 class InitNodeObj : public NodeObj {
  public:
-  explicit InitNodeObj(SimOnnxCtx* ctx, TensorProtoPtr handle)
+  explicit InitNodeObj(SimOnnxCtx* ctx, SBackendTensor handle)
       : NodeObj(ctx), handle_(handle) {
     setAttr("setName", "true");
     setAttr("setOpType", "false");
     setAttr("setInputs", "false");
     setAttr("setOutputs", "false");
     setAttr("setDim", "false");
+    setAttr("setDataType", "false");
     setAttr("NodeType", "InitNode");
   }
   std::string getName() override;
@@ -191,12 +182,10 @@ class InitNodeObj : public NodeObj {
   std::vector<std::string> getInputs() override { return {}; }
   std::vector<std::string> getOutputs() override { return {getName()}; }
   // bool setOutputs(const std::vector<std::string>& outputs) override;
-
- protected:
   bool destroyHandle() override;
 
  private:
-  TensorProtoPtr handle_;
+  SBackendTensor handle_;
 };
 
 }  // namespace simonnx

@@ -57,7 +57,7 @@ void NodeMenu::updateStatus() {
 
 void NodeMenu::slot_reset_name() {
   QString text = node_->getName();
-  TxtSetDialog d("name:", text, node_->ctx_.top_widget);
+  TxtSetDialog d("name:", &text, node_->ctx_.top_widget);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
     if (text.isEmpty()) {
@@ -72,7 +72,7 @@ void NodeMenu::slot_reset_name() {
 
 void NodeMenu::slot_reset_op_type() {
   QString text = node_->getOpType();
-  TxtSetDialog d("op_type:", text, node_->ctx_.top_widget);
+  TxtSetDialog d("op_type:", &text, node_->ctx_.top_widget);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
     if (text.isEmpty()) {
@@ -87,7 +87,7 @@ void NodeMenu::slot_reset_op_type() {
 
 void NodeMenu::slot_reset_inputs() {
   QList<QString> out = node_->getInputs();
-  TxtListSetDialog d("inputs:", out, node_->ctx_.top_widget);
+  TxtListSetDialog d("inputs:", &out, node_->ctx_.top_widget);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
     node_->setInputs(out);
@@ -97,7 +97,7 @@ void NodeMenu::slot_reset_inputs() {
 
 void NodeMenu::slot_reset_outputs() {
   QList<QString> out = node_->getOutputs();
-  TxtListSetDialog d("outputs:", out, node_->ctx_.top_widget);
+  TxtListSetDialog d("outputs:", &out, node_->ctx_.top_widget);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
     node_->setOutputs(out);
@@ -107,37 +107,13 @@ void NodeMenu::slot_reset_outputs() {
 
 void NodeMenu::slot_reset_dim() {
   auto dim = node_->getDim();
-  QString dim_str;
-  for (size_t i = 0; i < dim.size(); i++) {
-    dim_str += QString::number(dim[i]);
-    if (i < (dim.size() - 1)) {
-      dim_str += ", ";
-    }
-  }
-  TxtSetDialog d("dim:", dim_str, node_->ctx_.top_widget);
+  TxtSetDialog d("dim:", &dim, node_->ctx_.top_widget);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
-    dim_str = dim_str.replace(" ", "");
-    bool valid = dim_str.size() >= 2;
-    dim.clear();
-    if (valid) {
-      for (auto d_str : dim_str.split(",")) {
-        dim.append(d_str.toLongLong(&valid));
-        if (!valid) {
-          LOG(ERROR) << "err when parsing \"" << d_str.toStdString() << "\"";
-          break;
-        }
-      }
-    }
-    if (!valid) {
-      QMessageBox::critical(this, tr("Error"),
-                            tr("need valid dim, e.g. `b, c, h, w`"));
+    if (node_->setDim(dim)) {
+      node_->refresh();
     } else {
-      if (node_->setDim(dim)) {
-        node_->refresh();
-      } else {
-        QMessageBox::critical(this, tr("Error"), tr("set op_type error"));
-      }
+      QMessageBox::critical(this, tr("Error"), tr("set op_type error"));
     }
   }
 }

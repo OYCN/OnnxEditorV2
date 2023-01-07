@@ -25,16 +25,20 @@ class TxtSetDialog : public QDialog {
   Q_OBJECT
 
  public:
-  explicit TxtSetDialog(const QString& label, QString& input,
+  explicit TxtSetDialog(const QString& label, QString* input,
+                        QWidget* parent = nullptr);
+  explicit TxtSetDialog(const QString& label, QList<int64_t>* dim,
                         QWidget* parent = nullptr);
   ~TxtSetDialog();
 
  public slots:
+  void dimCheckSlot();
   void buttonAcceptedSlot();
 
  private:
   Ui::TxtSetDialog* ui;
-  QString& input;
+  QString* input;
+  QList<int64_t>* dim;
 };
 
 #endif  // GUI_UI_DIALOG_TXTSETDIALOG_TXTSETDIALOG_H_

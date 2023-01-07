@@ -16,8 +16,8 @@
 
 #include "gui/ui/dialog/nodesummary/ui_nodesummary.h"
 
-NodeSummary::NodeSummary(QString& name, QString& op_type,
-                         QList<QString>& inputs, QList<QString>& outputs,
+NodeSummary::NodeSummary(QString* name, QString* op_type,
+                         QList<QString>* inputs, QList<QString>* outputs,
                          QWidget* parent)
     : QDialog(parent),
       ui(new Ui::NodeSummary),
@@ -26,13 +26,13 @@ NodeSummary::NodeSummary(QString& name, QString& op_type,
       inputs(inputs),
       outputs(outputs) {
   ui->setupUi(this);
-  ui->name_edit->setText(name);
-  ui->op_type_edit->setText(op_type);
-  for (int i = 0; i < inputs.size(); i++) {
-    addItem(ui->inputs_list_widget, inputs[i]);
+  ui->name_edit->setText(*name);
+  ui->op_type_edit->setText(*op_type);
+  for (int i = 0; i < inputs->size(); i++) {
+    addItem(ui->inputs_list_widget, (*inputs)[i]);
   }
-  for (int i = 0; i < outputs.size(); i++) {
-    addItem(ui->outputs_list_widget, outputs[i]);
+  for (int i = 0; i < outputs->size(); i++) {
+    addItem(ui->outputs_list_widget, (*outputs)[i]);
   }
 
   connect(ui->buttonBox, &QDialogButtonBox::accepted, this,
@@ -72,16 +72,16 @@ void NodeSummary::delItem(QListWidget* listWidget, QListWidgetItem* item) {
 }
 
 void NodeSummary::buttonAcceptedSlot() {
-  name = ui->name_edit->text();
-  op_type = ui->op_type_edit->text();
-  inputs.clear();
+  *name = ui->name_edit->text();
+  *op_type = ui->op_type_edit->text();
+  inputs->clear();
   for (int i = 0; i < ui->inputs_list_widget->count(); i++) {
     auto item = ui->inputs_list_widget->item(i);
-    inputs.append(item->text());
+    inputs->append(item->text());
   }
-  outputs.clear();
+  outputs->clear();
   for (int i = 0; i < ui->outputs_list_widget->count(); i++) {
     auto item = ui->outputs_list_widget->item(i);
-    outputs.append(item->text());
+    outputs->append(item->text());
   }
 }

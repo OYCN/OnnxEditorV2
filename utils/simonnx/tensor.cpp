@@ -14,8 +14,7 @@
 
 #include "utils/simonnx/tensor.h"
 
-#include <onnx/onnx_pb.h>
-
+#include "utils/simonnx/backend/backend.h"
 #include "utils/simonnx/context.h"
 
 namespace utils {
@@ -24,10 +23,10 @@ namespace simonnx {
 TensorObj* TensorObj::Create(SimOnnxCtx* ctx, FakeTensor_t args) {
   return new FakeTensorObj(ctx, args);
 }
-// TensorObj* TensorObj::Create(SimOnnxCtx* ctx, TensorProtoPtr handle) {
+// TensorObj* TensorObj::Create(SimOnnxCtx* ctx, SBackendTensor handle) {
 //   return new InitTensorObj(ctx, handle);
 // }
-TensorObj* TensorObj::Create(SimOnnxCtx* ctx, ValueInfoProtoPtr handle) {
+TensorObj* TensorObj::Create(SimOnnxCtx* ctx, SBackendValueInfo handle) {
   return new ValueTensorObj(ctx, handle);
 }
 
@@ -37,7 +36,7 @@ std::string InitTensorObj::getName() { return handle_->name(); }
 //   return true;
 // }
 
-bool InitTensorObj::destroyHandle() { return getCtx()->destroyHandle(handle_); }
+bool InitTensorObj::destroyHandle() { return handle_->destroy(); }
 
 std::string ValueTensorObj::getName() { return handle_->name(); }
 // bool ValueTensorObj::setName(std::string name) {
@@ -45,9 +44,7 @@ std::string ValueTensorObj::getName() { return handle_->name(); }
 //   return true;
 // }
 
-bool ValueTensorObj::destroyHandle() {
-  return getCtx()->destroyHandle(handle_);
-}
+bool ValueTensorObj::destroyHandle() { return handle_->destroy(); }
 
 }  // namespace simonnx
 }  // namespace utils

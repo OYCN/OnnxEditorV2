@@ -56,6 +56,8 @@ class Node : public GraphItemBase {
   bool setOutputs(QList<QString> outputs);
   QList<int64_t> getDim() const;
   bool setDim(QList<int64_t> dim);
+  QString getDataType() const;
+  bool setDataType(QString type);
 
   void setDeleted(bool del) override;
   bool getDeleted() const override;

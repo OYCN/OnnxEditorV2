@@ -22,6 +22,7 @@
 #include <QMessageBox>
 #include <QtGui/QPainter>
 
+#include "gui/ui/dialog/iosummary/iosummary.h"
 #include "gui/ui/dialog/nodesummary/nodesummary.h"
 
 namespace gui {
@@ -274,6 +275,26 @@ bool Node::setDim(QList<int64_t> dim) {
   }
 }
 
+QString Node::getDataType() const {
+  if (handle_->getAttr("setDim") == "true") {
+    CHECK_EQ(handle_->getAttr("NodeType"), "IONode");
+    auto ionode_handle = dynamic_cast<utils::simonnx::IONodeObj *>(handle_);
+    return QString::fromStdString(ionode_handle->getDataType());
+  } else {
+    return {};
+  }
+}
+
+bool Node::setDataType(QString type) {
+  if (handle_->getAttr("setDataType") == "true") {
+    CHECK_EQ(handle_->getAttr("NodeType"), "IONode");
+    auto ionode_handle = dynamic_cast<utils::simonnx::IONodeObj *>(handle_);
+    return ionode_handle->setDataType(type.toStdString());
+  } else {
+    return false;
+  }
+}
+
 void Node::setDeleted(bool del) {
   if (del != getDeleted()) {
     if (del) {
@@ -300,24 +321,43 @@ void Node::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
 }
 
 void Node::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) {
-  QString name = getName();
-  QString op_type = getOpType();
-  QList<QString> ins = getInputs();
-  QList<QString> outs = getOutputs();
-  NodeSummary d(name, op_type, ins, outs, ctx_.top_widget);
-  auto ret = d.exec();
-  if (ret == QDialog::Accepted) {
-    if (name.isEmpty()) {
-      QMessageBox::critical(ctx_.top_widget, "Error", "name is empty");
-    } else if (op_type.isEmpty()) {
-      QMessageBox::critical(ctx_.top_widget, "Error", "op_type is empty");
-    } else {
-      setOpType(op_type);
+  if (handle_->getAttr("NodeType") == "IONode") {
+    QString name = getName();
+    QString type = getDataType();
+    QList<int64_t> dim = getDim();
+    IOSummary d("io node", &name, &type, &dim, ctx_.top_widget);
+    auto ret = d.exec();
+    if (ret == QDialog::Accepted) {
+      if (!setDataType(type)) {
+        QMessageBox::warning(
+            ctx_.top_widget, "Warning",
+            "DataType is invalid, but other change has been saved.");
+      }
       setName(name);
-      setInputs(ins);
-      setOutputs(outs);
+      setDim(dim);
       refresh();
       ioUpdateSend();
+    }
+  } else {
+    QString name = getName();
+    QString op_type = getOpType();
+    QList<QString> ins = getInputs();
+    QList<QString> outs = getOutputs();
+    NodeSummary d(&name, &op_type, &ins, &outs, ctx_.top_widget);
+    auto ret = d.exec();
+    if (ret == QDialog::Accepted) {
+      if (name.isEmpty()) {
+        QMessageBox::critical(ctx_.top_widget, "Error", "name is empty");
+      } else if (op_type.isEmpty()) {
+        QMessageBox::critical(ctx_.top_widget, "Error", "op_type is empty");
+      } else {
+        setOpType(op_type);
+        setName(name);
+        setInputs(ins);
+        setOutputs(outs);
+        refresh();
+        ioUpdateSend();
+      }
     }
   }
 }

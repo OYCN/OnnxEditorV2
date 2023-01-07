@@ -20,19 +20,15 @@
 #include <string>
 #include <vector>
 
+#include "utils/simonnx/backend/backend.h"
 #include "utils/simonnx/object.h"
-
-namespace ONNX_NAMESPACE {
-class TensorProto;
-class ValueInfoProto;
-};  // namespace ONNX_NAMESPACE
 
 namespace utils {
 namespace simonnx {
 
 using TensorObjBase = Object<ObjType_t::kTensor>;
-using TensorProtoPtr = ::ONNX_NAMESPACE::TensorProto*;
-using ValueInfoProtoPtr = ::ONNX_NAMESPACE::ValueInfoProto*;
+using SBackendTensor = backend::SBackendTensor;
+using SBackendValueInfo = backend::SBackendValueInfo;
 
 struct FakeTensor_t {
   std::string fake_name;
@@ -41,8 +37,8 @@ struct FakeTensor_t {
 class TensorObj : public TensorObjBase {
  public:
   static TensorObj* Create(SimOnnxCtx* ctx, FakeTensor_t args);
-  // static TensorObj* Create(SimOnnxCtx* ctx, TensorProtoPtr handle);
-  static TensorObj* Create(SimOnnxCtx* ctx, ValueInfoProtoPtr handle);
+  // static TensorObj* Create(SimOnnxCtx* ctx, SBackendTensor handle);
+  static TensorObj* Create(SimOnnxCtx* ctx, SBackendValueInfo handle);
 
  public:
   explicit TensorObj(SimOnnxCtx* ctx) : TensorObjBase(ctx) {}
@@ -60,8 +56,6 @@ class FakeTensorObj : public TensorObj {
     setAttr("setName", "false");
   }
   std::string getName() override { return faked_.fake_name; }
-
- protected:
   bool destroyHandle() override { return true; }
 
  private:
@@ -70,34 +64,30 @@ class FakeTensorObj : public TensorObj {
 
 class InitTensorObj : public TensorObj {
  public:
-  explicit InitTensorObj(SimOnnxCtx* ctx, TensorProtoPtr handle)
+  explicit InitTensorObj(SimOnnxCtx* ctx, SBackendTensor handle)
       : TensorObj(ctx), handle_(handle) {
     setAttr("setName", "false");
   }
   std::string getName() override;
   // bool setName(std::string name) override;
-
- protected:
   bool destroyHandle() override;
 
  private:
-  TensorProtoPtr handle_;
+  SBackendTensor handle_;
 };
 
 class ValueTensorObj : public TensorObj {
  public:
-  explicit ValueTensorObj(SimOnnxCtx* ctx, ValueInfoProtoPtr handle)
+  explicit ValueTensorObj(SimOnnxCtx* ctx, SBackendValueInfo handle)
       : TensorObj(ctx), handle_(handle) {
     setAttr("setName", "false");
   }
   std::string getName() override;
   // bool setName(std::string name) override;
-
- protected:
   bool destroyHandle() override;
 
  private:
-  ValueInfoProtoPtr handle_;
+  SBackendValueInfo handle_;
 };
 
 }  // namespace simonnx

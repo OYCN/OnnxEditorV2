@@ -20,6 +20,7 @@
 
 #include "gui/graph/node.h"
 #include "gui/graph/scene.h"
+#include "gui/ui/dialog/iosummary/iosummary.h"
 #include "gui/ui/dialog/nodesummary/nodesummary.h"
 
 namespace gui {
@@ -44,7 +45,7 @@ void SceneMenu::slot_new_node() {
   QString op_type = "";
   QList<QString> ins = {};
   QList<QString> outs = {};
-  NodeSummary d(name, op_type, ins, outs, scene_->gui_ctx_.top_widget);
+  NodeSummary d(&name, &op_type, &ins, &outs, scene_->gui_ctx_.top_widget);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
     if (name.isEmpty()) {
@@ -67,11 +68,51 @@ void SceneMenu::slot_new_node() {
 }
 
 void SceneMenu::slot_new_input() {
-  QMessageBox::critical(this, tr("Error"), tr("not implemented"));
+  QString name;
+  QString type;
+  QList<int64_t> dim;
+  IOSummary d("input node", &name, &type, &dim, scene_->gui_ctx_.top_widget);
+  auto ret = d.exec();
+  if (ret == QDialog::Accepted) {
+    auto handle = scene_->graph_ctx_->CreateNewIOObj(
+        utils::simonnx::IONodeType::kInputNode);
+    CHECK_NOTNULL(handle);
+    auto n = scene_->addNode(handle);
+    n->setPos(pos_);
+    n->setName(name);
+    n->setDim(dim);
+    n->refresh();
+    n->ioUpdateSend();
+    if (!n->setDataType(type)) {
+      QMessageBox::warning(
+          this, tr("Warning"),
+          tr("DataType is invalid, but node has already created."));
+    }
+  }
 }
 
 void SceneMenu::slot_new_output() {
-  QMessageBox::critical(this, tr("Error"), tr("not implemented"));
+  QString name;
+  QString type;
+  QList<int64_t> dim;
+  IOSummary d("output node", &name, &type, &dim, scene_->gui_ctx_.top_widget);
+  auto ret = d.exec();
+  if (ret == QDialog::Accepted) {
+    auto handle = scene_->graph_ctx_->CreateNewIOObj(
+        utils::simonnx::IONodeType::kOutputNode);
+    CHECK_NOTNULL(handle);
+    auto n = scene_->addNode(handle);
+    n->setPos(pos_);
+    n->setName(name);
+    n->setDim(dim);
+    n->refresh();
+    n->ioUpdateSend();
+    if (!n->setDataType(type)) {
+      QMessageBox::warning(
+          this, tr("Warning"),
+          tr("DataType is invalid, but node has already created."));
+    }
+  }
 }
 
 }  // namespace graph

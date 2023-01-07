@@ -1,8 +1,9 @@
+add_subdirectory(backend)
+
 add_library(simonnx STATIC
   context.cpp
   node.cpp
   tensor.cpp
-  onnx_pass.cpp
 )
 
 target_link_libraries(simonnx
@@ -12,4 +13,5 @@ target_link_libraries(simonnx
   magic_enum::magic_enum
   external_ogdf
   utils_algorithm
+  backend
 )

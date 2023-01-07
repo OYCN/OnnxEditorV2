@@ -16,14 +16,14 @@
 
 #include "gui/ui/dialog/txtlistsetdialog/ui_txtlistsetdialog.h"
 
-TxtListSetDialog::TxtListSetDialog(const QString& label, QList<QString>& list,
+TxtListSetDialog::TxtListSetDialog(const QString& label, QList<QString>* list,
                                    QWidget* parent)
     : QDialog(parent), ui(new Ui::TxtListSetDialog), list(list) {
   ui->setupUi(this);
   ui->label->setText(label);
   ui->label->adjustSize();
-  for (int i = 0; i < list.size(); i++) {
-    addItem(list[i]);
+  for (int i = 0; i < list->size(); i++) {
+    addItem((*list)[i]);
   }
   connect(ui->buttonBox, &QDialogButtonBox::accepted, this,
           &TxtListSetDialog::buttonAcceptedSlot);
@@ -36,10 +36,10 @@ TxtListSetDialog::TxtListSetDialog(const QString& label, QList<QString>& list,
 TxtListSetDialog::~TxtListSetDialog() { delete ui; }
 
 void TxtListSetDialog::buttonAcceptedSlot() {
-  list.clear();
+  list->clear();
   for (int i = 0; i < ui->listWidget->count(); i++) {
     auto item = ui->listWidget->item(i);
-    list.append(item->text());
+    list->append(item->text());
   }
 }
 
