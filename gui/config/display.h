@@ -1,10 +1,10 @@
 /**
  * @file display.h
- * @brief 
+ * @brief
  * @author opluss (opluss@qq.com)
- * 
+ *
  * @copyright Copyright (c) 2022  opluss
- * 
+ *
  * @par Modify log:
  * <table>
  * <tr><th>Date       <th>Version <th>Author  <th>Description
@@ -31,16 +31,13 @@ struct Display {
 
   // for node
   struct Node {
-    QSet<QString> hidden_op_type = {
-      "::initializer::"
-    };
-    QMap<QString, QString> redirect_op_type = {
-      {"::input::", "*input*"},
-      {"::output::", "*output*"}
-    };
+    QSet<QString> hidden_op_type = {"::initializer::"};
+    QMap<QString, QString> redirect_op_type = {{"::input::", "*input*"},
+                                               {"::output::", "*output*"}};
     bool name = false;
     bool op_type = true;
     bool attr = false;
+    bool movable = true;
   } node;
 
   // for edge

@@ -32,8 +32,12 @@ Scene::Scene(Context& ctx, QObject* parent)
     : gui_ctx_(ctx), QGraphicsScene{parent}, menu_(this) {
   graph_ctx_ = SimOnnxCtx::getSimOnnxCtx();
   connect(&gui_ctx_, &Context::nodeUpdateSignal, this, &Scene::nodeUpdateSlot);
+  connect(&gui_ctx_, &Context::selectedNodePosUpdateSignal, this,
+          &Scene::selectedNodePosUpdateSlot);
   update();
 }
+
+Scene::~Scene() { clearSelection(); }
 
 Node* Scene::addNode(NodeHandle handle) {
   auto n = new Node(gui_ctx_);
@@ -376,6 +380,23 @@ void Scene::nodeUpdateSlot(Node* node) {
   // without this emit, edge will be clear by other edge paint
   // I don't know why
   emit sceneRectChanged(sceneRect());
+}
+
+void Scene::selectedNodePosUpdateSlot() {
+  for (auto _item : selectedItems()) {
+    auto item = dynamic_cast<GraphItemBase*>(_item);
+    if (item->getItemType() == GraphItemType::kNode) {
+      auto node = dynamic_cast<Node*>(item);
+      auto ins = node->getInputs();
+      auto outs = node->getOutputs();
+      for (auto& in : ins) {
+        updateEdge(in);
+      }
+      for (auto& out : outs) {
+        updateEdge(out);
+      }
+    }
+  }
 }
 
 void Scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {

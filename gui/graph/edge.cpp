@@ -24,7 +24,7 @@ namespace gui {
 namespace graph {
 
 Edge::Edge(Context& ctx) : ctx_(ctx) {
-  setFlag(QGraphicsItem::ItemIsSelectable, true);
+  // setFlag(QGraphicsItem::ItemIsSelectable, true);
   setAcceptHoverEvents(true);
   setZValue(0);
 }
@@ -160,9 +160,7 @@ void Edge::setDeleted(bool del) {
   // }
 }
 
-bool Edge::getDeleted() const {
-  return handle_->isDeleted();
-}
+bool Edge::getDeleted() const { return handle_->isDeleted(); }
 
 void Edge::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
   // qDebug() << "Enter hover";
