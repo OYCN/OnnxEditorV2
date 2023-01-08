@@ -28,12 +28,14 @@ namespace backend {
 namespace proto {
 
 class ProtoBackendCtx;
+class ProtoBackendAttribute;
 
 using GraphProtoPtr = ::ONNX_NAMESPACE::GraphProto*;
 
 class ProtoBackendGraph : public ::utils::simonnx::backend::IBackendGraph {
  public:
   ProtoBackendGraph(ProtoBackendCtx* parent, GraphProtoPtr handle);
+  ProtoBackendGraph(ProtoBackendAttribute* parent, GraphProtoPtr handle);
   bool destroy() override;
 
   const std::vector<SBackendNode>& node() const override;
@@ -56,7 +58,12 @@ class ProtoBackendGraph : public ::utils::simonnx::backend::IBackendGraph {
   GraphProtoPtr getHandle() { return handle_; }
 
  private:
-  ProtoBackendCtx* parent_;
+  void initVar();
+  void deinitVar();
+
+ private:
+  ProtoBackendCtx* ctx_parent_;
+  ProtoBackendAttribute* attr_parent_;
   GraphProtoPtr handle_;
 
   std::vector<SBackendNode> node_;

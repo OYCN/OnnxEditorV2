@@ -33,6 +33,8 @@ bool ProtoBackendNode::destroy() {
   VLOG(1) << "delete NodeProtoPtr";
   auto nodes = parent_->getHandle()->mutable_node();
   if (delFromRepeatProto(nodes, handle_)) {
+    handle_ = nullptr;
+    attr_.clear();
     return true;
   } else {
     LOG(ERROR) << "delete NodeProtoPtr failed @" << handle_;
@@ -40,17 +42,26 @@ bool ProtoBackendNode::destroy() {
   }
 }
 
-std::string ProtoBackendNode::name() const { return handle_->name(); }
-bool ProtoBackendNode::set_name(const std::string& name) {
-  handle_->set_name(name);
-  return false;
+std::string ProtoBackendNode::name() const {
+  CHECK_HANDLE_DEL("");
+  return handle_->name();
 }
-std::string ProtoBackendNode::op_type() const { return handle_->op_type(); }
+bool ProtoBackendNode::set_name(const std::string& name) {
+  CHECK_HANDLE_DEL(false);
+  handle_->set_name(name);
+  return true;
+}
+std::string ProtoBackendNode::op_type() const {
+  CHECK_HANDLE_DEL("");
+  return handle_->op_type();
+}
 bool ProtoBackendNode::set_op_type(const std::string& op_type) {
+  CHECK_HANDLE_DEL(false);
   handle_->set_op_type(op_type);
   return true;
 }
 std::vector<std::string> ProtoBackendNode::input() const {
+  CHECK_HANDLE_DEL({});
   std::vector<std::string> ret(handle_->input_size());
   for (size_t i = 0; i < ret.size(); i++) {
     ret[i] = handle_->input(i);
@@ -58,6 +69,7 @@ std::vector<std::string> ProtoBackendNode::input() const {
   return ret;
 }
 bool ProtoBackendNode::set_input(const std::vector<std::string>& input) {
+  CHECK_HANDLE_DEL(false);
   handle_->clear_input();
   auto& obj = *handle_->mutable_input();
   for (const auto& n : input) {
@@ -66,6 +78,7 @@ bool ProtoBackendNode::set_input(const std::vector<std::string>& input) {
   return true;
 }
 std::vector<std::string> ProtoBackendNode::output() const {
+  CHECK_HANDLE_DEL({});
   std::vector<std::string> ret(handle_->output_size());
   for (size_t i = 0; i < ret.size(); i++) {
     ret[i] = handle_->output(i);
@@ -73,6 +86,7 @@ std::vector<std::string> ProtoBackendNode::output() const {
   return ret;
 }
 bool ProtoBackendNode::set_output(const std::vector<std::string>& output) {
+  CHECK_HANDLE_DEL(false);
   handle_->clear_output();
   auto& obj = *handle_->mutable_output();
   for (const auto& n : output) {
@@ -81,13 +95,16 @@ bool ProtoBackendNode::set_output(const std::vector<std::string>& output) {
   return true;
 }
 const std::vector<SBackendAttribute>& ProtoBackendNode::attribute() const {
+  CHECK_HANDLE_DEL(attr_);
   return attr_;
 }
 SBackendAttribute ProtoBackendNode::add_attribute() {
+  CHECK_HANDLE_DEL(nullptr);
   // TODO(oPluss): impl
   return nullptr;
 }
 bool ProtoBackendNode::del_attribute(SBackendAttribute attr) {
+  CHECK_HANDLE_DEL(false);
   // TODO(oPluss): impl
   return false;
 }
@@ -96,9 +113,13 @@ ProtoBackendAttribute::ProtoBackendAttribute(ProtoBackendNode* parent,
                                              AttributeProtoPtr handle)
     : parent_(parent), handle_(handle) {}
 
-std::string ProtoBackendAttribute::name() const { return handle_->name(); }
+std::string ProtoBackendAttribute::name() const {
+  CHECK_HANDLE_DEL("");
+  return handle_->name();
+}
 
 bool ProtoBackendAttribute::set_name(const std::string& name) {
+  CHECK_HANDLE_DEL(false);
   handle_->set_name(name);
   return true;
 }

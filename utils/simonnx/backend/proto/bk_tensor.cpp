@@ -33,6 +33,7 @@ bool ProtoBackendTensor::destroy() {
   LOG(INFO) << "delete TensorProtoPtr";
   auto inits = parent_->getHandle()->mutable_initializer();
   if (delFromRepeatProto(inits, handle_)) {
+    handle_ = nullptr;
     return true;
   } else {
     LOG(ERROR) << "delete TensorProtoPtr failed @" << handle_;
@@ -40,12 +41,17 @@ bool ProtoBackendTensor::destroy() {
   }
 }
 
-std::string ProtoBackendTensor::name() const { return handle_->name(); }
+std::string ProtoBackendTensor::name() const {
+  CHECK_HANDLE_DEL("");
+  return handle_->name();
+}
 bool ProtoBackendTensor::set_name(const std::string& name) {
+  CHECK_HANDLE_DEL(false);
   handle_->set_name(name);
   return true;
 }
 std::string ProtoBackendTensor::type() const {
+  CHECK_HANDLE_DEL("");
   std::string ret;
   if (!handle_->has_data_type()) {
     return ret;
@@ -56,6 +62,7 @@ std::string ProtoBackendTensor::type() const {
   return ONNX_NAMESPACE::TensorProto::DataType_Name(t);
 }
 bool ProtoBackendTensor::set_type(const std::string& type) {
+  CHECK_HANDLE_DEL(false);
   ONNX_NAMESPACE::TensorProto::DataType dt;
   if (!ONNX_NAMESPACE::TensorProto::DataType_Parse(type, &dt)) {
     return false;
@@ -64,22 +71,27 @@ bool ProtoBackendTensor::set_type(const std::string& type) {
   return true;
 }
 std::vector<int64_t> ProtoBackendTensor::dim() const {
+  CHECK_HANDLE_DEL({});
   // TODO(oPluss): impl
   return {};
 }
 bool ProtoBackendTensor::set_dim(const std::vector<int64_t>& dim) {
+  CHECK_HANDLE_DEL(false);
   // TODO(oPluss): impl
   return false;
 }
 void* ProtoBackendTensor::data() const {
+  CHECK_HANDLE_DEL(nullptr);
   // TODO(oPluss): impl
   return nullptr;
 }
 size_t ProtoBackendTensor::data_size() const {
+  CHECK_HANDLE_DEL(0);
   // TODO(oPluss): impl
   return 0;
 }
 bool ProtoBackendTensor::set_data(void* ptr, size_t len) {
+  CHECK_HANDLE_DEL(false);
   // TODO(oPluss): impl
   return false;
 }

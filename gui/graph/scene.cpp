@@ -47,9 +47,15 @@ Node* Scene::addNode(NodeHandle handle) {
   node_inputs_[n] = QSet<QString>(inputs.begin(), inputs.end());
   node_outputs_[n] = QSet<QString>(outputs.begin(), outputs.end());
   for (const auto& v : n->getInputs()) {
+    if (!edges_.contains(v)) {
+      addEdge(v);
+    }
     edge_dst_[v].insert(n);
   }
   for (const auto& v : n->getOutputs()) {
+    if (!edges_.contains(v)) {
+      addEdge(v);
+    }
     edge_src_[v].insert(n);
   }
   update();
@@ -95,10 +101,6 @@ void Scene::updateEdge() {
 }
 
 void Scene::updateEdge(const QString& name) {
-  if (name.size() == 0) {
-    LOG(INFO) << "Got empty edge name, skip update";
-    return;
-  }
   CHECK(edges_.contains(name)) << name.toStdString();
   if (!edge_dst_.contains(name) && !edge_src_.contains(name)) {
     LOG(INFO) << "Skip tensor which not used: " << name.toStdString();

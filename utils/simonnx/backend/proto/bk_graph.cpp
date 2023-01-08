@@ -20,6 +20,7 @@
 #include "utils/simonnx/backend/proto/bk_node.h"
 #include "utils/simonnx/backend/proto/bk_tensor.h"
 #include "utils/simonnx/backend/proto/bk_value_info.h"
+#include "utils/simonnx/backend/proto/helper.h"
 
 namespace utils {
 namespace simonnx {
@@ -28,7 +29,18 @@ namespace proto {
 
 ProtoBackendGraph::ProtoBackendGraph(ProtoBackendCtx* parent,
                                      GraphProtoPtr handle)
-    : parent_(parent), handle_(handle) {
+    : ctx_parent_(parent), attr_parent_(nullptr), handle_(handle) {
+  initVar();
+}
+ProtoBackendGraph::ProtoBackendGraph(ProtoBackendAttribute* parent,
+                                     GraphProtoPtr handle)
+    : ctx_parent_(nullptr), attr_parent_(parent), handle_(handle) {
+  initVar();
+}
+
+void ProtoBackendGraph::initVar() {
+  CHECK_NE(ctx_parent_ == nullptr, attr_parent_ == nullptr);
+  CHECK_NOTNULL(handle_);
   auto nodes = handle_->mutable_node();
   for (size_t i = 0; i < nodes->size(); i++) {
     node_.emplace_back(
@@ -55,62 +67,95 @@ ProtoBackendGraph::ProtoBackendGraph(ProtoBackendCtx* parent,
         this, value_infoes->Mutable(i)));
   }
 }
+void ProtoBackendGraph::deinitVar() {
+  node_.clear();
+  input_.clear();
+  output_.clear();
+  init_.clear();
+  value_info_.clear();
+}
 bool ProtoBackendGraph::destroy() {
-  // TODO(oPluss): impl
+  if (ctx_parent_ != nullptr) {
+    ctx_parent_->getHandle()->clear_graph();
+    handle_ = nullptr;
+    deinitVar();
+    return true;
+  }
+  if (attr_parent_ != nullptr) {
+    // TODO(oPluss): impl
+    return false;
+  }
   return false;
 }
 
 const std::vector<SBackendNode>& ProtoBackendGraph::node() const {
+  CHECK_HANDLE_DEL(node_);
   return node_;
 }
 SBackendNode ProtoBackendGraph::add_node() {
+  CHECK_HANDLE_DEL(nullptr);
   node_.emplace_back(
       std::make_shared<ProtoBackendNode>(this, handle_->mutable_node()->Add()));
   return node_.back();
 }
-bool ProtoBackendGraph::del_node(SBackendNode node) { return node->destroy(); }
+bool ProtoBackendGraph::del_node(SBackendNode node) {
+  CHECK_HANDLE_DEL(false);
+  return node->destroy();
+}
 const std::vector<SBackendValueInfo>& ProtoBackendGraph::input() const {
+  CHECK_HANDLE_DEL(input_);
   return input_;
 }
 SBackendValueInfo ProtoBackendGraph::add_input() {
+  CHECK_HANDLE_DEL(nullptr);
   input_.emplace_back(std::make_shared<ProtoBackendValueInfo>(
       this, handle_->mutable_input()->Add()));
   return input_.back();
 }
 bool ProtoBackendGraph::del_input(SBackendValueInfo input) {
+  CHECK_HANDLE_DEL(false);
   return input->destroy();
 }
 const std::vector<SBackendValueInfo>& ProtoBackendGraph::output() const {
+  CHECK_HANDLE_DEL(output_);
   return output_;
 }
 SBackendValueInfo ProtoBackendGraph::add_output() {
+  CHECK_HANDLE_DEL(nullptr);
   output_.emplace_back(std::make_shared<ProtoBackendValueInfo>(
       this, handle_->mutable_output()->Add()));
   return output_.back();
 }
 bool ProtoBackendGraph::del_output(SBackendValueInfo value_info) {
+  CHECK_HANDLE_DEL(false);
   return value_info->destroy();
 }
 const std::vector<SBackendTensor>& ProtoBackendGraph::initializer() const {
+  CHECK_HANDLE_DEL(init_);
   return init_;
 }
 SBackendTensor ProtoBackendGraph::add_initializer() {
+  CHECK_HANDLE_DEL(nullptr);
   init_.emplace_back(std::make_shared<ProtoBackendTensor>(
       this, handle_->mutable_initializer()->Add()));
   return init_.back();
 }
 bool ProtoBackendGraph::del_initializer(SBackendTensor tensor) {
+  CHECK_HANDLE_DEL(false);
   return tensor->destroy();
 }
 const std::vector<SBackendValueInfo>& ProtoBackendGraph::value_info() const {
+  CHECK_HANDLE_DEL(value_info_);
   return value_info_;
 }
 SBackendValueInfo ProtoBackendGraph::add_value_info() {
+  CHECK_HANDLE_DEL(nullptr);
   value_info_.emplace_back(std::make_shared<ProtoBackendValueInfo>(
       this, handle_->mutable_value_info()->Add()));
   return value_info_.back();
 }
 bool ProtoBackendGraph::del_value_info(SBackendValueInfo value_info) {
+  CHECK_HANDLE_DEL(false);
   return value_info->destroy();
 }
 
