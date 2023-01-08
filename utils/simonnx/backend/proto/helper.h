@@ -20,6 +20,14 @@ namespace simonnx {
 namespace backend {
 namespace proto {
 
+#define CHECK_HANDLE_DEL(...)                         \
+  do {                                                \
+    if (handle_ == nullptr) {                         \
+      LOG(ERROR) << "try to invoke a deleted handle"; \
+      return __VA_ARGS__;                             \
+    }                                                 \
+  } while (0)
+
 template <typename RPT, typename VT>
 bool delFromRepeatProto(RPT rp, VT handle) {
   for (auto iter = rp->begin(); iter != rp->end();) {

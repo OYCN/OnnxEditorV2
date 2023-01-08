@@ -36,6 +36,9 @@ std::shared_ptr<IBackendCtx> IBackendCtx::createCtx(BackendType type) {
   }
   if (ptr) {
     ptr->setSptr(ptr);
+    LOG(INFO) << "BackendCtx created";
+  } else {
+    LOG(ERROR) << "BackendCtx created error";
   }
   return ptr;
 }

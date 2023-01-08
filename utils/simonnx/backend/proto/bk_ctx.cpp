@@ -30,7 +30,10 @@ namespace proto {
 
 namespace fs = std::filesystem;
 
-ProtoBackendCtx::ProtoBackendCtx() { mp_ = new ::ONNX_NAMESPACE::ModelProto(); }
+ProtoBackendCtx::ProtoBackendCtx() {
+  mp_ = new ::ONNX_NAMESPACE::ModelProto();
+  graph_ = std::make_shared<ProtoBackendGraph>(this, mp_->mutable_graph());
+}
 ProtoBackendCtx::~ProtoBackendCtx() { delete mp_; }
 
 bool ProtoBackendCtx::loadFile(const std::string& path) {
@@ -52,7 +55,6 @@ bool ProtoBackendCtx::loadFile(const std::string& path) {
     LOG(ERROR) << "proto parse error";
     return false;
   }
-  mp_->graph();
   graph_ = std::make_shared<ProtoBackendGraph>(this, mp_->mutable_graph());
   return true;
 }

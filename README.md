@@ -33,11 +33,10 @@
     - [ ] display & edit data
  - [ ] display & edit attribute
 
-# Known Bug
+# Known Issue
 
- - Some obj is null in initial state
  - Not limit the empty name of node/io
- - UI about edit IO in node will display error in light mode
+ - UI about edit IO of node will display error in light mode
  
  # Build
  
