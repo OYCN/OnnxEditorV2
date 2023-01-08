@@ -22,6 +22,9 @@ Context::Context(QObject* parent) : QObject(parent) {}
 Context::~Context() = default;
 
 void Context::nodeUpdateSend(Node* node) { emit nodeUpdateSignal(node); }
+void Context::selectedNodePosUpdateSend() {
+  emit selectedNodePosUpdateSignal();
+}
 
 }  // namespace graph
 }  // namespace gui

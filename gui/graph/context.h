@@ -38,9 +38,11 @@ class Context : public QObject {
 
  signals:
   void nodeUpdateSignal(Node* node);
+  void selectedNodePosUpdateSignal();
 
  public:
   void nodeUpdateSend(Node* node);
+  void selectedNodePosUpdateSend();
 };
 
 }  // namespace graph

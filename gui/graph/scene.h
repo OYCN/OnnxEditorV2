@@ -38,6 +38,7 @@ class Scene : public QGraphicsScene {
 
  public:
   explicit Scene(Context& ctx, QObject* parent = nullptr);
+  ~Scene();
 
  public:
   Node* addNode(NodeHandle handle);
@@ -53,6 +54,7 @@ class Scene : public QGraphicsScene {
 
  public slots:
   void nodeUpdateSlot(Node* node);
+  void selectedNodePosUpdateSlot();
 
  protected:
   void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;

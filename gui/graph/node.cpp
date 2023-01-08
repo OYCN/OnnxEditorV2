@@ -309,15 +309,15 @@ void Node::setDeleted(bool del) {
 bool Node::getDeleted() const { return handle_->isDeleted(); }
 
 void Node::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
-  // qDebug() << "Enter hover";
   mHovered = true;
   update();
+  QGraphicsItem::hoverEnterEvent(event);
 }
 
 void Node::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
-  // qDebug() << "Leave hover";
   mHovered = false;
   update();
+  QGraphicsItem::hoverLeaveEvent(event);
 }
 
 void Node::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) {
@@ -360,10 +360,18 @@ void Node::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) {
       }
     }
   }
+  QGraphicsItem::mouseDoubleClickEvent(event);
 }
 
 void Node::mousePressEvent(QGraphicsSceneMouseEvent *event) {
-  // qDebug() << "Double press: " << this;
+  QGraphicsItem::mousePressEvent(event);
+}
+
+void Node::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
+  QGraphicsItem::mouseMoveEvent(event);
+  if (isSelected()) {
+    ctx_.selectedNodePosUpdateSend();
+  }
 }
 
 void Node::contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {
@@ -371,6 +379,22 @@ void Node::contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {
   menu_.updateStatus();
   menu_.exec(event->screenPos());
   event->accept();
+}
+
+QVariant Node::itemChange(QGraphicsItem::GraphicsItemChange change,
+                          const QVariant &value) {
+  // if (change == QGraphicsItem::ItemPositionChange) {
+  //   LOG(INFO) << "ItemPositionChange";
+  //   // ctx_.nodePosUpdateSend(this);
+  // } else if (change == QGraphicsItem::ItemPositionHasChanged) {
+  //   LOG(INFO) << "ItemPositionHasChanged";
+  //   // ctx_.nodePosUpdateSend(this);
+  // } else
+  if (change == QGraphicsItem::ItemSelectedHasChanged) {
+    setFlag(QGraphicsItem::ItemIsMovable,
+            value.toBool() && ctx_.display.node.movable);
+  }
+  return QGraphicsItem::itemChange(change, value);
 }
 
 }  // namespace graph

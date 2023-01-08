@@ -74,7 +74,10 @@ class Node : public GraphItemBase {
   void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
   void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
   void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+  void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
   void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
+  QVariant itemChange(QGraphicsItem::GraphicsItemChange change,
+                      const QVariant &value) override;
 
  private:
   Context &ctx_;
