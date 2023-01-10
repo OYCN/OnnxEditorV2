@@ -397,6 +397,8 @@ void Scene::selectedNodePosUpdateSlot() {
       }
     }
   }
+  // same as nodeUpdateSlot
+  emit sceneRectChanged(sceneRect());
 }
 
 void Scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
