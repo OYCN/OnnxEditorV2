@@ -109,21 +109,6 @@ bool ProtoBackendNode::del_attribute(SBackendAttribute attr) {
   return false;
 }
 
-ProtoBackendAttribute::ProtoBackendAttribute(ProtoBackendNode* parent,
-                                             AttributeProtoPtr handle)
-    : parent_(parent), handle_(handle) {}
-
-std::string ProtoBackendAttribute::name() const {
-  CHECK_HANDLE_DEL("");
-  return handle_->name();
-}
-
-bool ProtoBackendAttribute::set_name(const std::string& name) {
-  CHECK_HANDLE_DEL(false);
-  handle_->set_name(name);
-  return true;
-}
-
 }  // namespace proto
 }  // namespace backend
 }  // namespace simonnx

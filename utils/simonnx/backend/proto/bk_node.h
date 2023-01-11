@@ -20,7 +20,6 @@
 
 namespace ONNX_NAMESPACE {
 class NodeProto;
-class AttributeProto;
 };  // namespace ONNX_NAMESPACE
 
 namespace utils {
@@ -31,7 +30,6 @@ namespace proto {
 class ProtoBackendGraph;
 
 using NodeProtoPtr = ::ONNX_NAMESPACE::NodeProto*;
-using AttributeProtoPtr = ::ONNX_NAMESPACE::AttributeProto*;
 
 class ProtoBackendNode : public ::utils::simonnx::backend::IBackendNode {
  public:
@@ -58,22 +56,6 @@ class ProtoBackendNode : public ::utils::simonnx::backend::IBackendNode {
   NodeProtoPtr handle_;
 
   std::vector<SBackendAttribute> attr_;
-};
-
-class ProtoBackendAttribute
-    : public ::utils::simonnx::backend::IBackendAttribute {
- public:
-  ProtoBackendAttribute(ProtoBackendNode* parent, AttributeProtoPtr handle);
-
-  std::string name() const override;
-  bool set_name(const std::string& name) override;
-
- public:
-  AttributeProtoPtr getHandle() { return handle_; }
-
- private:
-  ProtoBackendNode* parent_;
-  AttributeProtoPtr handle_;
 };
 
 }  // namespace proto
