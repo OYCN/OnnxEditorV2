@@ -17,8 +17,27 @@
 #include <QPair>
 #include <QPushButton>
 
-#include "gui/ui/dialog/helper.h"
 #include "gui/ui/dialog/iosummary/ui_iosummary.h"
+#include "utils/algorithm/parse.h"
+
+using DimStr = utils::algorithm::parse::DimStr;
+
+QString dim2str(QList<int64_t> dim) {
+  std::vector<int64_t> d(dim.begin(), dim.end());
+  auto str = DimStr::Array2Str(d);
+  return QString::fromStdString(str);
+}
+
+QList<int64_t> str2dim(QString str) {
+  std::string s = str.toStdString();
+  auto dim = DimStr::Str2Array(s);
+  return {dim.begin(), dim.end()};
+}
+
+bool valid(QString str) {
+  std::string s = str.toStdString();
+  return DimStr::StrValid(s);
+}
 
 IOSummary::IOSummary(const QString& label, QString* name, QString* type,
                      QList<int64_t>* dim, QWidget* parent)
@@ -39,16 +58,14 @@ IOSummary::IOSummary(const QString& label, QString* name, QString* type,
 IOSummary::~IOSummary() { delete ui; }
 
 void IOSummary::dimCheckSlot() {
-  auto ret = str2dim(ui->dim_edit->text());
   auto b = ui->buttonBox->button(QDialogButtonBox::Ok);
   if (b != nullptr) {
-    b->setEnabled(ret.first);
+    b->setEnabled(valid(ui->dim_edit->text()));
   }
 }
 
 void IOSummary::buttonAcceptedSlot() {
   *name = ui->name_edit->text();
   *type = ui->type_edit->text();
-  auto ret = str2dim(ui->dim_edit->text());
-  *dim = ret.second;
+  *dim = str2dim(ui->dim_edit->text());
 }

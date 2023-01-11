@@ -26,7 +26,7 @@
  - [x] Edit node
    - [x] Edit `name` & `op_type` & `input` & `output`
    - [x] Add & Remove
-   - [ ] Edit & Add & Remove `attribute`
+   - [x] Edit & Add & Remove `attribute`
  - [ ] Built-in script
    - [ ] About Dims
      - [ ] Set BatchSize for All Node/Value

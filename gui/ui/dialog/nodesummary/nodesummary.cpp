@@ -14,25 +14,50 @@
 
 #include "gui/ui/dialog/nodesummary/nodesummary.h"
 
+#include <algorithm>
+
 #include "gui/ui/dialog/nodesummary/ui_nodesummary.h"
 
 NodeSummary::NodeSummary(QString* name, QString* op_type,
                          QList<QString>* inputs, QList<QString>* outputs,
-                         QWidget* parent)
+                         QList<QList<QString>>* attrs, QWidget* parent)
     : QDialog(parent),
       ui(new Ui::NodeSummary),
       name(name),
       op_type(op_type),
       inputs(inputs),
-      outputs(outputs) {
+      outputs(outputs),
+      attrs(attrs) {
   ui->setupUi(this);
   ui->name_edit->setText(*name);
   ui->op_type_edit->setText(*op_type);
+
+  ui->inputs_list_widget->setAlternatingRowColors(true);
   for (int i = 0; i < inputs->size(); i++) {
     addItem(ui->inputs_list_widget, (*inputs)[i]);
   }
   for (int i = 0; i < outputs->size(); i++) {
     addItem(ui->outputs_list_widget, (*outputs)[i]);
+  }
+
+  QStringList header;
+  header << "name"
+         << "type"
+         << "value";
+  ui->attr_tabel_widget->setColumnCount(header.size());
+  ui->attr_tabel_widget->verticalHeader()->hide();
+  ui->attr_tabel_widget->setHorizontalHeaderLabels(header);
+  ui->attr_tabel_widget->horizontalHeader()->setStretchLastSection(true);
+  ui->attr_tabel_widget->setSelectionBehavior(QAbstractItemView::SelectRows);
+  ui->attr_tabel_widget->setSelectionMode(QAbstractItemView::SingleSelection);
+  ui->attr_tabel_widget->setAlternatingRowColors(true);
+  ui->attr_tabel_widget->horizontalHeader()->setSectionResizeMode(
+      0, QHeaderView::ResizeToContents);
+  ui->attr_tabel_widget->horizontalHeader()->setSectionResizeMode(
+      1, QHeaderView::ResizeToContents);
+
+  for (int i = 0; i < attrs->size(); i++) {
+    addRow(ui->attr_tabel_widget, (*attrs)[i]);
   }
 
   connect(ui->buttonBox, &QDialogButtonBox::accepted, this,
@@ -53,6 +78,17 @@ NodeSummary::NodeSummary(QString* name, QString* op_type,
       delItem(ui->outputs_list_widget, item);
     }
   });
+  connect(ui->attr_add, &QPushButton::clicked, this, [&]() {
+    addRow(ui->attr_tabel_widget, {"", "", ""});
+  });
+  connect(ui->attr_del, &QPushButton::clicked, this, [&]() {
+    auto items = ui->attr_tabel_widget->selectedItems();
+    QSet<int> rows_s;
+    for (auto item : items) {
+      rows_s.insert(item->row());
+    }
+    delRow(ui->attr_tabel_widget, rows_s);
+  });
 }
 
 NodeSummary::~NodeSummary() { delete ui; }
@@ -71,6 +107,29 @@ void NodeSummary::delItem(QListWidget* listWidget, QListWidgetItem* item) {
   delete item;
 }
 
+QList<QTableWidgetItem*> NodeSummary::addRow(QTableWidget* listWidget,
+                                             const QList<QString>& attr) {
+  int row = ui->attr_tabel_widget->rowCount();
+  ui->attr_tabel_widget->insertRow(row);
+  QList<QTableWidgetItem*> ret;
+  for (size_t i = 0; i < attr.size(); i++) {
+    auto item = new QTableWidgetItem(attr[i]);
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
+    ret.append(item);
+    ui->attr_tabel_widget->setItem(row, i, item);
+  }
+  ui->attr_tabel_widget->setCurrentCell(row, QItemSelectionModel::Select);
+  return ret;
+}
+
+void NodeSummary::delRow(QTableWidget* listWidget, QSet<int> rows) {
+  auto rows_l = QList<int>(rows.begin(), rows.end());
+  std::sort(rows_l.begin(), rows_l.end(), std::greater<int>());
+  for (auto row : rows_l) {
+    ui->attr_tabel_widget->removeRow(row);
+  }
+}
+
 void NodeSummary::buttonAcceptedSlot() {
   *name = ui->name_edit->text();
   *op_type = ui->op_type_edit->text();
@@ -83,5 +142,16 @@ void NodeSummary::buttonAcceptedSlot() {
   for (int i = 0; i < ui->outputs_list_widget->count(); i++) {
     auto item = ui->outputs_list_widget->item(i);
     outputs->append(item->text());
+  }
+  attrs->clear();
+  auto row = ui->attr_tabel_widget->rowCount();
+  auto col = ui->attr_tabel_widget->columnCount();
+  for (int r = 0; r < row; r++) {
+    QList<QString> this_r;
+    for (int c = 0; c < col; c++) {
+      auto item = ui->attr_tabel_widget->item(r, c);
+      this_r.append(item->text());
+    }
+    attrs->append(this_r);
   }
 }

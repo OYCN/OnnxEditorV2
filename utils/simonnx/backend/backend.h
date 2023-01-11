@@ -15,6 +15,7 @@
 #ifndef UTILS_SIMONNX_BACKEND_BACKEND_H_
 #define UTILS_SIMONNX_BACKEND_BACKEND_H_
 
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <string>
@@ -40,11 +41,7 @@ using SBackendAttribute = std::shared_ptr<IBackendAttribute>;
 
 enum class BackendType { kProto, kOnnxIR };
 
-enum class PassType {
-  kNone,
-  kAll,
-  kTopoSort
-};
+enum class PassType { kNone, kAll, kTopoSort };
 
 class IBackendCtx {
  public:
@@ -125,8 +122,20 @@ class IBackendTensor {
 
 class IBackendAttribute {
  public:
+  virtual bool destroy() = 0;
   virtual std::string name() const = 0;
   virtual bool set_name(const std::string& name) = 0;
+  virtual std::string type() const = 0;
+  virtual int i() const = 0;
+  virtual bool set_i(int v) = 0;
+  virtual float f() const = 0;
+  virtual bool set_f(float v) = 0;
+  virtual std::string s() const = 0;
+  virtual bool set_s(std::string s) = 0;
+  virtual std::vector<int> ints() const = 0;
+  virtual bool set_ints(std::vector<int> vs) = 0;
+  virtual std::vector<float> floats() const = 0;
+  virtual bool set_floats(std::vector<float> vs) = 0;
 };
 
 }  // namespace backend

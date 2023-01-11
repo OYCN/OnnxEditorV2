@@ -45,25 +45,32 @@ void SceneMenu::slot_new_node() {
   QString op_type = "";
   QList<QString> ins = {};
   QList<QString> outs = {};
-  NodeSummary d(&name, &op_type, &ins, &outs, scene_->gui_ctx_.top_widget);
+  QList<QList<QString>> attr = {};
+  NodeSummary d(&name, &op_type, &ins, &outs, &attr,
+                scene_->gui_ctx_.top_widget);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
-    if (name.isEmpty()) {
-      QMessageBox::critical(this, tr("Error"), tr("name is empty"));
-    } else if (op_type.isEmpty()) {
-      QMessageBox::critical(this, tr("Error"), tr("op_type is empty"));
-    } else {
-      auto handle = scene_->graph_ctx_->CreateNewNodeObj();
-      CHECK_NOTNULL(handle);
-      auto n = scene_->addNode(handle);
-      n->setPos(pos_);
-      n->setOpType(op_type);
-      n->setName(name);
-      n->setInputs(ins);
-      n->setOutputs(outs);
-      n->refresh();
-      n->ioUpdateSend();
+    auto handle = scene_->graph_ctx_->CreateNewNodeObj();
+    CHECK_NOTNULL(handle);
+    auto n = scene_->addNode(handle);
+    n->setPos(pos_);
+    if (!n->setOpType(op_type)) {
+      QMessageBox::critical(this, "Error", "set op_type error");
     }
+    if (!n->setName(name)) {
+      QMessageBox::critical(this, "Error", "set name error");
+    }
+    if (!n->setInputs(ins)) {
+      QMessageBox::critical(this, "Error", "set inputs error");
+    }
+    if (!n->setOutputs(outs)) {
+      QMessageBox::critical(this, "Error", "set outputs error");
+    }
+    if (!n->setAttrs(attr)) {
+      QMessageBox::critical(this, "Error", "set attrs error");
+    }
+    n->refresh();
+    n->ioUpdateSend();
   }
 }
 

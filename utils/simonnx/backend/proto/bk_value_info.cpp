@@ -36,9 +36,10 @@ bool ProtoBackendValueInfo::destroy() {
   if (delFromRepeatProto(ins, handle_) || delFromRepeatProto(outs, handle_) ||
       delFromRepeatProto(vals, handle_)) {
     handle_ = nullptr;
+    LOG(INFO) << "delete ValueInfo success";
     return true;
   } else {
-    LOG(ERROR) << "delete ValueInfoProtoPtr failed @" << handle_;
+    LOG(ERROR) << "delete ValueInfo failed @" << handle_;
     return false;
   }
 }

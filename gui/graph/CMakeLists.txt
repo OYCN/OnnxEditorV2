@@ -4,7 +4,6 @@ add_library(graph STATIC
   scene.cpp
   node.cpp
   edge.cpp
-  node_menu.cpp
   scene_menu.cpp
   context.cpp
 )

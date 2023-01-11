@@ -28,12 +28,14 @@ namespace backend {
 namespace proto {
 
 class ProtoBackendGraph;
+class ProtoBackendAttribute;
 
 using TensorProtoPtr = ::ONNX_NAMESPACE::TensorProto*;
 
 class ProtoBackendTensor : public ::utils::simonnx::backend::IBackendTensor {
  public:
   ProtoBackendTensor(ProtoBackendGraph* parent, TensorProtoPtr handle);
+  ProtoBackendTensor(ProtoBackendAttribute* parent, TensorProtoPtr handle);
   bool destroy() override;
 
   std::string name() const override;
@@ -50,7 +52,8 @@ class ProtoBackendTensor : public ::utils::simonnx::backend::IBackendTensor {
   TensorProtoPtr getHandle() { return handle_; }
 
  private:
-  ProtoBackendGraph* parent_;
+  ProtoBackendGraph* graph_parent_;
+  ProtoBackendAttribute* attr_parent_;
   TensorProtoPtr handle_;
 };
 
