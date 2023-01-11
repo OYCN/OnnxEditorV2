@@ -18,25 +18,23 @@
 >
 > Please save it frequently to prevent lost your modifications due to program FATAL
 
-# TODO List
+# Support List
 
- - [x] rename op name
- - [x] rename op type
- - [x] rename io name
- - [x] rename node io
- - [x] add node
- - [x] remove node
- - [x] remove Input/Output
- - [x] add/edit Input/Output
-    - [x] display & edit dim
- - [ ] add constant value
-    - [ ] display & edit data
- - [ ] display & edit attribute
-
-# Known Issue
-
- - Not limit the empty name of node/io
- - UI about edit IO of node will display error in light mode
+ - [x] Edit input/output
+   - [x] Edit `name` & `data_type` & `dim`
+   - [x] Add & Remove
+ - [x] Edit node
+   - [x] Edit `name` & `op_type` & `input` & `output`
+   - [x] Add & Remove
+   - [ ] Edit & Add & Remove `attribute`
+ - [ ] Built-in script
+   - [ ] About Dims
+     - [ ] Set BatchSize for All Node/Value
+     - [ ] Shape Inference (By ONNX)
+   - [ ] Check whether the node/graph is correct
+ - [ ] Functional
+   - [ ] Search Node
+   - [ ] Switch Node display (`name` or `op_type`)
  
  # Build
  
