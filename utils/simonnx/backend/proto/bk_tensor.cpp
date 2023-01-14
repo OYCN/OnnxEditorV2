@@ -27,18 +27,31 @@ namespace proto {
 
 ProtoBackendTensor::ProtoBackendTensor(ProtoBackendGraph* parent,
                                        TensorProtoPtr handle)
-    : parent_(parent), handle_(handle) {}
+    : graph_parent_(parent), attr_parent_(nullptr), handle_(handle) {}
+
+ProtoBackendTensor::ProtoBackendTensor(ProtoBackendAttribute* parent,
+                                       TensorProtoPtr handle)
+    : graph_parent_(nullptr), attr_parent_(parent), handle_(handle) {}
 
 bool ProtoBackendTensor::destroy() {
   LOG(INFO) << "delete TensorProtoPtr";
-  auto inits = parent_->getHandle()->mutable_initializer();
-  if (delFromRepeatProto(inits, handle_)) {
-    handle_ = nullptr;
-    return true;
-  } else {
-    LOG(ERROR) << "delete TensorProtoPtr failed @" << handle_;
+  if (graph_parent_ != nullptr) {
+    auto inits = graph_parent_->getHandle()->mutable_initializer();
+    if (delFromRepeatProto(inits, handle_)) {
+      handle_ = nullptr;
+      LOG(INFO) << "delete Tensor from graph success";
+      return true;
+    } else {
+      LOG(ERROR) << "delete Tensor from graph failed @" << handle_;
+      return false;
+    }
+  } else if (attr_parent_ != nullptr) {
+    // TODO(oPluss): Impl
+    LOG(ERROR) << "delete Tensor from attr not impl";
     return false;
   }
+  LOG(ERROR) << "delete Tensor failed";
+  return false;
 }
 
 std::string ProtoBackendTensor::name() const {

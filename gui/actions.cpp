@@ -24,8 +24,6 @@
 #include "gui/mainwindow.h"
 #include "gui/ui/dialog/iosummary/iosummary.h"
 #include "gui/ui/dialog/nodesummary/nodesummary.h"
-#include "gui/ui/dialog/txtlistsetdialog/txtlistsetdialog.h"
-#include "gui/ui/dialog/txtsetdialog/txtsetdialog.h"
 #include "utils/simonnx/context.h"
 
 using SimOnnxCtx = utils::simonnx::SimOnnxCtx;
@@ -65,10 +63,6 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
     act->setShortcut(QKeySequence("Ctrl+w"));
   }
 
-  addAction(menu_debug_ui, "Txt Set Dialog",
-            [&]() { act_txt_set_dialog_exec_callback(); });
-  addAction(menu_debug_ui, "Txt List Set Dialog",
-            [&]() { act_txt_list_set_dialog_exec_callback(); });
   addAction(menu_debug_ui, "Node Summary Dialog",
             [&]() { act_node_summary_dialog_exec_callback(); });
   addAction(menu_debug_ui, "IO Summary Dialog",
@@ -185,37 +179,14 @@ void Actions::act_file_save_a_callback() {
   }
 }
 
-void Actions::act_txt_set_dialog_exec_callback() {
-  QString out = "input_data";
-  TxtSetDialog d("debug label:", &out, parent_);
-  auto ret = d.exec();
-  if (ret == QDialog::Accepted) {
-    LOG(INFO) << "Accepted: " << out.toStdString();
-  } else {
-    LOG(INFO) << "Rejected";
-  }
-}
-
-void Actions::act_txt_list_set_dialog_exec_callback() {
-  QList<QString> out = {"in0", "in1", "in2"};
-  TxtListSetDialog d("debug label:", &out, parent_);
-  auto ret = d.exec();
-  if (ret == QDialog::Accepted) {
-    LOG(INFO) << "Accepted:";
-    for (const auto& v : out) {
-      LOG(INFO) << v.toStdString();
-    }
-  } else {
-    LOG(INFO) << "Rejected";
-  }
-}
-
 void Actions::act_node_summary_dialog_exec_callback() {
   QString name = "node name";
   QString op_type = "node op type";
   QList<QString> ins = {"in0", "in1", "in2"};
   QList<QString> outs = {"out0", "out1"};
-  NodeSummary d(&name, &op_type, &ins, &outs, parent_);
+  QList<QList<QString>> attrs = {{"name1", "type1", "value1"},
+                                 {"name2", "type2", "value2"}};
+  NodeSummary d(&name, &op_type, &ins, &outs, &attrs, parent_);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
     LOG(INFO) << "Accepted:";
@@ -226,6 +197,11 @@ void Actions::act_node_summary_dialog_exec_callback() {
     }
     for (const auto& v : outs) {
       LOG(INFO) << v.toStdString();
+    }
+    for (const auto& attr : attrs) {
+      CHECK_EQ(attr.size(), 3);
+      LOG(INFO) << attr[0].toStdString() << ", " << attr[1].toStdString()
+                << ", " << attr[2].toStdString() << ", ";
     }
   } else {
     LOG(INFO) << "Rejected";

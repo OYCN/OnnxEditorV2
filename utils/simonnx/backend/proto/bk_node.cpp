@@ -17,6 +17,7 @@
 #include <glog/logging.h>
 #include <onnx/onnx_pb.h>
 
+#include "utils/simonnx/backend/proto/bk_attr.h"
 #include "utils/simonnx/backend/proto/bk_graph.h"
 #include "utils/simonnx/backend/proto/helper.h"
 
@@ -27,7 +28,13 @@ namespace proto {
 
 ProtoBackendNode::ProtoBackendNode(ProtoBackendGraph* parent,
                                    NodeProtoPtr handle)
-    : parent_(parent), handle_(handle) {}
+    : parent_(parent), handle_(handle) {
+  auto attrs = handle_->mutable_attribute();
+  for (size_t i = 0; i < attrs->size(); i++) {
+    attr_.emplace_back(
+        std::make_shared<ProtoBackendAttribute>(this, attrs->Mutable(i)));
+  }
+}
 
 bool ProtoBackendNode::destroy() {
   VLOG(1) << "delete NodeProtoPtr";
@@ -35,9 +42,10 @@ bool ProtoBackendNode::destroy() {
   if (delFromRepeatProto(nodes, handle_)) {
     handle_ = nullptr;
     attr_.clear();
+    LOG(INFO) << "delete Node success";
     return true;
   } else {
-    LOG(ERROR) << "delete NodeProtoPtr failed @" << handle_;
+    LOG(ERROR) << "delete Node failed @" << handle_;
     return false;
   }
 }
@@ -100,28 +108,22 @@ const std::vector<SBackendAttribute>& ProtoBackendNode::attribute() const {
 }
 SBackendAttribute ProtoBackendNode::add_attribute() {
   CHECK_HANDLE_DEL(nullptr);
-  // TODO(oPluss): impl
-  return nullptr;
+  attr_.emplace_back(std::make_shared<ProtoBackendAttribute>(
+      this, handle_->mutable_attribute()->Add()));
+  return attr_.back();
 }
 bool ProtoBackendNode::del_attribute(SBackendAttribute attr) {
   CHECK_HANDLE_DEL(false);
-  // TODO(oPluss): impl
+  if (attr->destroy()) {
+    for (size_t i = 0; i < attr_.size(); i++) {
+      if (attr_[i].get() == attr.get()) {
+        std::swap(attr_[i], attr_.back());
+        attr_.pop_back();
+        return true;
+      }
+    }
+  }
   return false;
-}
-
-ProtoBackendAttribute::ProtoBackendAttribute(ProtoBackendNode* parent,
-                                             AttributeProtoPtr handle)
-    : parent_(parent), handle_(handle) {}
-
-std::string ProtoBackendAttribute::name() const {
-  CHECK_HANDLE_DEL("");
-  return handle_->name();
-}
-
-bool ProtoBackendAttribute::set_name(const std::string& name) {
-  CHECK_HANDLE_DEL(false);
-  handle_->set_name(name);
-  return true;
 }
 
 }  // namespace proto

@@ -46,7 +46,7 @@ class ProtoBackendGraph : public ::utils::simonnx::backend::IBackendGraph {
   bool del_input(SBackendValueInfo input) override;
   const std::vector<SBackendValueInfo>& output() const override;
   SBackendValueInfo add_output() override;
-  bool del_output(SBackendValueInfo value_info) override;
+  bool del_output(SBackendValueInfo output) override;
   const std::vector<SBackendTensor>& initializer() const override;
   SBackendTensor add_initializer() override;
   bool del_initializer(SBackendTensor tensor) override;

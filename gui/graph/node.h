@@ -22,7 +22,6 @@
 
 #include "gui/graph/context.h"
 #include "gui/graph/item.h"
-#include "gui/graph/node_menu.h"
 #include "utils/simonnx/context.h"
 
 namespace gui {
@@ -58,6 +57,8 @@ class Node : public GraphItemBase {
   bool setDim(QList<int64_t> dim);
   QString getDataType() const;
   bool setDataType(QString type);
+  QList<QList<QString>> getAttrs() const;
+  bool setAttrs(const QList<QList<QString>> &attrs);
 
   void setDeleted(bool del) override;
   bool getDeleted() const override;
@@ -81,7 +82,6 @@ class Node : public GraphItemBase {
 
  private:
   Context &ctx_;
-  NodeMenu menu_;
 
   NodeHandle handle_;
 

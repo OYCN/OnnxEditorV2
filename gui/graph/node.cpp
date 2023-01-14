@@ -28,7 +28,7 @@
 namespace gui {
 namespace graph {
 
-Node::Node(Context &ctx) : ctx_(ctx), menu_(this) {
+Node::Node(Context &ctx) : ctx_(ctx) {
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setAcceptHoverEvents(true);
   setZValue(2);
@@ -258,7 +258,7 @@ QList<int64_t> Node::getDim() const {
   if (handle_->getAttr("setDim") == "true") {
     CHECK_EQ(handle_->getAttr("NodeType"), "IONode");
     auto ionode_handle = dynamic_cast<utils::simonnx::IONodeObj *>(handle_);
-    auto dim = ionode_handle->getDim();
+    auto dim = ionode_handle->getDim().getArray();
     return QList(dim.begin(), dim.end());
   } else {
     return {};
@@ -269,7 +269,8 @@ bool Node::setDim(QList<int64_t> dim) {
   if (handle_->getAttr("setDim") == "true") {
     CHECK_EQ(handle_->getAttr("NodeType"), "IONode");
     auto ionode_handle = dynamic_cast<utils::simonnx::IONodeObj *>(handle_);
-    return ionode_handle->setDim({dim.begin(), dim.end()});
+    return ionode_handle->setDim(
+        utils::simonnx::DimStr(std::vector<int64_t>({dim.begin(), dim.end()})));
   } else {
     return false;
   }
@@ -293,6 +294,32 @@ bool Node::setDataType(QString type) {
   } else {
     return false;
   }
+}
+
+QList<QList<QString>> Node::getAttrs() const {
+  QList<QList<QString>> ret;
+  for (auto attr : handle_->getAttrs()) {
+    QList<QString> r;
+    r.append(QString::fromStdString(attr.key));
+    r.append(QString::fromStdString(attr.type));
+    r.append(QString::fromStdString(attr.value));
+    CHECK_EQ(r.size(), 3);
+    ret.append(r);
+  }
+  return ret;
+}
+
+bool Node::setAttrs(const QList<QList<QString>> &attrs) {
+  decltype(handle_->getAttrs()) ret;
+  for (auto attr : attrs) {
+    ret.emplace_back();
+    auto &r = ret.back();
+    CHECK_EQ(attr.size(), 3);
+    r.key = attr[0].toStdString();
+    r.type = attr[1].toStdString();
+    r.value = attr[2].toStdString();
+  }
+  return handle_->setAttrs(ret);
 }
 
 void Node::setDeleted(bool del) {
@@ -329,12 +356,16 @@ void Node::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) {
     auto ret = d.exec();
     if (ret == QDialog::Accepted) {
       if (!setDataType(type)) {
-        QMessageBox::warning(
+        QMessageBox::critical(
             ctx_.top_widget, "Warning",
             "DataType is invalid, but other change has been saved.");
       }
-      setName(name);
-      setDim(dim);
+      if (!setName(name)) {
+        QMessageBox::critical(ctx_.top_widget, "Error", "name set error");
+      }
+      if (!setDim(dim)) {
+        QMessageBox::critical(ctx_.top_widget, "Error", "dim set error");
+      }
       refresh();
       ioUpdateSend();
     }
@@ -343,21 +374,28 @@ void Node::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) {
     QString op_type = getOpType();
     QList<QString> ins = getInputs();
     QList<QString> outs = getOutputs();
-    NodeSummary d(&name, &op_type, &ins, &outs, ctx_.top_widget);
+    auto attrs = getAttrs();
+    NodeSummary d(&name, &op_type, &ins, &outs, &attrs, ctx_.top_widget);
     auto ret = d.exec();
     if (ret == QDialog::Accepted) {
-      if (name.isEmpty()) {
-        QMessageBox::critical(ctx_.top_widget, "Error", "name is empty");
-      } else if (op_type.isEmpty()) {
-        QMessageBox::critical(ctx_.top_widget, "Error", "op_type is empty");
-      } else {
-        setOpType(op_type);
-        setName(name);
-        setInputs(ins);
-        setOutputs(outs);
-        refresh();
-        ioUpdateSend();
+      if (!setOpType(op_type)) {
+        QMessageBox::critical(ctx_.top_widget, "Error", "set op_type error");
       }
+      if (!setName(name)) {
+        QMessageBox::critical(ctx_.top_widget, "Error", "set op_type error");
+        LOG(ERROR) << "set name error";
+      }
+      if (!setInputs(ins)) {
+        QMessageBox::critical(ctx_.top_widget, "Error", "set inputs error");
+      }
+      if (!setOutputs(outs)) {
+        QMessageBox::critical(ctx_.top_widget, "Error", "set outputs error");
+      }
+      if (!setAttrs(attrs)) {
+        QMessageBox::critical(ctx_.top_widget, "Error", "set attrs error");
+      }
+      refresh();
+      ioUpdateSend();
     }
   }
   QGraphicsItem::mouseDoubleClickEvent(event);
@@ -376,8 +414,8 @@ void Node::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
 
 void Node::contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {
   QGraphicsItem::contextMenuEvent(event);
-  menu_.updateStatus();
-  menu_.exec(event->screenPos());
+  // menu_.updateStatus();
+  // menu_.exec(event->screenPos());
   event->accept();
 }
 

@@ -17,6 +17,7 @@
 
 #include <QDialog>
 #include <QListWidgetItem>
+#include <QTableWidgetItem>
 
 namespace Ui {
 class NodeSummary;
@@ -27,7 +28,8 @@ class NodeSummary : public QDialog {
 
  public:
   explicit NodeSummary(QString* name, QString* op_type, QList<QString>* inputs,
-                       QList<QString>* outputs, QWidget* parent = nullptr);
+                       QList<QString>* outputs, QList<QList<QString>>* attrs,
+                       QWidget* parent = nullptr);
   ~NodeSummary();
 
  public slots:
@@ -36,6 +38,9 @@ class NodeSummary : public QDialog {
  private:
   QListWidgetItem* addItem(QListWidget* listWidget, const QString& name);
   void delItem(QListWidget* listWidget, QListWidgetItem* item);
+  QList<QTableWidgetItem*> addRow(QTableWidget* listWidget,
+                                  const QList<QString>& attr);
+  void delRow(QTableWidget* listWidget, QSet<int> rows);
 
  private:
   Ui::NodeSummary* ui;
@@ -43,6 +48,7 @@ class NodeSummary : public QDialog {
   QString* op_type;
   QList<QString>* inputs;
   QList<QString>* outputs;
+  QList<QList<QString>>* attrs;
 };
 
 #endif  // GUI_UI_DIALOG_NODESUMMARY_NODESUMMARY_H_
