@@ -1,10 +1,10 @@
 /**
  * @file iosummary.cpp
- * @brief 
+ * @brief
  * @author opluss (opluss@qq.com)
- * 
+ *
  * @copyright Copyright (c) 2023  opluss
- * 
+ *
  * @par Modify log:
  * <table>
  * <tr><th>Date       <th>Version <th>Author  <th>Description
@@ -46,8 +46,31 @@ IOSummary::IOSummary(const QString& label, QString* name, QString* type,
   ui->label->setText(label);
   ui->label->adjustSize();
   ui->name_edit->setText(*name);
-  ui->type_edit->setText(*type);
   ui->dim_edit->setText(dim2str(*dim));
+  ui->type_edit->clear();
+  QStringList strList;
+  strList << "FLOAT"
+          << "UINT8"
+          << "INT8"
+          << "UINT16"
+          << "INT16"
+          << "UINT32"
+          << "INT32"
+          << "UINT64"
+          << "INT64"
+          << "STRING"
+          << "BOOL"
+          << "FLOAT16"
+          << "DOUBLE";
+  ui->type_edit->addItems(strList);
+  auto idx = ui->type_edit->findText(*type);
+  if (idx == -1) {
+    idx = 0;
+    if (type->size() != 0) {
+      LOG(ERROR) << "unknow type: " << type;
+    }
+  }
+  ui->type_edit->setCurrentIndex(idx);
   connect(ui->buttonBox, &QDialogButtonBox::accepted, this,
           &IOSummary::buttonAcceptedSlot);
   connect(ui->dim_edit, &QLineEdit::textChanged, this,
@@ -66,6 +89,6 @@ void IOSummary::dimCheckSlot() {
 
 void IOSummary::buttonAcceptedSlot() {
   *name = ui->name_edit->text();
-  *type = ui->type_edit->text();
+  *type = ui->type_edit->currentText();
   *dim = str2dim(ui->dim_edit->text());
 }

@@ -60,7 +60,7 @@ class ArrayStr {
     if (IS_TYPE(int32_t) || IS_TYPE(int64_t)) {
       ele_str = "-?\\d";
     } else if (IS_TYPE(float) || IS_TYPE(double)) {
-      ele_str = "-?\\d+\\.\\d*";
+      ele_str = "-?\\d+\\.?\\d*";
     } else {
       LOG(FATAL) << "error type";
     }

@@ -75,7 +75,14 @@
         <widget class="QLineEdit" name="dim_edit"/>
        </item>
        <item>
-        <widget class="QLineEdit" name="type_edit"/>
+        <widget class="QComboBox" name="type_edit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>

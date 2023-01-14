@@ -14,6 +14,9 @@
 
 #include "gui/ui/dialog/nodesummary/nodesummary.h"
 
+#include <glog/logging.h>
+
+#include <QComboBox>
 #include <algorithm>
 
 #include "gui/ui/dialog/nodesummary/ui_nodesummary.h"
@@ -46,15 +49,18 @@ NodeSummary::NodeSummary(QString* name, QString* op_type,
          << "value";
   ui->attr_tabel_widget->setColumnCount(header.size());
   ui->attr_tabel_widget->verticalHeader()->hide();
+  ui->attr_tabel_widget->verticalHeader()->setDefaultSectionSize(15);
   ui->attr_tabel_widget->setHorizontalHeaderLabels(header);
-  ui->attr_tabel_widget->horizontalHeader()->setStretchLastSection(true);
+  // ui->attr_tabel_widget->horizontalHeader()->setStretchLastSection(true);
   ui->attr_tabel_widget->setSelectionBehavior(QAbstractItemView::SelectRows);
   ui->attr_tabel_widget->setSelectionMode(QAbstractItemView::SingleSelection);
   ui->attr_tabel_widget->setAlternatingRowColors(true);
   ui->attr_tabel_widget->horizontalHeader()->setSectionResizeMode(
-      0, QHeaderView::ResizeToContents);
+      0, QHeaderView::Stretch);
   ui->attr_tabel_widget->horizontalHeader()->setSectionResizeMode(
-      1, QHeaderView::ResizeToContents);
+      1, QHeaderView::Stretch);
+  ui->attr_tabel_widget->horizontalHeader()->setSectionResizeMode(
+      2, QHeaderView::Stretch);
 
   for (int i = 0; i < attrs->size(); i++) {
     addRow(ui->attr_tabel_widget, (*attrs)[i]);
@@ -113,10 +119,31 @@ QList<QTableWidgetItem*> NodeSummary::addRow(QTableWidget* listWidget,
   ui->attr_tabel_widget->insertRow(row);
   QList<QTableWidgetItem*> ret;
   for (size_t i = 0; i < attr.size(); i++) {
-    auto item = new QTableWidgetItem(attr[i]);
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
-    ret.append(item);
-    ui->attr_tabel_widget->setItem(row, i, item);
+    if (i == 1) {
+      // type
+      auto box = new QComboBox();
+      QStringList strList;
+      strList << "FLOAT"
+              << "INT"
+              << "FLOATS"
+              << "INTS"
+              << "STRING";
+      box->addItems(strList);
+      auto idx = box->findText(attr[i]);
+      if (idx == -1) {
+        idx = 0;
+        if (attr[i].size() != 0) {
+          LOG(ERROR) << "unknow type: " << attr[i].toStdString();
+        }
+      }
+      box->setCurrentIndex(idx);
+      ui->attr_tabel_widget->setCellWidget(row, i, box);
+    } else {
+      auto item = new QTableWidgetItem(attr[i]);
+      item->setFlags(item->flags() | Qt::ItemIsEditable);
+      ret.append(item);
+      ui->attr_tabel_widget->setItem(row, i, item);
+    }
   }
   ui->attr_tabel_widget->setCurrentCell(row, QItemSelectionModel::Select);
   return ret;
@@ -149,8 +176,14 @@ void NodeSummary::buttonAcceptedSlot() {
   for (int r = 0; r < row; r++) {
     QList<QString> this_r;
     for (int c = 0; c < col; c++) {
-      auto item = ui->attr_tabel_widget->item(r, c);
-      this_r.append(item->text());
+      if (c == 1) {
+        auto box =
+            dynamic_cast<QComboBox*>(ui->attr_tabel_widget->cellWidget(r, c));
+        this_r.append(box->currentText());
+      } else {
+        auto item = ui->attr_tabel_widget->item(r, c);
+        this_r.append(item->text());
+      }
     }
     attrs->append(this_r);
   }
