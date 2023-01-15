@@ -112,6 +112,8 @@ bool apply2Attr(SBackendAttribute dst, const NodeAttr_t& src) {
     ret = dst->set_f(std::stof(src.value)) && ret;
   } else if (type == "INT") {
     ret = dst->set_i(std::stoi(src.value)) && ret;
+  } else if (type == "STRING") {
+    ret = dst->set_s(src.value) && ret;
   } else if (type == "FLOATS") {
     ret = ArrayStr<float>::StrValid(src.value) && ret;
     ret = ret && dst->set_floats(ArrayStr<float>::Str2Array(src.value));
