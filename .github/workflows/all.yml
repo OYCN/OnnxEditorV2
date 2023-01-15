@@ -16,15 +16,25 @@ env:
   # BUILD_TYPE: debug
 
 jobs:
-  check:
+  cpp-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: check code style
+      - name: check code style by cpp-lint
         run: |
           sudo apt install python3
           ./script/check.sh
+  
+  clang-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: check code style by clang-format
+        run: |
+          sudo apt install clang-format
+          ./script/clang_format_change.sh
 
   build:
     runs-on: ubuntu-latest

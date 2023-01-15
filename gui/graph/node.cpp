@@ -34,162 +34,11 @@ Node::Node(Context &ctx) : ctx_(ctx) {
   setZValue(2);
 }
 
-QRectF Node::boundingRect() const { return mAllRect; }
-
-void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
-                 QWidget *) {
-  painter->save();
-
-  // display outside border
-  {
-    auto color = isSelected() ? ctx_.ui.node.mSelectedBoundaryColor
-                              : ctx_.ui.node.mNormalBoundaryColor;
-    auto width =
-        mHovered ? ctx_.ui.node.mHoveredPenWidth : ctx_.ui.node.mPenWidth;
-    QPen p(color, width);
-    painter->setPen(p);
-    QLinearGradient gradient(QPointF(0.0, 0.0),
-                             QPointF(2.0, mAllRect.height()));
-    gradient.setColorAt(0.0, ctx_.ui.node.mGradientColor0);
-    gradient.setColorAt(0.03, ctx_.ui.node.mGradientColor1);
-    gradient.setColorAt(0.97, ctx_.ui.node.mGradientColor2);
-    gradient.setColorAt(1.0, ctx_.ui.node.mGradientColor3);
-    painter->setBrush(gradient);
-    painter->drawRoundedRect(mAllRect, 3, 3);
-  }
-
-  // display title
-  {
-    QFont f(ctx_.ui.node.mFont);
-    f.setBold(true);
-    painter->setFont(f);
-    painter->setPen(ctx_.ui.node.mFontColor);
-    painter->drawText(mTitleRect, Qt::AlignCenter, mTitle);
-  }
-
-  // display attrs
-  {
-    QFont f(ctx_.ui.node.mFont);
-    painter->setFont(f);
-    painter->setPen(ctx_.ui.node.mFontColor);
-    for (const auto &attr : mAttrs) {
-      painter->drawText(attr.rect_key, Qt::AlignLeft, attr.key);
-      painter->drawText(attr.rect_val, Qt::AlignLeft, attr.value);
-    }
-  }
-
-  painter->restore();
-}
+QRectF Node::boundingRect() const { return border_; }
 
 void Node::bind(NodeHandle handle) {
   handle_ = handle;
   refresh();
-}
-
-void Node::refresh() {
-  auto op_type = QString::fromStdString(handle_->getOpType());
-  auto name = QString::fromStdString(handle_->getName());
-  if (ctx_.display.node.hidden_op_type.contains(op_type) || getDeleted()) {
-    this->setVisible(false);
-  } else {
-    this->setVisible(true);
-  }
-
-  mTitle = "";
-  if (ctx_.display.node.name) {
-    mTitle += name;
-  }
-  if (ctx_.display.node.op_type) {
-    if (ctx_.display.node.redirect_op_type.contains(op_type)) {
-      op_type = ctx_.display.node.redirect_op_type[op_type];
-    }
-    mTitle = "[" + op_type + "]" + mTitle;
-  }
-
-  QList<QString> attr_keys;
-  QList<QString> attr_vals;
-
-  // title
-  QFont title_font(ctx_.ui.node.mFont);
-  title_font.setBold(true);
-  QFontMetrics title_fm(title_font);
-  QRectF title_rect = title_fm.boundingRect(mTitle);
-  auto base_title_rect = QRectF(0, 0, title_rect.width(), title_rect.height());
-  title_rect = base_title_rect.translated(
-      ctx_.ui.node.mPadOutsideL + ctx_.ui.node.mPadTitleL,
-      ctx_.ui.node.mPadOutsideT + ctx_.ui.node.mPadTitleT);
-  QRectF title_rect_after_padding =
-      title_rect.adjusted(-ctx_.ui.node.mPadTitleL, -ctx_.ui.node.mPadTitleT,
-                          ctx_.ui.node.mPadTitleR, ctx_.ui.node.mPadTitleB);
-
-  // attrs
-  QFont attrs_font(ctx_.ui.node.mFont);
-  QFontMetrics attr_fm(attrs_font);
-  // fake a attr to get the rect
-  QRectF span_rect = attr_fm.boundingRect(ctx_.ui.node.mSpan);
-
-  // TODO(opluss): add cfg field to adjust style about attrs display format
-  // now, we will using left align style
-
-  // #1 search the max width rect about k+v
-  auto search_max_len_rect = [&](decltype(attr_keys) &ins) {
-    QRectF max_len_rect(
-        0, title_rect_after_padding.bottomLeft().y() + ctx_.ui.node.mPadAttrsT,
-        0, 0);
-    for (const auto &i : ins) {
-      auto this_rect = attr_fm.boundingRect(i);
-      if (max_len_rect.width() < this_rect.width()) {
-        max_len_rect.setWidth(this_rect.width());
-        max_len_rect.setHeight(this_rect.height());
-      }
-    }
-    return max_len_rect;
-  };
-  auto max_key_rect = search_max_len_rect(attr_keys);
-  auto max_val_rect = search_max_len_rect(attr_vals);
-  // qDebug() << "max_key_rect:" << max_key_rect;
-  // qDebug() << "max_val_rect:" << max_val_rect;
-
-  // #2 pad the key/val and caculate the rect
-  QRectF key_rect = max_key_rect.translated(
-      ctx_.ui.node.mPadOutsideL + ctx_.ui.node.mPadAttrsL, 0);
-  QRectF val_rect =
-      key_rect.translated(key_rect.width() + span_rect.width(), 0);
-  CHECK_EQ(key_rect.height(), val_rect.height());
-  qreal h_offset =
-      key_rect.height() + ctx_.ui.node.mPadAttrsB + ctx_.ui.node.mPadAttrsT;
-  mAttrs.clear();
-  // qDebug() << "key_rect:" << key_rect;
-  // qDebug() << "val_rect:" << val_rect;
-  // qDebug() << "h_offset:" << h_offset;
-  for (size_t i = 0; i < attr_keys.size(); i++) {
-    NodeAttr_t nad;
-    nad.key = attr_keys[i];
-    nad.value = attr_vals[i];
-    nad.rect_key = key_rect;
-    nad.rect_val = val_rect;
-    key_rect.translate(0, h_offset);
-    val_rect.translate(0, h_offset);
-    mAttrs.emplace_back(nad);
-  }
-
-  QRectF attrs_rect_after_padding(0, 0, 0, 0);
-  if (!mAttrs.empty()) {
-    attrs_rect_after_padding = mAttrs[0].rect_key | mAttrs.back().rect_val;
-    attrs_rect_after_padding.adjust(
-        -ctx_.ui.node.mPadAttrsL, -ctx_.ui.node.mPadAttrsT,
-        ctx_.ui.node.mPadAttrsR, ctx_.ui.node.mPadAttrsB);
-  }
-
-  // all rect which is after padding
-  mAllRect = title_rect_after_padding | attrs_rect_after_padding;
-  mAllRect.adjust(-ctx_.ui.node.mPadOutsideL, -ctx_.ui.node.mPadOutsideT,
-                  ctx_.ui.node.mPadOutsideR, ctx_.ui.node.mPadOutsideB);
-  mTitleRect = QRectF(mAllRect.width() / 2 - title_rect.width() / 2,
-                      title_rect.y(), title_rect.width(), title_rect.height());
-  CHECK_NEAR(mAllRect.x(), 0, 1e-4);
-  CHECK_NEAR(mAllRect.y(), 0, 1e-4);
-  update();
 }
 
 void Node::ioUpdateSend() { ctx_.nodeUpdateSend(this); }
@@ -433,6 +282,222 @@ QVariant Node::itemChange(QGraphicsItem::GraphicsItemChange change,
             value.toBool() && ctx_.display.node.movable);
   }
   return QGraphicsItem::itemChange(change, value);
+}
+
+void Node::refresh() {
+  display_.clear();
+  auto op_type = QString::fromStdString(handle_->getOpType());
+  if (ctx_.display.node.hidden_op_type.contains(op_type) || getDeleted()) {
+    this->setVisible(false);
+    return;
+  } else {
+    this->setVisible(true);
+  }
+
+  // op_type
+  Display_t op_type_display;
+  if (ctx_.display.node.op_type) {
+    if (ctx_.display.node.redirect_op_type.contains(op_type)) {
+      op_type = ctx_.display.node.redirect_op_type[op_type];
+    }
+    op_type_display.txt = op_type;
+    op_type_display.font = QFont(ctx_.ui.node.mFont);
+    op_type_display.font.setBold(true);
+    QFontMetrics op_type_fm(op_type_display.font);
+    QRectF op_type_rect = op_type_fm.boundingRect(op_type);
+    op_type_display.txt_rect =
+        QRectF(0, 0, op_type_rect.width(), op_type_rect.height());
+  }
+
+  // name
+  Display_t name_display;
+  if (ctx_.display.node.name) {
+    name_display.txt = QString::fromStdString(handle_->getName());
+    name_display.font = QFont(ctx_.ui.node.mFont);
+    name_display.font.setBold(false);
+    QFontMetrics name_fm(name_display.font);
+    name_display.txt = name_fm.elidedText(name_display.txt, Qt::ElideMiddle,
+                                          ctx_.ui.node.name_max_width);
+    QRectF name_rect = name_fm.boundingRect(name_display.txt);
+    name_display.txt_rect = QRectF(0, 0, name_rect.width(), name_rect.height());
+  }
+
+  if (ctx_.display.node.op_type && !ctx_.display.node.name) {
+    setToolTip(QString::fromStdString(handle_->getName()));
+  } else if (!ctx_.display.node.op_type && ctx_.display.node.name) {
+    setToolTip(QString::fromStdString(handle_->getOpType()));
+  } else if (!ctx_.display.node.op_type && !ctx_.display.node.name) {
+    setToolTip(QString::fromStdString(handle_->getOpType()) + "\n" +
+               QString::fromStdString(handle_->getName()));
+  } else {
+    setToolTip("");
+  }
+
+  // attrs
+  QList<Display_t> attrs_display;
+  if (ctx_.display.node.attr) {
+    auto attrs = getAttrs();
+    for (size_t i = 0; i < attrs.size(); i++) {
+      Display_t attr_display;
+      auto &attr = attrs[i];
+      auto str = attr[0];
+      auto type = attr[1];
+      auto value = attr[2];
+      value.replace("\n", "\\n");
+
+      // limit str & val size
+      attr_display.font = QFont(ctx_.ui.node.mFont);
+      QFontMetrics attr_fm(attr_display.font);
+      int all_size =
+          ctx_.ui.node.attr_key_max_width + ctx_.ui.node.attr_val_max_width;
+      if (str.size() > value.size()) {
+        str = attr_fm.elidedText(str, Qt::ElideMiddle,
+                                 ctx_.ui.node.attr_key_max_width);
+        QRectF str_rect = attr_fm.boundingRect(str);
+        value = attr_fm.elidedText(value, Qt::ElideMiddle,
+                                   all_size - str_rect.width());
+      } else {
+        value = attr_fm.elidedText(value, Qt::ElideMiddle,
+                                   ctx_.ui.node.attr_val_max_width);
+        QRectF value_rect = attr_fm.boundingRect(value);
+        str = attr_fm.elidedText(str, Qt::ElideMiddle,
+                                 all_size - value_rect.width());
+      }
+
+      if (type.back() == 'S') {
+        // is Array
+        int i = 0;
+        for (auto token :
+             value.remove('[').remove(']').remove(' ').split(',')) {
+          if (token.size() != 0) {
+            i++;
+          }
+        }
+        str += QString(" %1<%2>").arg(type).arg(i);
+      } else {
+        str += " " + value;
+      }
+      attr_display.txt = str;
+      QRectF attr_rect = attr_fm.boundingRect(attr_display.txt);
+      attr_display.txt_rect =
+          QRectF(0, 0, attr_rect.width(), attr_rect.height());
+      attrs_display.append(attr_display);
+    }
+  }
+
+  // get max width
+  qreal max_w = 0;
+  {
+    auto aw = op_type_display.txt_rect.width();
+    auto bw = name_display.txt_rect.width();
+    max_w = aw > bw ? aw : bw;
+    for (const auto &attr : attrs_display) {
+      if (max_w < attr.txt_rect.width()) {
+        max_w = attr.txt_rect.width();
+      }
+    }
+  }
+
+  display_.clear();
+  QRectF attrs_border_rect;
+  // reset txt_rect and border_rect
+  {
+    qreal off = ctx_.ui.node.mPadTitleT;
+    if (ctx_.display.node.op_type) {
+      op_type_display.txt_rect.translate(ctx_.ui.node.mPadOpTypeL,
+                                         off + ctx_.ui.node.mPadOpTypeT);
+      off = 0;
+      op_type_display.txt_rect.setWidth(max_w);
+      op_type_display.border_rect = op_type_display.txt_rect.adjusted(
+          -ctx_.ui.node.mPadOpTypeL, -ctx_.ui.node.mPadOpTypeT,
+          ctx_.ui.node.mPadOpTypeR, ctx_.ui.node.mPadOpTypeB);
+      CHECK_EQ(op_type_display.border_rect.x(), 0);
+      op_type_display.flag = Qt::AlignCenter;
+      display_.append(op_type_display);
+    }
+    if (ctx_.display.node.name) {
+      name_display.txt_rect.translate(
+          ctx_.ui.node.mPadNameL,
+          off + op_type_display.border_rect.bottom() + ctx_.ui.node.mPadNameT);
+      name_display.txt_rect.setWidth(max_w);
+      name_display.border_rect = name_display.txt_rect.adjusted(
+          -ctx_.ui.node.mPadNameL, -ctx_.ui.node.mPadNameT,
+          ctx_.ui.node.mPadNameR, ctx_.ui.node.mPadNameB);
+      CHECK_EQ(name_display.border_rect.x(), 0);
+      name_display.flag = Qt::AlignCenter;
+      display_.append(name_display);
+    }
+    title_.setX(0);
+    title_.setY(0);
+    title_.setWidth(std::max(op_type_display.border_rect.width(),
+                             name_display.border_rect.width()));
+    title_.setHeight(op_type_display.border_rect.height() +
+                     name_display.border_rect.height() +
+                     ctx_.ui.node.mPadTitleT + ctx_.ui.node.mPadTitleB);
+    qreal y = title_.bottom() + ctx_.ui.node.mPadAttrsT;
+    for (auto &attr : attrs_display) {
+      attr.txt_rect.translate(ctx_.ui.node.mPadAttrsL, y);
+      attr.txt_rect.setWidth(max_w);
+      attr.border_rect = attr.txt_rect.adjusted(-ctx_.ui.node.mPadAttrsL, 0,
+                                                ctx_.ui.node.mPadAttrsR, 0);
+      CHECK_EQ(attr.border_rect.x(), 0);
+      attr.flag = Qt::AlignLeft;
+      display_.append(attr);
+      attrs_border_rect |= attr.border_rect;
+      y = attrs_border_rect.bottom() + ctx_.ui.node.mPadAttrsGap;
+    }
+    if (attrs_display.size() != 0) {
+      attrs_border_rect.adjust(0, -ctx_.ui.node.mPadAttrsT, 0,
+                               ctx_.ui.node.mPadAttrsB);
+    }
+  }
+
+  // set border_rect
+  border_ = title_ | attrs_border_rect;
+  CHECK_EQ(border_.x(), 0);
+  CHECK_EQ(border_.y(), 0);
+  title_.setWidth(border_.width());
+
+  update();
+}
+
+void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
+                 QWidget *) {
+  // display outside border
+  {
+    painter->save();
+    auto color = isSelected() ? ctx_.ui.node.mSelectedBoundaryColor
+                              : ctx_.ui.node.mNormalBoundaryColor;
+    auto width =
+        mHovered ? ctx_.ui.node.mHoveredPenWidth : ctx_.ui.node.mPenWidth;
+    QPen p(color, width);
+    painter->setPen(p);
+    painter->setBrush(ctx_.ui.node.mBgColor);
+    painter->drawRoundedRect(border_, 3, 3);
+    painter->restore();
+  }
+  {
+    painter->save();
+    QPen p(Qt::NoPen);
+    painter->setPen(p);
+    painter->setBrush(ctx_.ui.node.mTitleColor);
+    auto width =
+        mHovered ? ctx_.ui.node.mHoveredPenWidth : ctx_.ui.node.mPenWidth;
+    width /= 2;
+    painter->drawRoundedRect(title_.adjusted(width, width, -width, -width), 3,
+                             3);
+    painter->restore();
+  }
+
+  // display txt
+  for (const auto &d : display_) {
+    painter->save();
+    painter->setFont(d.font);
+    painter->setPen(ctx_.ui.node.mFontColor);
+    painter->drawText(d.txt_rect, d.flag, d.txt);
+    // painter->drawRect(d.txt_rect);
+    painter->restore();
+  }
 }
 
 }  // namespace graph

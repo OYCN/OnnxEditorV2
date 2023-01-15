@@ -15,10 +15,12 @@
 #ifndef GUI_GRAPH_NODE_H_
 #define GUI_GRAPH_NODE_H_
 
+#include <QFont>
 #include <QGraphicsItem>
 #include <QList>
 #include <QObject>
 #include <QSet>
+#include <functional>
 
 #include "gui/graph/context.h"
 #include "gui/graph/item.h"
@@ -31,14 +33,6 @@ using NodeHandle = utils::simonnx::NodeHandle;
 
 class Node : public GraphItemBase {
   friend class NodeMenu;
-
- public:
-  struct NodeAttr_t {
-    QString key;
-    QString value;
-    QRectF rect_key;
-    QRectF rect_val;
-  };
 
  public:
   explicit Node(Context &cfg);
@@ -66,7 +60,6 @@ class Node : public GraphItemBase {
 
  public:
   QRectF boundingRect() const override;
-  const QString &getTitle() const { return mTitle; }
 
  protected:
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
@@ -85,12 +78,17 @@ class Node : public GraphItemBase {
 
   NodeHandle handle_;
 
-  QString mTitle = "";
-  QList<NodeAttr_t> mAttrs;
+  struct Display_t {
+    QRectF txt_rect;
+    QRectF border_rect;
+    QFont font;
+    QString txt;
+    Qt::AlignmentFlag flag;
+  };
+  QList<Display_t> display_;
 
-  QRectF mAllRect;
-  QRectF mTitleRect;
-  QRectF mFirstAttrRect;
+  QRectF border_;
+  QRectF title_;
   bool mHovered = false;
 };
 

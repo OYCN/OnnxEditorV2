@@ -15,8 +15,8 @@
 #ifndef UTILS_SIMONNX_TREATY_H_
 #define UTILS_SIMONNX_TREATY_H_
 
-#define TREATY_INPUT_OP_TYPE "~::INPUT"
-#define TREATY_OUTPUT_OP_TYPE "~::OUTPUT"
-#define TREATY_INIT_OP_TYPE "~::INIT"
+#define TREATY_INPUT_OP_TYPE "::input::"
+#define TREATY_OUTPUT_OP_TYPE "::output::"
+#define TREATY_INIT_OP_TYPE "::initializer::"
 
 #endif  // UTILS_SIMONNX_TREATY_H_
