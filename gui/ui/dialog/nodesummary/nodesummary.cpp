@@ -123,7 +123,8 @@ QList<QTableWidgetItem*> NodeSummary::addRow(QTableWidget* listWidget,
       // type
       auto box = new QComboBox();
       QStringList strList;
-      strList << "FLOAT"
+      strList << "UNDEFINED"
+              << "FLOAT"
               << "INT"
               << "FLOATS"
               << "INTS"

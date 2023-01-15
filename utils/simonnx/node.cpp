@@ -82,6 +82,8 @@ std::string readValueFromAttr(SBackendAttribute src) {
     return std::to_string(src->f());
   } else if (type == "INT") {
     return std::to_string(src->i());
+  } else if (type == "STRING") {
+    return src->s();
   } else if (type == "FLOATS") {
     return ArrayStr<float>::Array2Str(src->floats());
   } else if (type == "INTS") {

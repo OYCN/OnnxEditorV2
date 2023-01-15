@@ -17,20 +17,11 @@
 
 #include "gui/gui.h"
 
-#include "utils/simonnx/context.h"
-
 const char* usage = R"(
-  xxxx
-    xx
-    xx
+  Onnx edit utils
 )";
 
-DEFINE_bool(test, false, "test");
-
-void initializer_no_args() {
-  LOG(INFO) << "Create default SimOnnxCtx";
-  utils::simonnx::SimOnnxCtx::createSimOnnxCtx();
-}
+DEFINE_bool(nogui, false, "disable gui");
 
 void initializer_args(int argc, char* argv[]) {
   google::InitGoogleLogging(argv[0]);
@@ -43,9 +34,11 @@ void initializer_args(int argc, char* argv[]) {
 
 int main(int argc, char* argv[]) {
   initializer_args(argc, argv);
-  initializer_no_args();
 
-  auto ret = gui::gui_on(argc, argv);
+  bool ret = true;
+  if (!FLAGS_nogui) {
+    ret = gui::gui_on(argc, argv);
+  }
 
   return ret;
 }

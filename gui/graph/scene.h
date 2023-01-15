@@ -50,7 +50,9 @@ class Scene : public QGraphicsScene {
   void dump(QString path);
   void clear();
 
-  void loadGraph(SimOnnxCtx* ctx);
+  void loadGraph();
+  SimOnnxCtx* getGraph() { return graph_ctx_; }
+  SimOnnxCtx* releaseGraph();
 
  public slots:
   void nodeUpdateSlot(Node* node);

@@ -99,10 +99,13 @@ bool clear_by_dt(AttributeProtoPtr handle,
     CLEAR_DT(FLOAT, f)
     CLEAR_DT(INT, i)
     CLEAR_DT(STRING, s)
+    CLEAR_DT(TENSOR, t)
+    CLEAR_DT(GRAPH, g)
     CLEAR_DT_S(FLOATS, floats)
     CLEAR_DT_S(INTS, ints)
-    case ONNX_NAMESPACE::AttributeProto_AttributeType::
-        AttributeProto_AttributeType_UNDEFINED:
+    CLEAR_DT_S(TENSORS, tensors)
+    CLEAR_DT_S(GRAPHS, graphs)
+    case ONNX_NAMESPACE::AttributeProto_AttributeType_UNDEFINED:
       return true;
     default:
       LOG(ERROR) << "will clear a unhandled dt: "
@@ -160,7 +163,35 @@ std::string ProtoBackendAttribute::type() const {
   CHECK_HANDLE_DEL("");
   auto data_type = handle_->type();
   CHECK(ONNX_NAMESPACE::AttributeProto_AttributeType_IsValid(data_type));
+  CHECK(ONNX_NAMESPACE::AttributeProto_AttributeType_IsValid(data_type));
   auto t = static_cast<ONNX_NAMESPACE::AttributeProto_AttributeType>(data_type);
+  if (t == ONNX_NAMESPACE::AttributeProto_AttributeType_UNDEFINED) {
+    if (handle_->has_i()) {
+      t = ONNX_NAMESPACE::AttributeProto_AttributeType_INT;
+    } else if (handle_->has_f()) {
+      t = ONNX_NAMESPACE::AttributeProto_AttributeType_FLOAT;
+    } else if (handle_->has_s()) {
+      t = ONNX_NAMESPACE::AttributeProto_AttributeType_STRING;
+    } else if (handle_->has_t()) {
+      t = ONNX_NAMESPACE::AttributeProto_AttributeType_TENSOR;
+    } else if (handle_->has_g()) {
+      t = ONNX_NAMESPACE::AttributeProto_AttributeType_GRAPH;
+    } else if (handle_->ints_size()) {
+      t = ONNX_NAMESPACE::AttributeProto_AttributeType_INTS;
+    } else if (handle_->floats_size()) {
+      t = ONNX_NAMESPACE::AttributeProto_AttributeType_FLOATS;
+    } else if (handle_->strings_size()) {
+      t = ONNX_NAMESPACE::AttributeProto_AttributeType_STRINGS;
+    } else if (handle_->tensors_size()) {
+      t = ONNX_NAMESPACE::AttributeProto_AttributeType_TENSORS;
+    } else if (handle_->graphs_size()) {
+      t = ONNX_NAMESPACE::AttributeProto_AttributeType_GRAPHS;
+    }
+    if (!setType(handle_, t)) {
+      LOG(ERROR) << "attr type fallback error";
+      t = ONNX_NAMESPACE::AttributeProto_AttributeType_UNDEFINED;
+    }
+  }
   return ONNX_NAMESPACE::AttributeProto_AttributeType_Name(t);
 }
 

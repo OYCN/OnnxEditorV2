@@ -14,6 +14,8 @@
 
 #include "gui/mainwindow.h"
 
+#include <QCoreApplication>
+
 #include "gui/graph/view.h"
 
 namespace gui {
@@ -23,6 +25,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), actions_(this) {
   scene_ = view_->getScene();
   this->setCentralWidget(view_);
   InitWindow();
+
+  auto args = QCoreApplication::arguments();
+  if (args.size() == 2) {
+    view_->loadFile(args[1]);
+  }
 }
 
 void MainWindow::InitWindow() {

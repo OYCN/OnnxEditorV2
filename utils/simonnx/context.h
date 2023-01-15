@@ -80,6 +80,11 @@ class SimOnnxCtx {
     return ret;
   }
 
+  bool binded();
+  bool trybindby(void* ptr);
+  bool tryunbindby(void* ptr);
+  void bindby(void* ptr);
+  void unbindby(void* ptr);
   void genRandomOnnx(int num);
   bool openOnnx(const std::string path);
   bool saveOnnx(const std::string path, bool overwrite);
@@ -113,6 +118,7 @@ class SimOnnxCtx {
   void reset_impl();
 
  private:
+  void* owner_ = nullptr;
   std::mutex mutex_;
   std::map<ObjType_t, std::list<IObject*>> obj_free_ctx_;
   std::map<ObjType_t, std::list<IObject*>> obj_del_ctx_;

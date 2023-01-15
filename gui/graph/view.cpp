@@ -46,6 +46,46 @@ View::View(QWidget *parent) : QGraphicsView{parent}, ctx_(this) {
   update();
 }
 
+bool View::closeFile() {
+  scene_->clear();
+  return true;
+}
+
+bool View::loadFile(QString path) {
+  // onnx2graph will reset ctx, if not switch ctx obj, we will clear scene
+  // before process it
+  closeFile();
+  {
+    bool ret = scene_->getGraph()->openOnnx(path.toStdString());
+    if (!ret) {
+      QMessageBox::critical(this, tr("Open Error"), tr("open failed"),
+                            QMessageBox::Ok);
+      return false;
+    }
+  }
+  scene_->loadGraph();
+  {
+    auto ret = scene_->layout();
+    auto rect = ret.first;
+    auto pt = ret.second;
+    rect.adjust(0, -50, 0, 50);
+    setSceneRect(rect);
+    setScale(1.5);
+    centerOn(pt);
+  }
+  return true;
+}
+
+bool View::saveFile(QString path, bool overwrite) {
+  bool ret = scene_->getGraph()->saveOnnx(path.toStdString(), overwrite);
+  if (!ret) {
+    QMessageBox::critical(this, tr("Save Error"), tr("save failed"),
+                          QMessageBox::Ok);
+    return false;
+  }
+  return true;
+}
+
 Scene *View::getScene() {
   CHECK_NOTNULL(scene_);
   return scene_;

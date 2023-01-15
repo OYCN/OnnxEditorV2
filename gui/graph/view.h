@@ -35,6 +35,10 @@ class View : public QGraphicsView {
  public:
   explicit View(QWidget* parent = nullptr);
 
+  bool closeFile();
+  bool loadFile(QString path);
+  bool saveFile(QString path, bool overwrite = true);
+
  public:
   void expand(qreal f);
   void expandAbs(qreal w, qreal h);

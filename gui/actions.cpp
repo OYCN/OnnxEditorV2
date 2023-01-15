@@ -71,7 +71,7 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
   addAction(menu_debug_graph, "Random Graph",
             [&]() { act_random_graph_callback(); });
   addAction(menu_debug_graph, "pass delete", [&]() {
-    if (!SimOnnxCtx::getSimOnnxCtx()->applyDeletedObj()) {
+    if (!parent_->scene_->getGraph()->applyDeletedObj()) {
       QMessageBox::critical(parent_, tr("Error"), tr("apply deleted obj error"),
                             QMessageBox::Ok);
     } else {
@@ -80,7 +80,7 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
     }
   });
   addAction(menu_debug_graph, "pass topo sort", [&]() {
-    if (!SimOnnxCtx::getSimOnnxCtx()->ctxPass(PassType::kTopoSort)) {
+    if (!parent_->scene_->getGraph()->ctxPass(PassType::kTopoSort)) {
       QMessageBox::critical(parent_, tr("Pass Error"), tr("pass delete error"),
                             QMessageBox::Ok);
     } else {
@@ -89,7 +89,7 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
     }
   });
   addAction(menu_debug_graph, "reload graph",
-            [&]() { parent_->scene_->loadGraph(SimOnnxCtx::getSimOnnxCtx()); });
+            [&]() { parent_->scene_->loadGraph(); });
   addAction(menu_debug_graph, "layout", [&]() { parent_->scene_->layout(); });
   act_dump2gml_ = addAction(menu_debug_graph_dump, "dump to gml",
                             [&]() { parent_->scene_->dump("debug.gml"); });
@@ -138,28 +138,8 @@ void Actions::act_file_open_callback() {
   if (fileName.isEmpty()) {
     return;
   }
-  // onnx2graph will reset ctx, if not switch ctx obj, we will clear scene
-  // before process it
-  parent_->scene_->clear();
-  {
-    bool ret = SimOnnxCtx::getSimOnnxCtx()->openOnnx(fileName.toStdString());
-    if (!ret) {
-      QMessageBox::critical(parent_, tr("Open Error"), tr("open failed"),
-                            QMessageBox::Ok);
-      return;
-    }
-  }
-  parent_->scene_->loadGraph(SimOnnxCtx::getSimOnnxCtx());
-  {
-    auto ret = parent_->scene_->layout();
-    auto rect = ret.first;
-    auto pt = ret.second;
-    rect.adjust(0, -50, 0, 50);
-    // qDebug() << rect;
-    parent_->view_->setSceneRect(rect);
-    parent_->view_->setScale(1.5);
-    parent_->view_->centerOn(pt);
-    // parent_->view_->centertop();
+  if (!parent_->view_->loadFile(fileName)) {
+    parent_->view_->closeFile();
   }
 }
 
@@ -168,13 +148,6 @@ void Actions::act_file_save_a_callback() {
   QString fileName = QFileDialog::getSaveFileName(parent_, "save onnx file",
                                                   "/", tr("*.onnx"));
   if (fileName.isEmpty()) {
-    return;
-  }
-  bool ret =
-      SimOnnxCtx::getSimOnnxCtx()->saveOnnx(fileName.toStdString(), true);
-  if (!ret) {
-    QMessageBox::critical(parent_, tr("Save Error"), tr("save failed"),
-                          QMessageBox::Ok);
     return;
   }
 }
@@ -229,8 +202,8 @@ void Actions::act_io_summary_dialog_exec_callback() {
 void Actions::act_random_graph_callback() {
   LOG(INFO) << "act_random_graph_callback";
   parent_->scene_->clear();
-  SimOnnxCtx::getSimOnnxCtx()->genRandomOnnx(50);
-  parent_->scene_->loadGraph(SimOnnxCtx::getSimOnnxCtx());
+  parent_->scene_->getGraph()->genRandomOnnx(50);
+  parent_->scene_->loadGraph();
   auto ret = parent_->scene_->layout();
   auto rect = ret.first;
   auto pt = ret.second;

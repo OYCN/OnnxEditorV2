@@ -24,6 +24,12 @@
 #include "utils/algorithm/external/ogdf/ogdf_proxy.h"
 #include "utils/simonnx/backend/backend.h"
 
+#define CHECK_BINDED                              \
+  do {                                            \
+    if (!binded()) {                              \
+      LOG(WARNING) << "SimOnnxCtx not be binded"; \
+    }                                             \
+  } while (0)
 namespace utils {
 namespace simonnx {
 
@@ -41,6 +47,7 @@ SimOnnxCtx::~SimOnnxCtx() {}
 
 NodeHandle SimOnnxCtx::CreateNewNodeObj() {
   LOCK;
+  CHECK_BINDED;
   CHECK_NOTNULL(bkctx_);
   auto graph = bkctx_->graph();
   CHECK_NOTNULL(graph);
@@ -51,6 +58,7 @@ NodeHandle SimOnnxCtx::CreateNewNodeObj() {
 
 NodeHandle SimOnnxCtx::CreateNewIOObj(IONodeType type) {
   LOCK;
+  CHECK_BINDED;
   CHECK_NOTNULL(bkctx_);
   auto graph = bkctx_->graph();
   CHECK_NOTNULL(graph);
@@ -72,6 +80,7 @@ NodeHandle SimOnnxCtx::CreateNewIOObj(IONodeType type) {
 
 void SimOnnxCtx::DeleteObj(IObject* obj) {
   LOCK;
+  CHECK_BINDED;
   if (obj->isDeleted() == false) {
     obj->setDeleted(true);
     auto objtype = obj->getObjType();
@@ -83,6 +92,7 @@ void SimOnnxCtx::DeleteObj(IObject* obj) {
 
 void SimOnnxCtx::RestoreObj(IObject* obj) {
   LOCK;
+  CHECK_BINDED;
   if (obj->isDeleted() == true) {
     obj->setDeleted(false);
     auto objtype = obj->getObjType();
@@ -92,8 +102,32 @@ void SimOnnxCtx::RestoreObj(IObject* obj) {
   }
 }
 
+bool SimOnnxCtx::binded() {
+  LOCK;
+  return owner_ != nullptr;
+}
+bool SimOnnxCtx::trybindby(void* ptr) {
+  LOCK;
+  if (owner_ != nullptr || ptr == nullptr) {
+    return false;
+  }
+  owner_ = ptr;
+  return true;
+}
+bool SimOnnxCtx::tryunbindby(void* ptr) {
+  LOCK;
+  if (ptr == nullptr || owner_ != ptr) {
+    return false;
+  }
+  owner_ = nullptr;
+  return true;
+}
+void SimOnnxCtx::bindby(void* ptr) { CHECK(trybindby(ptr)); }
+void SimOnnxCtx::unbindby(void* ptr) { CHECK(tryunbindby(ptr)); }
+
 void SimOnnxCtx::genRandomOnnx(int num) {
   LOCK;
+  CHECK_BINDED;
   reset_impl();
   auto g = utils::algorithm::external::ogdf::genRandomGraph(num, num);
 
@@ -131,6 +165,7 @@ void SimOnnxCtx::genRandomOnnx(int num) {
 
 bool SimOnnxCtx::openOnnx(const std::string path) {
   LOCK;
+  CHECK_BINDED;
   reset_impl();
   if (!bkctx_->loadFile(path)) {
     return false;
@@ -197,6 +232,7 @@ bool SimOnnxCtx::openOnnx(const std::string path) {
 
 bool SimOnnxCtx::saveOnnx(const std::string path, bool overwrite) {
   LOCK;
+  CHECK_BINDED;
   // remove deleted node obj
   if (!applyDeletedObj()) {
     return false;
@@ -225,6 +261,7 @@ void SimOnnxCtx::reset_impl() {
 }
 void SimOnnxCtx::reset() {
   LOCK;
+  CHECK_BINDED;
   reset_impl();
 }
 

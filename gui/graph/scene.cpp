@@ -30,14 +30,19 @@ namespace graph {
 
 Scene::Scene(Context& ctx, QObject* parent)
     : gui_ctx_(ctx), QGraphicsScene{parent}, menu_(this) {
-  graph_ctx_ = SimOnnxCtx::getSimOnnxCtx();
+  // graph_ctx_ = SimOnnxCtx::getSimOnnxCtx();
+  graph_ctx_ = SimOnnxCtx::createSimOnnxCtx();
+  graph_ctx_->bindby(this);
   connect(&gui_ctx_, &Context::nodeUpdateSignal, this, &Scene::nodeUpdateSlot);
   connect(&gui_ctx_, &Context::selectedNodePosUpdateSignal, this,
           &Scene::selectedNodePosUpdateSlot);
   update();
 }
 
-Scene::~Scene() { clearSelection(); }
+Scene::~Scene() {
+  clearSelection();
+  releaseGraph();
+}
 
 Node* Scene::addNode(NodeHandle handle) {
   auto n = new Node(gui_ctx_);
@@ -308,17 +313,22 @@ void Scene::clear() {
   update();
 }
 
-void Scene::loadGraph(SimOnnxCtx* ctx) {
-  clear();
-  graph_ctx_ = ctx;
-  LOG(INFO) << "set graph_ctx_ to " << graph_ctx_;
+SimOnnxCtx* Scene::releaseGraph() {
+  auto ctx = graph_ctx_;
+  graph_ctx_ = nullptr;
+  ctx->unbindby(this);
+  return ctx;
+}
 
-  auto node_handles = ctx->getObjVec<NodeHandle>();
+void Scene::loadGraph() {
+  CHECK_NOTNULL(graph_ctx_);
+  clear();
+  auto node_handles = graph_ctx_->getObjVec<NodeHandle>();
   for (auto n : node_handles) {
     addNode(n);
   }
 
-  auto tensor_handles = ctx->getObjVec<TensorHandle>();
+  auto tensor_handles = graph_ctx_->getObjVec<TensorHandle>();
   for (auto t : tensor_handles) {
     addEdge(t);
   }
