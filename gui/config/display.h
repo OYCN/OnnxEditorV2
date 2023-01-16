@@ -32,11 +32,11 @@ struct Display {
   // for node
   struct Node {
     QSet<QString> hidden_op_type = {"::initializer::"};
-    QMap<QString, QString> redirect_op_type = {{"::input::", "*input*"},
-                                               {"::output::", "*output*"}};
+    QMap<QString, QString> redirect_op_type = {{"::input::", "Input"},
+                                               {"::output::", "Output"}};
     bool name = false;
     bool op_type = true;
-    bool attr = false;
+    bool attr = true;
     bool movable = true;
   } node;
 

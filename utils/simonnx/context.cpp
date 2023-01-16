@@ -183,7 +183,7 @@ bool SimOnnxCtx::openOnnx(const std::string path) {
   }
   for (auto i : inits) {
     if (name_set.count(i->name()) == 0) {
-      FakeNode_t args = {"::initializer::", "", {}, {i->name()}};
+      FakeNode_t args = {TREATY_INIT_OP_TYPE, "", {}, {i->name()}};
       SimOnnxCtx::getSimOnnxCtx()->CreateNodeObj(args);
       name_set.insert(i->name());
       VLOG(1) << "inits add: " << i->name();

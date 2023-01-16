@@ -140,7 +140,7 @@ QList<QTableWidgetItem*> NodeSummary::addRow(QTableWidget* listWidget,
       box->setCurrentIndex(idx);
       ui->attr_tabel_widget->setCellWidget(row, i, box);
     } else {
-      auto item = new QTableWidgetItem(attr[i]);
+      auto item = new QTableWidgetItem(QString(attr[i]).replace("\n", "\\n"));
       item->setFlags(item->flags() | Qt::ItemIsEditable);
       ret.append(item);
       ui->attr_tabel_widget->setItem(row, i, item);
@@ -183,7 +183,7 @@ void NodeSummary::buttonAcceptedSlot() {
         this_r.append(box->currentText());
       } else {
         auto item = ui->attr_tabel_widget->item(r, c);
-        this_r.append(item->text());
+        this_r.append(item->text().replace("\\n", "\n"));
       }
     }
     attrs->append(this_r);

@@ -33,25 +33,28 @@ struct Ui {
 
   // for node
   struct Node {
-    qreal mPadOutsideT = 7;
-    qreal mPadOutsideB = 7;
-    qreal mPadOutsideL = 3;
-    qreal mPadOutsideR = 3;
-    qreal mPadTitleT = 1;
-    qreal mPadTitleB = 1;
-    qreal mPadTitleL = 1;
-    qreal mPadTitleR = 1;
-    qreal mPadAttrsT = 0.5;
-    qreal mPadAttrsB = 0.5;
-    qreal mPadAttrsL = 0.5;
-    qreal mPadAttrsR = 0.5;
-    QString mSpan = ": ";
+    int name_max_width = 150;
+    int attr_key_max_width = 80;
+    int attr_val_max_width = 70;
+    qreal mPadOpTypeT = 1;
+    qreal mPadOpTypeB = 1;
+    qreal mPadOpTypeL = 5;
+    qreal mPadOpTypeR = 5;
+    qreal mPadNameT = 1;
+    qreal mPadNameB = 1;
+    qreal mPadNameL = 5;
+    qreal mPadNameR = 5;
+    qreal mPadTitleT = 5;
+    qreal mPadTitleB = 5;
+    qreal mPadAttrsT = 5;
+    qreal mPadAttrsB = 5;
+    qreal mPadAttrsL = 5;
+    qreal mPadAttrsR = 5;
+    qreal mPadAttrsGap = 1;
     QColor mNormalBoundaryColor = {255, 255, 255};
     QColor mSelectedBoundaryColor = {255, 165, 0};
-    QColor mGradientColor0 = {128, 128, 128};  // gray
-    QColor mGradientColor1 = {80, 80, 80};
-    QColor mGradientColor2 = {64, 64, 64};
-    QColor mGradientColor3 = {58, 58, 58};
+    QColor mTitleColor = {80, 80, 80};
+    QColor mBgColor = {100, 100, 100};
     qreal mPenWidth = 1;
     qreal mHoveredPenWidth = 1.5;
     QString mFont = "Monospace";
