@@ -64,9 +64,10 @@ struct Ui {
   // for edge
   struct {
     qreal mEdgeLineWidth = 3.0;
-    QColor mEdgeSelectedHallowColor = {255, 165, 0};  // orange
-    QColor mEdgeHoveredColor = {224, 255, 255};       // lightcyan
-    QColor mEdgeNormalColor = {0, 139, 139};          // darkcyan
+    QColor mEdgeSelectedHallowColor = {255, 165, 0};   // orange
+    QColor mEdgeNormalHoveredColor = {224, 255, 255};  // lightcyan
+    QColor mEdgeNormalColor = {0, 139, 139};           // darkcyan
+    QColor mEdgeErrorColor = {248, 4, 2};
     QColor mEdgeSelectedColor = {100, 100, 100};
     qreal mEdgeStartPointRadius = 3;
     QColor mEdgeStartPointColor = {128, 128, 128};  // gray

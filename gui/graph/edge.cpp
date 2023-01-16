@@ -67,7 +67,7 @@ void Edge::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
     QPen p;
     p.setWidth(2 * ctx_.ui.edge.mEdgeLineWidth);
     p.setColor(isSelected() ? ctx_.ui.edge.mEdgeSelectedHallowColor
-                            : ctx_.ui.edge.mEdgeHoveredColor);
+                            : ctx_.ui.edge.mEdgeNormalHoveredColor);
     painter->setPen(p);
     painter->setBrush(Qt::NoBrush);
     painter->drawPath(mPath);
@@ -77,8 +77,12 @@ void Edge::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
   {
     QPen p;
     p.setWidth(ctx_.ui.edge.mEdgeLineWidth);
-    p.setColor(isSelected() ? ctx_.ui.edge.mEdgeSelectedColor
-                            : ctx_.ui.edge.mEdgeNormalColor);
+    if (src_.size() > 1) {
+      p.setColor(ctx_.ui.edge.mEdgeErrorColor);
+    } else {
+      p.setColor(isSelected() ? ctx_.ui.edge.mEdgeSelectedColor
+                              : ctx_.ui.edge.mEdgeNormalColor);
+    }
     painter->setPen(p);
     painter->setBrush(Qt::NoBrush);
     painter->drawPath(mPath);
@@ -122,16 +126,13 @@ void Edge::updateEdge(const QList<QPointF>& src, const QList<QPointF>& dst) {
   if (src_.size() == 0 || dst_.size() == 0) {
     return;
   }
-  if (src_.size() > 1) {
-    LOG(ERROR) << "Not handled multi src case";
-    return;
-  }
-  auto s = src_[0];
-  for (const auto d : dst_) {
-    mPath.moveTo(s);
-    QPointF c1 = QPointF(s.x(), (s.y() + d.y()) / 2);
-    QPointF c2 = QPointF(d.x(), (s.y() + d.y()) / 2);
-    mPath.cubicTo(c1, c2, d);
+  for (const auto s : src_) {
+    for (const auto d : dst_) {
+      mPath.moveTo(s);
+      QPointF c1 = QPointF(s.x(), (s.y() + d.y()) / 2);
+      QPointF c2 = QPointF(d.x(), (s.y() + d.y()) / 2);
+      mPath.cubicTo(c1, c2, d);
+    }
   }
 
   // update text pos
