@@ -24,7 +24,7 @@ namespace gui {
 namespace graph {
 class Scene;
 class View;
-}
+}  // namespace graph
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -35,11 +35,14 @@ class MainWindow : public QMainWindow {
 
  private:
   void InitWindow();
+  void setTitleFile(QString path = "");
 
  private:
   graph::View* view_ = nullptr;
   graph::Scene* scene_ = nullptr;
   Actions actions_;
+
+  QString file_path_;
 
   friend class Actions;
 };

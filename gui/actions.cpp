@@ -51,14 +51,23 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
     act->setShortcut(QKeySequence("Ctrl+o"));
   }
   {
+    auto act = addAction(menu_file, "Save", [&]() {
+      act_file_save_a_callback(parent_->file_path_);
+    });
+    act->setStatusTip("Save this onnx file");
+    act->setShortcut(QKeySequence("Ctrl+s"));
+  }
+  {
     auto act =
         addAction(menu_file, "Save as", [&]() { act_file_save_a_callback(); });
     act->setStatusTip("Save this onnx file as new file");
     act->setShortcut(QKeySequence("Ctrl+e"));
   }
   {
-    auto act =
-        addAction(menu_file, "Close", [&]() { parent_->scene_->clear(); });
+    auto act = addAction(menu_file, "Close", [&]() {
+      parent_->scene_->clear();
+      parent_->setTitleFile();
+    });
     act->setStatusTip("Close this file");
     act->setShortcut(QKeySequence("Ctrl+w"));
   }
@@ -140,15 +149,24 @@ void Actions::act_file_open_callback() {
   }
   if (!parent_->view_->loadFile(fileName)) {
     parent_->view_->closeFile();
+    parent_->setTitleFile();
+  } else {
+    parent_->setTitleFile(fileName);
   }
 }
 
-void Actions::act_file_save_a_callback() {
-  LOG(INFO) << "act_file_save_a_callback";
-  QString fileName = QFileDialog::getSaveFileName(parent_, "save onnx file",
-                                                  "/", tr("*.onnx"));
+void Actions::act_file_save_a_callback(QString fileName) {
+  LOG(INFO) << "act_file_save_a_callback: " << fileName.toStdString();
+  if (fileName.size() == 0) {
+    fileName = QFileDialog::getSaveFileName(parent_, "save onnx file", "/",
+                                            tr("*.onnx"));
+  }
   if (fileName.isEmpty()) {
     return;
+  }
+  if (!parent_->view_->saveFile(fileName, true)) {
+    QMessageBox::critical(parent_, tr("Save Error"), tr("save failed"),
+                          QMessageBox::Ok);
   }
 }
 

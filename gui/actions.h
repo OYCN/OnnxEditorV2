@@ -39,7 +39,7 @@ class Actions : public QObject {
 
  private slots:
   void act_file_open_callback();
-  void act_file_save_a_callback();
+  void act_file_save_a_callback(QString fileName = "");
 
   void act_node_summary_dialog_exec_callback();
   void act_io_summary_dialog_exec_callback();

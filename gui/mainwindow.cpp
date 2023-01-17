@@ -28,14 +28,25 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), actions_(this) {
 
   auto args = QCoreApplication::arguments();
   if (args.size() == 2) {
-    view_->loadFile(args[1]);
+    if (view_->loadFile(args[1])) {
+      setTitleFile(args[1]);
+    }
   }
 }
 
 void MainWindow::InitWindow() {
   this->resize(QSize(800, 600));
   setWindowIcon(QIcon(":/img/appicon.ico"));
-  setWindowTitle("OnnxEditor");
+  setTitleFile();
+}
+
+void MainWindow::setTitleFile(QString path) {
+  file_path_ = path;
+  if (path.size() != 0) {
+    setWindowTitle(QString("OnnxEditor(%1)").arg(path));
+  } else {
+    setWindowTitle("OnnxEditor");
+  }
 }
 
 }  // namespace gui
