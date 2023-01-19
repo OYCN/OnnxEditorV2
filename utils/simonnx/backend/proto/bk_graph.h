@@ -56,6 +56,11 @@ class ProtoBackendGraph : public ::utils::simonnx::backend::IBackendGraph {
 
  public:
   GraphProtoPtr getHandle() { return handle_; }
+  bool remove_node_sp(IBackendNode* ptr);
+  bool remove_input_sp(IBackendValueInfo* ptr);
+  bool remove_output_sp(IBackendValueInfo* ptr);
+  bool remove_initializer_sp(IBackendTensor* ptr);
+  bool remove_value_info_sp(IBackendValueInfo* ptr);
 
  private:
   void initVar();

@@ -55,7 +55,8 @@ bool ProtoBackendTensor::destroy() {
   LOG(INFO) << "delete TensorProtoPtr";
   if (graph_parent_ != nullptr) {
     auto inits = graph_parent_->getHandle()->mutable_initializer();
-    if (delFromRepeatProto(inits, handle_)) {
+    if (delFromRepeatProto(inits, handle_) &&
+        graph_parent_->remove_initializer_sp(this)) {
       handle_ = nullptr;
       LOG(INFO) << "delete Tensor from graph success";
       return true;

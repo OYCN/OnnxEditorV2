@@ -103,16 +103,7 @@ SBackendNode ProtoBackendGraph::add_node() {
 }
 bool ProtoBackendGraph::del_node(SBackendNode node) {
   CHECK_HANDLE_DEL(false);
-  if (node->destroy()) {
-    for (size_t i = 0; i < node_.size(); i++) {
-      if (node_[i].get() == node.get()) {
-        std::swap(node_[i], node_.back());
-        node_.pop_back();
-        return true;
-      }
-    }
-  }
-  return false;
+  return node->destroy();
 }
 const std::vector<SBackendValueInfo>& ProtoBackendGraph::input() const {
   CHECK_HANDLE_DEL(input_);
@@ -126,16 +117,7 @@ SBackendValueInfo ProtoBackendGraph::add_input() {
 }
 bool ProtoBackendGraph::del_input(SBackendValueInfo input) {
   CHECK_HANDLE_DEL(false);
-  if (input->destroy()) {
-    for (size_t i = 0; i < input_.size(); i++) {
-      if (input_[i].get() == input.get()) {
-        std::swap(input_[i], input_.back());
-        input_.pop_back();
-        return true;
-      }
-    }
-  }
-  return false;
+  return input->destroy();
 }
 const std::vector<SBackendValueInfo>& ProtoBackendGraph::output() const {
   CHECK_HANDLE_DEL(output_);
@@ -149,16 +131,7 @@ SBackendValueInfo ProtoBackendGraph::add_output() {
 }
 bool ProtoBackendGraph::del_output(SBackendValueInfo output) {
   CHECK_HANDLE_DEL(false);
-  if (output->destroy()) {
-    for (size_t i = 0; i < output_.size(); i++) {
-      if (output_[i].get() == output.get()) {
-        std::swap(output_[i], output_.back());
-        output_.pop_back();
-        return true;
-      }
-    }
-  }
-  return false;
+  return output->destroy();
 }
 const std::vector<SBackendTensor>& ProtoBackendGraph::initializer() const {
   CHECK_HANDLE_DEL(init_);
@@ -172,16 +145,7 @@ SBackendTensor ProtoBackendGraph::add_initializer() {
 }
 bool ProtoBackendGraph::del_initializer(SBackendTensor tensor) {
   CHECK_HANDLE_DEL(false);
-  if (tensor->destroy()) {
-    for (size_t i = 0; i < init_.size(); i++) {
-      if (init_[i].get() == tensor.get()) {
-        std::swap(init_[i], init_.back());
-        init_.pop_back();
-        return true;
-      }
-    }
-  }
-  return false;
+  return tensor->destroy();
 }
 const std::vector<SBackendValueInfo>& ProtoBackendGraph::value_info() const {
   CHECK_HANDLE_DEL(value_info_);
@@ -195,13 +159,55 @@ SBackendValueInfo ProtoBackendGraph::add_value_info() {
 }
 bool ProtoBackendGraph::del_value_info(SBackendValueInfo value_info) {
   CHECK_HANDLE_DEL(false);
-  if (value_info->destroy()) {
-    for (size_t i = 0; i < value_info_.size(); i++) {
-      if (value_info_[i].get() == value_info.get()) {
-        std::swap(value_info_[i], value_info_.back());
-        value_info_.pop_back();
-        return true;
-      }
+  return value_info->destroy();
+}
+
+bool ProtoBackendGraph::remove_node_sp(IBackendNode* ptr) {
+  for (size_t i = 0; i < node_.size(); i++) {
+    if (node_[i].get() == ptr) {
+      std::swap(node_[i], node_.back());
+      node_.pop_back();
+      return true;
+    }
+  }
+  return false;
+}
+bool ProtoBackendGraph::remove_input_sp(IBackendValueInfo* ptr) {
+  for (size_t i = 0; i < input_.size(); i++) {
+    if (input_[i].get() == ptr) {
+      std::swap(input_[i], input_.back());
+      input_.pop_back();
+      return true;
+    }
+  }
+  return false;
+}
+bool ProtoBackendGraph::remove_output_sp(IBackendValueInfo* ptr) {
+  for (size_t i = 0; i < output_.size(); i++) {
+    if (output_[i].get() == ptr) {
+      std::swap(output_[i], output_.back());
+      output_.pop_back();
+      return true;
+    }
+  }
+  return false;
+}
+bool ProtoBackendGraph::remove_initializer_sp(IBackendTensor* ptr) {
+  for (size_t i = 0; i < init_.size(); i++) {
+    if (init_[i].get() == ptr) {
+      std::swap(init_[i], init_.back());
+      init_.pop_back();
+      return true;
+    }
+  }
+  return false;
+}
+bool ProtoBackendGraph::remove_value_info_sp(IBackendValueInfo* ptr) {
+  for (size_t i = 0; i < value_info_.size(); i++) {
+    if (value_info_[i].get() == ptr) {
+      std::swap(value_info_[i], value_info_.back());
+      value_info_.pop_back();
+      return true;
     }
   }
   return false;
