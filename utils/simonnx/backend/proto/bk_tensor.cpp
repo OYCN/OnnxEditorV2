@@ -19,11 +19,29 @@
 
 #include "utils/simonnx/backend/proto/bk_graph.h"
 #include "utils/simonnx/backend/proto/helper.h"
-
 namespace utils {
 namespace simonnx {
 namespace backend {
 namespace proto {
+
+std::string getType(const TensorProtoPtr handle) {
+  std::string ret;
+  if (!handle->has_data_type()) {
+    return ret;
+  }
+  auto data_type = handle->data_type();
+  CHECK(ONNX_NAMESPACE::TensorProto::DataType_IsValid(data_type));
+  auto t = static_cast<ONNX_NAMESPACE::TensorProto::DataType>(data_type);
+  return ONNX_NAMESPACE::TensorProto::DataType_Name(t);
+}
+std::vector<int64_t> getDim(const TensorProtoPtr handle) {
+  // TODO(oPluss): impl
+  return {};
+}
+Buff getData(const TensorProtoPtr handle) {
+  // TODO(oPluss): impl
+  return {};
+}
 
 ProtoBackendTensor::ProtoBackendTensor(ProtoBackendGraph* parent,
                                        TensorProtoPtr handle)
@@ -65,14 +83,7 @@ bool ProtoBackendTensor::set_name(const std::string& name) {
 }
 std::string ProtoBackendTensor::type() const {
   CHECK_HANDLE_DEL("");
-  std::string ret;
-  if (!handle_->has_data_type()) {
-    return ret;
-  }
-  auto data_type = handle_->data_type();
-  CHECK(ONNX_NAMESPACE::TensorProto::DataType_IsValid(data_type));
-  auto t = static_cast<ONNX_NAMESPACE::TensorProto::DataType>(data_type);
-  return ONNX_NAMESPACE::TensorProto::DataType_Name(t);
+  return getType(handle_);
 }
 bool ProtoBackendTensor::set_type(const std::string& type) {
   CHECK_HANDLE_DEL(false);
@@ -85,28 +96,50 @@ bool ProtoBackendTensor::set_type(const std::string& type) {
 }
 std::vector<int64_t> ProtoBackendTensor::dim() const {
   CHECK_HANDLE_DEL({});
-  // TODO(oPluss): impl
-  return {};
+  return getDim(handle_);
 }
 bool ProtoBackendTensor::set_dim(const std::vector<int64_t>& dim) {
   CHECK_HANDLE_DEL(false);
   // TODO(oPluss): impl
   return false;
 }
-void* ProtoBackendTensor::data() const {
-  CHECK_HANDLE_DEL(nullptr);
+Buff ProtoBackendTensor::data() const {
+  CHECK_HANDLE_DEL({});
   // TODO(oPluss): impl
-  return nullptr;
+  return {};
 }
-size_t ProtoBackendTensor::data_size() const {
-  CHECK_HANDLE_DEL(0);
-  // TODO(oPluss): impl
-  return 0;
-}
-bool ProtoBackendTensor::set_data(void* ptr, size_t len) {
+bool ProtoBackendTensor::set_data(Buff buff) {
   CHECK_HANDLE_DEL(false);
   // TODO(oPluss): impl
   return false;
+}
+
+TmpTensor::TmpTensor(const TensorProtoPtr handle) {
+  name_ = handle->name();
+  type_ = getType(handle);
+  dim_ = getDim(handle);
+  buff_ = getData(handle);
+}
+bool TmpTensor::destroy() { return false; }
+std::string TmpTensor::name() const { return name_; }
+bool TmpTensor::set_name(const std::string& name) {
+  name_ = name;
+  return true;
+}
+std::string TmpTensor::type() const { return type_; }
+bool TmpTensor::set_type(const std::string& type) {
+  type_ = type;
+  return true;
+}
+std::vector<int64_t> TmpTensor::dim() const { return dim_; }
+bool TmpTensor::set_dim(const std::vector<int64_t>& dim) {
+  dim_ = dim;
+  return true;
+}
+Buff TmpTensor::data() const { return buff_; }
+bool TmpTensor::set_data(Buff buff) {
+  buff_ = buff;
+  return true;
 }
 
 }  // namespace proto

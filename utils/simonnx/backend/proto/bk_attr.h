@@ -45,17 +45,27 @@ class ProtoBackendAttribute
   bool set_f(float v) override;
   std::string s() const override;
   bool set_s(std::string s) override;
+  SBackendTensor t() const override;
+  bool set_t(SBackendTensor t) override;
   std::vector<int> ints() const override;
   bool set_ints(std::vector<int> vs) override;
   std::vector<float> floats() const override;
   bool set_floats(std::vector<float> vs) override;
+  std::vector<std::string> strings() const override;
+  bool set_strings(std::vector<std::string> vs) override;
+  std::vector<SBackendTensor> tensors() const override;
+  bool set_tensors(std::vector<SBackendTensor> vs) override;
 
  public:
   AttributeProtoPtr getHandle() { return handle_; }
 
  private:
+  void initVar();
+
+ private:
   ProtoBackendNode* parent_;
   AttributeProtoPtr handle_;
+  std::vector<SBackendTensor> tensor_sptr_;
 };
 
 }  // namespace proto

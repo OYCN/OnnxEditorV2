@@ -18,6 +18,7 @@
 #include <onnx/onnx_pb.h>
 
 #include "utils/simonnx/backend/proto/bk_node.h"
+#include "utils/simonnx/backend/proto/bk_tensor.h"
 #include "utils/simonnx/backend/proto/helper.h"
 
 #define CHECK_IS_DT(dt)                           \
@@ -54,6 +55,7 @@
     if (SET_TYPE(dt)) {                          \
       CHECK(CHECK_IS_DT(dt));                    \
       handle_->set_##op(v);                      \
+      initVar();                                 \
       return true;                               \
     } else {                                     \
       return false;                              \
@@ -79,6 +81,7 @@
       for (auto v : vs) {                         \
         *eles->Add() = v;                         \
       }                                           \
+      initVar();                                  \
       return true;                                \
     } else {                                      \
       return false;                               \
@@ -89,6 +92,14 @@ namespace utils {
 namespace simonnx {
 namespace backend {
 namespace proto {
+
+bool syncTensor(IBackendTensor* dst, const IBackendTensor* src) {
+  dst->set_name(src->name());
+  dst->set_type(src->type());
+  dst->set_dim(src->dim());
+  dst->set_data(src->data());
+  return true;
+}
 
 bool clear_by_dt(AttributeProtoPtr handle,
                  ONNX_NAMESPACE::AttributeProto_AttributeType dt) {
@@ -132,15 +143,32 @@ bool setType(AttributeProtoPtr handle,
   return true;
 }
 
+void ProtoBackendAttribute::initVar() {
+  tensor_sptr_.clear();
+  auto t = type();
+  if (t == "TENSOR") {
+    tensor_sptr_.emplace_back(
+        std::make_shared<ProtoBackendTensor>(this, handle_->mutable_t()));
+  } else if (t == "TENSORS") {
+    auto eles = handle_->mutable_tensors();
+    for (size_t i = 0; i < eles->size(); i++) {
+      tensor_sptr_.emplace_back(new TmpTensor(eles->Mutable(i)));
+    }
+  }
+}
+
 ProtoBackendAttribute::ProtoBackendAttribute(ProtoBackendNode* parent,
                                              AttributeProtoPtr handle)
-    : parent_(parent), handle_(handle) {}
+    : parent_(parent), handle_(handle) {
+  initVar();
+}
 
 bool ProtoBackendAttribute::destroy() {
   VLOG(1) << "delete NodeProtoPtr";
   auto attrs = parent_->getHandle()->mutable_attribute();
   if (delFromRepeatProto(attrs, handle_)) {
     handle_ = nullptr;
+    tensor_sptr_.clear();
     LOG(INFO) << "delete Attr success";
     return true;
   } else {
@@ -198,9 +226,54 @@ std::string ProtoBackendAttribute::type() const {
 DEF_METHORD_ELE(INT, i, int, 0);
 DEF_METHORD_ELE(FLOAT, f, float, 0.0);
 DEF_METHORD_ELE(STRING, s, std::string, "");
+SBackendTensor ProtoBackendAttribute::t() const {
+  if (CHECK_HAS_DT(TENSOR, t)) {
+    CHECK_EQ(tensor_sptr_.size(), 1);
+    return tensor_sptr_[0];
+  } else {
+    return nullptr;
+  }
+}
+bool ProtoBackendAttribute::set_t(SBackendTensor v) {
+  if (SET_TYPE(TENSOR)) {
+    CHECK(CHECK_IS_DT(TENSOR));
+    auto t = ProtoBackendTensor(this, handle_->mutable_t());
+    initVar();
+    return syncTensor(&t, v.get());
+  } else {
+    return false;
+  }
+}
 
 DEF_METHORD_ELES(INTS, ints, std::vector<int>);
 DEF_METHORD_ELES(FLOATS, floats, std::vector<float>);
+DEF_METHORD_ELES(STRINGS, strings, std::vector<std::string>);
+std::vector<SBackendTensor> ProtoBackendAttribute::tensors() const {
+  return tensor_sptr_;
+}
+bool ProtoBackendAttribute::set_tensors(std::vector<SBackendTensor> vs) {
+  if (SET_TYPE(TENSORS)) {
+    CHECK(CHECK_IS_DT(TENSORS));
+    // copy input to tmp memory
+    std::vector<TmpTensor> tmp_vs;
+    for (auto v : vs) {
+      tmp_vs.emplace_back();
+      syncTensor(&tmp_vs.back(), v.get());
+    }
+    CHECK_EQ(vs.size(), tmp_vs.size());
+    auto eles = handle_->mutable_tensors();
+    eles->Clear();
+    bool ret = true;
+    for (auto tv : tmp_vs) {
+      auto t = ProtoBackendTensor(this, eles->Add());
+      ret = syncTensor(&t, &tv) && ret;
+    }
+    initVar();
+    return ret;
+  } else {
+    return false;
+  }
+}
 
 }  // namespace proto
 }  // namespace backend
