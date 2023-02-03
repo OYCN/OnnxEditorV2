@@ -294,9 +294,15 @@ void Node::refresh() {
     this->setVisible(true);
   }
 
+  bool if_display_op_type =
+      ctx_.display.node.op_type &&
+      !ctx_.display.node.only_display_name.contains(op_type);
+  bool if_display_name = ctx_.display.node.name ||
+                         ctx_.display.node.only_display_name.contains(op_type);
+
   // op_type
   Display_t op_type_display;
-  if (ctx_.display.node.op_type) {
+  if (if_display_op_type) {
     if (ctx_.display.node.redirect_op_type.contains(op_type)) {
       op_type = ctx_.display.node.redirect_op_type[op_type];
     }
@@ -311,7 +317,7 @@ void Node::refresh() {
 
   // name
   Display_t name_display;
-  if (ctx_.display.node.name) {
+  if (if_display_name) {
     name_display.txt = QString::fromStdString(handle_->getName());
     name_display.font = QFont(ctx_.ui.node.mFont);
     name_display.font.setBold(false);
@@ -322,11 +328,11 @@ void Node::refresh() {
     name_display.txt_rect = QRectF(0, 0, name_rect.width(), name_rect.height());
   }
 
-  if (ctx_.display.node.op_type && !ctx_.display.node.name) {
+  if (if_display_op_type && !if_display_name) {
     setToolTip(QString::fromStdString(handle_->getName()));
-  } else if (!ctx_.display.node.op_type && ctx_.display.node.name) {
+  } else if (!if_display_op_type && if_display_name) {
     setToolTip(QString::fromStdString(handle_->getOpType()));
-  } else if (!ctx_.display.node.op_type && !ctx_.display.node.name) {
+  } else if (!if_display_op_type && !if_display_name) {
     setToolTip(QString::fromStdString(handle_->getOpType()) + "\n" +
                QString::fromStdString(handle_->getName()));
   } else {
@@ -403,7 +409,7 @@ void Node::refresh() {
   // reset txt_rect and border_rect
   {
     qreal off = ctx_.ui.node.mPadTitleT;
-    if (ctx_.display.node.op_type) {
+    if (if_display_op_type) {
       op_type_display.txt_rect.translate(ctx_.ui.node.mPadOpTypeL,
                                          off + ctx_.ui.node.mPadOpTypeT);
       off = 0;
@@ -415,7 +421,7 @@ void Node::refresh() {
       op_type_display.flag = Qt::AlignCenter;
       display_.append(op_type_display);
     }
-    if (ctx_.display.node.name) {
+    if (if_display_name) {
       name_display.txt_rect.translate(
           ctx_.ui.node.mPadNameL,
           off + op_type_display.border_rect.bottom() + ctx_.ui.node.mPadNameT);

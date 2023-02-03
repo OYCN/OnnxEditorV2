@@ -31,7 +31,8 @@ struct Display {
 
   // for node
   struct Node {
-    QSet<QString> hidden_op_type = {"::initializer::"};
+    QSet<QString> hidden_op_type = {"::initializer::", "Constant"};
+    QSet<QString> only_display_name = {"::input::", "::output::"};
     QMap<QString, QString> redirect_op_type = {{"::input::", "Input"},
                                                {"::output::", "Output"}};
     bool name = false;

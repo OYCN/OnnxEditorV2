@@ -32,7 +32,7 @@ View::View(QWidget *parent) : QGraphicsView{parent}, ctx_(this) {
   setDragMode(QGraphicsView::ScrollHandDrag);
   setRenderHint(QPainter::Antialiasing);
 
-  setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  // setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
   setTransformationAnchor(QGraphicsView::AnchorUnderMouse);

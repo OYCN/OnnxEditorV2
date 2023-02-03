@@ -18,6 +18,14 @@
 >
 > Please save it frequently to prevent lost your modifications due to program FATAL
 
+# Keyboard Shortcuts
+
+ - `ctl - s`: save file
+ - `ctl - w`: close file
+ - `ctl - e`: save as
+ - `del` or `backspace`: delete nodes
+ - `shift` + `mouse left pressed move`: select nodes
+
 # Support List
 
  - [x] Edit input/output
@@ -27,6 +35,7 @@
    - [x] Edit `name` & `op_type` & `input` & `output`
    - [x] Add & Remove
    - [x] Edit & Add & Remove `attribute`
+     - [ ] Edit Tensor Object
  - [ ] Built-in script
    - [ ] About Dims
      - [ ] Set BatchSize for All Node/Value
