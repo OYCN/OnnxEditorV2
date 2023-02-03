@@ -70,11 +70,8 @@ PKG_CMD="
     cp ./script/_run_safe.sh ${PKG_DIR}/run.sh &&
     # cp /ws/gui/res/fonts/*.ttf ${PKG_DIR}/lib/fonts &&
     cp ${BUILD_DIR}/main ${PKG_DIR}/bin/ &&
-    cp /qt/lib/*.so* ${PKG_DIR}/lib &&
-    cp /qt/plugins/platforms/*.so* ${PKG_DIR}/lib/qtplugin &&
-    cp /graphviz/lib/*.so* ${PKG_DIR}/lib &&
-    cp /graphviz/lib/graphviz/*.so* ${PKG_DIR}/lib &&
-    cp /glog/lib/*.so* ${PKG_DIR}/lib
+    ./script/collect_safe.sh ${BUILD_DIR}/main ${PKG_DIR}/lib &&
+    cp /qt/plugins/platforms/*.so* ${PKG_DIR}/lib/qtplugin
 "
 
 if [[ -n ${PKG_DIR} ]]

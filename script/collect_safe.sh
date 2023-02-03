@@ -16,7 +16,14 @@ fi
 
 export LD_LIBRARY_PATH=/qt/lib:/graphviz/lib:/graphviz/lib/graphviz:/glog/lib:${LD_LIBRARY_PATH}
 
+SEARCH_LIST=$( ls /qt/plugins/platforms/*.so* )
+
 deps=$( ldd $1 | awk '{if (match($3,"/")){ print $3}}' )
+
+for s in ${SEARCH_LIST[*]}
+do
+  deps+=($( ldd ${s} | awk '{if (match($3,"/")){ print $3}}' ))
+done
 
 echo "bin file: $1"
 echo "target dir: $2"
