@@ -39,7 +39,7 @@ ProtoBackendNode::ProtoBackendNode(ProtoBackendGraph* parent,
 bool ProtoBackendNode::destroy() {
   VLOG(1) << "delete NodeProtoPtr";
   auto nodes = parent_->getHandle()->mutable_node();
-  if (delFromRepeatProto(nodes, handle_)) {
+  if (delFromRepeatProto(nodes, handle_) && parent_->remove_node_sp(this)) {
     handle_ = nullptr;
     attr_.clear();
     LOG(INFO) << "delete Node success";

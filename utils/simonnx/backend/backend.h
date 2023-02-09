@@ -32,6 +32,7 @@ class IBackendValueInfo;
 class IBackendTensor;
 class IBackendAttribute;
 
+using Buff = std::vector<std::byte>;
 using SBackendCtx = std::shared_ptr<IBackendCtx>;
 using SBackendGraph = std::shared_ptr<IBackendGraph>;
 using SBackendNode = std::shared_ptr<IBackendNode>;
@@ -115,9 +116,8 @@ class IBackendTensor {
   virtual bool set_type(const std::string& type) = 0;
   virtual std::vector<int64_t> dim() const = 0;
   virtual bool set_dim(const std::vector<int64_t>& dim) = 0;
-  virtual void* data() const = 0;
-  virtual size_t data_size() const = 0;
-  virtual bool set_data(void* ptr, size_t len) = 0;
+  virtual Buff data() const = 0;
+  virtual bool set_data(Buff buff) = 0;
 };
 
 class IBackendAttribute {
@@ -132,10 +132,16 @@ class IBackendAttribute {
   virtual bool set_f(float v) = 0;
   virtual std::string s() const = 0;
   virtual bool set_s(std::string s) = 0;
+  virtual SBackendTensor t() const = 0;
+  virtual bool set_t(SBackendTensor t) = 0;
   virtual std::vector<int> ints() const = 0;
   virtual bool set_ints(std::vector<int> vs) = 0;
   virtual std::vector<float> floats() const = 0;
   virtual bool set_floats(std::vector<float> vs) = 0;
+  virtual std::vector<std::string> strings() const = 0;
+  virtual bool set_strings(std::vector<std::string> vs) = 0;
+  virtual std::vector<SBackendTensor> tensors() const = 0;
+  virtual bool set_tensors(std::vector<SBackendTensor> vs) = 0;
 };
 
 }  // namespace backend

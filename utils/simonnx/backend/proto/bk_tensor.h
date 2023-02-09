@@ -44,9 +44,8 @@ class ProtoBackendTensor : public ::utils::simonnx::backend::IBackendTensor {
   bool set_type(const std::string& type) override;
   std::vector<int64_t> dim() const override;
   bool set_dim(const std::vector<int64_t>& dim) override;
-  void* data() const override;
-  size_t data_size() const override;
-  bool set_data(void* ptr, size_t len) override;
+  Buff data() const override;
+  bool set_data(Buff buff) override;
 
  public:
   TensorProtoPtr getHandle() { return handle_; }
@@ -55,6 +54,28 @@ class ProtoBackendTensor : public ::utils::simonnx::backend::IBackendTensor {
   ProtoBackendGraph* graph_parent_;
   ProtoBackendAttribute* attr_parent_;
   TensorProtoPtr handle_;
+};
+
+class TmpTensor : public ::utils::simonnx::backend::IBackendTensor {
+ public:
+  TmpTensor() = default;
+  explicit TmpTensor(const TensorProtoPtr handle);
+  bool destroy() override;
+
+  std::string name() const override;
+  bool set_name(const std::string& name) override;
+  std::string type() const override;
+  bool set_type(const std::string& type) override;
+  std::vector<int64_t> dim() const override;
+  bool set_dim(const std::vector<int64_t>& dim) override;
+  Buff data() const override;
+  bool set_data(Buff buff) override;
+
+ private:
+  std::string name_;
+  std::vector<int64_t> dim_;
+  Buff buff_;
+  std::string type_;
 };
 
 }  // namespace proto

@@ -33,8 +33,10 @@ bool ProtoBackendValueInfo::destroy() {
   auto ins = parent_->getHandle()->mutable_input();
   auto outs = parent_->getHandle()->mutable_output();
   auto vals = parent_->getHandle()->mutable_value_info();
-  if (delFromRepeatProto(ins, handle_) || delFromRepeatProto(outs, handle_) ||
-      delFromRepeatProto(vals, handle_)) {
+  if ((delFromRepeatProto(ins, handle_) && parent_->remove_input_sp(this)) ||
+      (delFromRepeatProto(outs, handle_) && parent_->remove_output_sp(this)) ||
+      (delFromRepeatProto(vals, handle_) &&
+       parent_->remove_value_info_sp(this))) {
     handle_ = nullptr;
     LOG(INFO) << "delete ValueInfo success";
     return true;
