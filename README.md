@@ -18,6 +18,10 @@
 >
 > Please save it frequently to prevent lost your modifications due to program FATAL
 
+# Latest Release Download
+
+[Linux](https://github.com/OYCN/OnnxEditorV2/releases/latest/download/OnnxEditor-x86_64.AppImage)
+
 # Keyboard Shortcuts
 
  - `ctl - s`: save file
