@@ -273,6 +273,7 @@ bool SimOnnxCtx::applyDeletedObj() {
       }
     }
   }
+  obj_del_ctx_.clear();
   return true;
 }
 
