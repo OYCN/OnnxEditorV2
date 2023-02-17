@@ -17,6 +17,7 @@
 #include <glog/logging.h>
 
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QMenuBar>
 #include <QMessageBox>
 
@@ -158,7 +159,14 @@ void Actions::act_file_open_callback() {
 void Actions::act_file_save_a_callback(QString fileName) {
   LOG(INFO) << "act_file_save_a_callback: " << fileName.toStdString();
   if (fileName.size() == 0) {
-    fileName = QFileDialog::getSaveFileName(parent_, "save onnx file", "/",
+    QString path = "/";
+    if (parent_->file_path_.size() != 0) {
+      auto abs_dir = QFileInfo(parent_->file_path_).absoluteDir();
+      if (abs_dir.exists()) {
+        path = abs_dir.path();
+      }
+    }
+    fileName = QFileDialog::getSaveFileName(parent_, "save onnx file", path,
                                             tr("*.onnx"));
   }
   if (fileName.isEmpty()) {
