@@ -20,11 +20,14 @@
 #include <string>
 #include <vector>
 
+#include "utils/algorithm/parse.h"
 #include "utils/simonnx/backend/backend.h"
 #include "utils/simonnx/object.h"
 
 namespace utils {
 namespace simonnx {
+
+using DimStr = utils::algorithm::parse::DimStr;
 
 using TensorObjBase = Object<ObjType_t::kTensor>;
 using SBackendTensor = backend::SBackendTensor;
@@ -43,8 +46,12 @@ class TensorObj : public TensorObjBase {
  public:
   explicit TensorObj(SimOnnxCtx* ctx) : TensorObjBase(ctx) {}
   virtual ~TensorObj() {}
-  virtual std::string getName() = 0;
+  virtual std::string getName() const = 0;
   virtual bool setName(std::string name) { return false; }
+  virtual DimStr getDim() const = 0;
+  virtual bool setShape(std::vector<int64_t> shape) { return false; }
+  virtual std::string getDataType() const = 0;
+  virtual bool setDataType(const std::string& datatype) { return false; }
 };
 
 using TensorHandle = utils::simonnx::TensorObj*;
@@ -55,7 +62,9 @@ class FakeTensorObj : public TensorObj {
       : TensorObj(ctx), faked_(args) {
     setAttr("setName", "false");
   }
-  std::string getName() override { return faked_.fake_name; }
+  std::string getName() const override { return faked_.fake_name; }
+  DimStr getDim() const override { return DimStr({}); }
+  std::string getDataType() const { return ""; }
   bool destroyHandle() override { return true; }
 
  private:
@@ -68,8 +77,10 @@ class InitTensorObj : public TensorObj {
       : TensorObj(ctx), handle_(handle) {
     setAttr("setName", "false");
   }
-  std::string getName() override;
+  std::string getName() const override;
   // bool setName(std::string name) override;
+  DimStr getDim() const override;
+  std::string getDataType() const override;
   bool destroyHandle() override;
 
  private:
@@ -82,8 +93,10 @@ class ValueTensorObj : public TensorObj {
       : TensorObj(ctx), handle_(handle) {
     setAttr("setName", "false");
   }
-  std::string getName() override;
+  std::string getName() const override;
   // bool setName(std::string name) override;
+  DimStr getDim() const override;
+  std::string getDataType() const override;
   bool destroyHandle() override;
 
  private:

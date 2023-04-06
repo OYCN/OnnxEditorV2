@@ -19,6 +19,7 @@
 
 #include <charconv>
 #include <cstdint>
+#include <initializer_list>
 #include <regex>  // NOLINT
 #include <sstream>
 #include <string>
@@ -40,6 +41,8 @@ class ArrayStr {
   using Str_t = std::string;
 
  public:
+  explicit ArrayStr(std::initializer_list<_T> array)
+      : ArrayStr(Array_t(array)) {}
   explicit ArrayStr(Array_t array) : dim_(array) {
     str_ = ArrayStr::Array2Str(dim_);
   }

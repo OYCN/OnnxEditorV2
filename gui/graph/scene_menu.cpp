@@ -78,7 +78,30 @@ void SceneMenu::slot_new_input() {
   QString name;
   QString type;
   QList<int64_t> dim;
-  IOSummary d("input node", &name, &type, &dim, scene_->gui_ctx_.top_widget);
+  IOSummary d(
+      "input node", &name, &type, &dim, scene_->gui_ctx_.top_widget,
+      [&](QString n) {
+        if (scene_->edges_.contains(n)) {
+          auto e = scene_->edges_[n];
+          CHECK_NOTNULL(e);
+          if (!e->getDeleted()) {
+            return e->getDim();
+          }
+        }
+        VLOG(1) << "Tensor dim not found: " << n.toStdString();
+        return QList<int64_t>();
+      },
+      [&](QString n) {
+        if (scene_->edges_.contains(n)) {
+          auto e = scene_->edges_[n];
+          CHECK_NOTNULL(e);
+          if (!e->getDeleted()) {
+            return e->getDataType();
+          }
+        }
+        VLOG(1) << "Tensor type not found: " << n.toStdString();
+        return QString();
+      });
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
     auto handle = scene_->graph_ctx_->CreateNewIOObj(
@@ -102,7 +125,30 @@ void SceneMenu::slot_new_output() {
   QString name;
   QString type;
   QList<int64_t> dim;
-  IOSummary d("output node", &name, &type, &dim, scene_->gui_ctx_.top_widget);
+  IOSummary d(
+      "output node", &name, &type, &dim, scene_->gui_ctx_.top_widget,
+      [&](QString n) {
+        if (scene_->edges_.contains(n)) {
+          auto e = scene_->edges_[n];
+          CHECK_NOTNULL(e);
+          if (!e->getDeleted()) {
+            return e->getDim();
+          }
+        }
+        VLOG(1) << "Tensor dim not found: " << n.toStdString();
+        return QList<int64_t>();
+      },
+      [&](QString n) {
+        if (scene_->edges_.contains(n)) {
+          auto e = scene_->edges_[n];
+          CHECK_NOTNULL(e);
+          if (!e->getDeleted()) {
+            return e->getDataType();
+          }
+        }
+        VLOG(1) << "Tensor type not found: " << n.toStdString();
+        return QString();
+      });
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
     auto handle = scene_->graph_ctx_->CreateNewIOObj(
