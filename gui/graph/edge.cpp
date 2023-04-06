@@ -150,6 +150,14 @@ QString Edge::getName() const {
   return QString::fromStdString(handle_->getName());
 }
 
+QList<int64_t> Edge::getDim() const {
+  auto dim = handle_->getDim().getArray();
+  return QList<int64_t>(dim.begin(), dim.end());
+}
+QString Edge::getDataType() const {
+  return QString::fromStdString(handle_->getDataType());
+}
+
 void Edge::setDeleted(bool del) {
   LOG(ERROR) << "edge is not deletable";
   // if (del != getDeleted()) {

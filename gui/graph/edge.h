@@ -33,12 +33,12 @@ class Edge : public GraphItemBase {
   void bind(TensorHandle handle);
   void updateEdge(const QList<QPointF>& src, const QList<QPointF>& dst);
   QString getName() const;
+  QList<int64_t> getDim() const;
+  QString getDataType() const;
 
   void setDeleted(bool del) override;
   bool getDeleted() const override;
-  GraphItemType getItemType() const override {
-    return GraphItemType::kEdge;
-  }
+  GraphItemType getItemType() const override { return GraphItemType::kEdge; }
 
  protected:
   QRectF boundingRect() const override;

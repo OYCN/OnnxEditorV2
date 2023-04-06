@@ -30,19 +30,23 @@ TensorObj* TensorObj::Create(SimOnnxCtx* ctx, SBackendValueInfo handle) {
   return new ValueTensorObj(ctx, handle);
 }
 
-std::string InitTensorObj::getName() { return handle_->name(); }
+std::string InitTensorObj::getName() const { return handle_->name(); }
 // bool InitTensorObj::setName(std::string name) {
 //   handle_->set_name(name);
 //   return true;
 // }
+DimStr InitTensorObj::getDim() const { return DimStr(handle_->dim()); }
+std::string InitTensorObj::getDataType() const { return handle_->type(); }
 
 bool InitTensorObj::destroyHandle() { return handle_->destroy(); }
 
-std::string ValueTensorObj::getName() { return handle_->name(); }
+std::string ValueTensorObj::getName() const { return handle_->name(); }
 // bool ValueTensorObj::setName(std::string name) {
 //   handle_->set_name(name);
 //   return true;
 // }
+DimStr ValueTensorObj::getDim() const { return DimStr(handle_->dim()); }
+std::string ValueTensorObj::getDataType() const { return handle_->type(); }
 
 bool ValueTensorObj::destroyHandle() { return handle_->destroy(); }
 

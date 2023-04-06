@@ -56,15 +56,9 @@ Node* Scene::addNode(NodeHandle handle) {
   node_inputs_[n] = QSet<QString>(inputs.begin(), inputs.end());
   node_outputs_[n] = QSet<QString>(outputs.begin(), outputs.end());
   for (const auto& v : n->getInputs()) {
-    if (!edges_.contains(v)) {
-      addEdge(v);
-    }
     edge_dst_[v].insert(n);
   }
   for (const auto& v : n->getOutputs()) {
-    if (!edges_.contains(v)) {
-      addEdge(v);
-    }
     edge_src_[v].insert(n);
   }
   update();
@@ -335,6 +329,16 @@ void Scene::loadGraph() {
 
   // auto create remainder edge
   for (auto e_name : edge_src_.keys()) {
+    if (!edges_.contains(e_name)) {
+      CHECK_NOTNULL(addEdge(e_name));
+    }
+  }
+  for (auto e_name : edge_src_.keys()) {
+    if (!edges_.contains(e_name)) {
+      CHECK_NOTNULL(addEdge(e_name));
+    }
+  }
+  for (auto e_name : edge_dst_.keys()) {
     if (!edges_.contains(e_name)) {
       CHECK_NOTNULL(addEdge(e_name));
     }

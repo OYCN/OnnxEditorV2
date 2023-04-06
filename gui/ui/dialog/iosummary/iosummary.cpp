@@ -40,8 +40,16 @@ bool valid(QString str) {
 }
 
 IOSummary::IOSummary(const QString& label, QString* name, QString* type,
-                     QList<int64_t>* dim, QWidget* parent)
-    : QDialog(parent), ui(new Ui::IOSummary), name(name), type(type), dim(dim) {
+                     QList<int64_t>* dim, QWidget* parent,
+                     std::function<QList<int64_t>(QString)> name2dim_callback,
+                     std::function<QString(QString)> name2type_callback)
+    : QDialog(parent),
+      ui(new Ui::IOSummary),
+      name(name),
+      type(type),
+      dim(dim),
+      name2dim_callback(name2dim_callback),
+      name2type_callback(name2type_callback) {
   ui->setupUi(this);
   ui->label->setText(label);
   ui->label->adjustSize();
@@ -73,6 +81,10 @@ IOSummary::IOSummary(const QString& label, QString* name, QString* type,
   ui->type_edit->setCurrentIndex(idx);
   connect(ui->buttonBox, &QDialogButtonBox::accepted, this,
           &IOSummary::buttonAcceptedSlot);
+  connect(ui->name_edit, &QLineEdit::textChanged, this,
+          &IOSummary::name2DimSlot);
+  connect(ui->name_edit, &QLineEdit::textChanged, this,
+          &IOSummary::name2TypeSlot);
   connect(ui->dim_edit, &QLineEdit::textChanged, this,
           &IOSummary::dimCheckSlot);
   dimCheckSlot();
@@ -80,6 +92,37 @@ IOSummary::IOSummary(const QString& label, QString* name, QString* type,
 
 IOSummary::~IOSummary() { delete ui; }
 
+void IOSummary::name2DimSlot() {
+  if (name2dim_callback == nullptr) {
+    return;
+  }
+  auto n = ui->name_edit->text();
+  auto dim = name2dim_callback(n);
+  if (dim.size() != 0) {
+    ui->dim_edit->setText(dim2str(dim));
+    LOG(INFO) << "set dim to " << ui->dim_edit->text().toStdString();
+    return;
+  }
+  LOG(INFO) << "dim is empty, skip: " << n.toStdString();
+}
+void IOSummary::name2TypeSlot() {
+  if (name2type_callback == nullptr) {
+    return;
+  }
+  auto n = ui->name_edit->text();
+  auto type = name2type_callback(n);
+  if (type.size() != 0) {
+    auto idx = ui->type_edit->findText(type);
+    if (idx == -1) {
+      LOG(ERROR) << "unknow type: " << type.toStdString();
+      return;
+    }
+    ui->type_edit->setCurrentIndex(idx);
+    LOG(INFO) << "set type to " << ui->type_edit->currentText().toStdString();
+    return;
+  }
+  LOG(INFO) << "type is empty, skip: " << n.toStdString();
+}
 void IOSummary::dimCheckSlot() {
   auto b = ui->buttonBox->button(QDialogButtonBox::Ok);
   if (b != nullptr) {

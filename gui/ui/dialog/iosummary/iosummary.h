@@ -17,6 +17,7 @@
 
 #include <QDialog>
 #include <QList>
+#include <functional>
 
 namespace Ui {
 class IOSummary;
@@ -26,11 +27,16 @@ class IOSummary : public QDialog {
   Q_OBJECT
 
  public:
-  explicit IOSummary(const QString& label, QString* name, QString* type,
-                     QList<int64_t>* dim, QWidget* parent = nullptr);
+  explicit IOSummary(
+      const QString& label, QString* name, QString* type, QList<int64_t>* dim,
+      QWidget* parent = nullptr,
+      std::function<QList<int64_t>(QString)> name2dim_callback = nullptr,
+      std::function<QString(QString)> name2type_callback = nullptr);
   ~IOSummary();
 
  public slots:
+  void name2DimSlot();
+  void name2TypeSlot();
   void dimCheckSlot();
   void buttonAcceptedSlot();
 
@@ -40,6 +46,8 @@ class IOSummary : public QDialog {
   QString* name;
   QString* type;
   QList<int64_t>* dim;
+  std::function<QList<int64_t>(QString)> name2dim_callback;
+  std::function<QString(QString)> name2type_callback;
 };
 
 #endif  // GUI_UI_DIALOG_IOSUMMARY_IOSUMMARY_H_
