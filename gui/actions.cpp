@@ -112,6 +112,17 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
             [&]() { act_node_summary_dialog_exec_callback(); });
   addAction(menu_debug_ui, "IO Summary Dialog",
             [&]() { act_io_summary_dialog_exec_callback(); });
+  addAction(menu_debug_ui, "Focus on first valid node", [&]() {
+    auto& nodes = parent_->scene_->getNodes();
+    for (const auto& n : nodes) {
+      if (n->isVisible() && !n->getDeleted()) {
+        parent_->view_->focusOn(n);
+        return;
+      }
+    }
+    QMessageBox::critical(parent_, tr("Find Error"), tr("Valid node not found"),
+                          QMessageBox::Ok);
+  });
 
   addAction(menu_debug_graph, "Random Graph",
             [&]() { act_random_graph_callback(); });

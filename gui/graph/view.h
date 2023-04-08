@@ -46,6 +46,7 @@ class View : public QGraphicsView {
   void centertop();
   const Context& getCtx() const { return ctx_; }
   Scene* getScene();
+  void focusOn(GraphItemBase* item, bool clean = true);
 
  public Q_SLOTS:  // NOLINT
   void scaleUp();

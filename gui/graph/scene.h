@@ -49,6 +49,7 @@ class Scene : public QGraphicsScene {
   QPair<QRectF, QPointF> layout();
   void dump(QString path);
   void clear();
+  const QList<Node*>& getNodes() const { return nodes_; }
 
   void loadGraph();
   SimOnnxCtx* getGraph() { return graph_ctx_; }
