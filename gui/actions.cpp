@@ -34,11 +34,13 @@ namespace gui {
 
 Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
   auto menu_file = addMenu("File");
+  auto menu_edit = addMenu("Edit");
   auto menu_debug = addMenu("Debug");
   auto menu_debug_ui = addMenu("ui", menu_debug);
   auto menu_debug_graph = addMenu("graph", menu_debug);
   auto menu_debug_graph_dump = addMenu("dump", menu_debug_graph);
 
+  // File
   {
     auto act =
         addAction(menu_file, "New File", [&]() { parent_->scene_->clear(); });
@@ -71,6 +73,39 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
     });
     act->setStatusTip("Close this file");
     act->setShortcut(QKeySequence("Ctrl+w"));
+  }
+  // Edit
+  {
+    auto act = addAction(menu_edit, "Find", [&]() {
+      QMessageBox::critical(parent_, tr("NotImpl Error"),
+                            tr("Find is not implemented"), QMessageBox::Ok);
+    });
+    act->setStatusTip("Find node or edge");
+    act->setShortcut(QKeySequence("Ctrl+f"));
+  }
+  {
+    auto act = addAction(menu_edit, "Copy", [&]() {
+      QMessageBox::critical(parent_, tr("NotImpl Error"),
+                            tr("Copy is not implemented"), QMessageBox::Ok);
+    });
+    act->setStatusTip("Copy nodes");
+    act->setShortcut(QKeySequence("Ctrl+c"));
+  }
+  {
+    auto act = addAction(menu_edit, "Paste", [&]() {
+      QMessageBox::critical(parent_, tr("NotImpl Error"),
+                            tr("Paste is not implemented"), QMessageBox::Ok);
+    });
+    act->setStatusTip("Paste nodes");
+    act->setShortcut(QKeySequence("Ctrl+v"));
+  }
+  {
+    auto act = addAction(menu_edit, "Undo", [&]() {
+      QMessageBox::critical(parent_, tr("NotImpl Error"),
+                            tr("Undo is not implemented"), QMessageBox::Ok);
+    });
+    act->setStatusTip("Undo edit");
+    act->setShortcut(QKeySequence("Ctrl+z"));
   }
 
   addAction(menu_debug_ui, "Node Summary Dialog",

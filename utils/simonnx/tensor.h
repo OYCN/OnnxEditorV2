@@ -64,7 +64,7 @@ class FakeTensorObj : public TensorObj {
   }
   std::string getName() const override { return faked_.fake_name; }
   DimStr getDim() const override { return DimStr({}); }
-  std::string getDataType() const { return ""; }
+  std::string getDataType() const override { return ""; }
   bool destroyHandle() override { return true; }
 
  private:

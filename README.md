@@ -57,8 +57,12 @@
  # build in ./build
  # ccache save to ./ccache
  ./script/build_static_in_docker.sh 
+ # (OPT) or build and copy file to ./release
+ ./script/build_static_in_docker.sh --pkg ./release
  # run
  ./build/main
+ # (OPT) pkg to appimg
+ ./script/appimg.sh ./release
  ```
  
  ## On macos:
