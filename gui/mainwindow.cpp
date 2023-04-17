@@ -34,6 +34,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), actions_(this) {
   }
 }
 
+MainWindow::~MainWindow() {
+  if (view_) {
+    delete view_;
+  }
+}
+
 void MainWindow::InitWindow() {
   this->resize(QSize(800, 600));
   setWindowIcon(QIcon(":/img/appicon.ico"));
