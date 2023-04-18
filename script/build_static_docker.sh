@@ -2,26 +2,26 @@
 
 set -e
 
-CODE_DIR=$(cd "$(dirname "${0}")/../"; pwd)
+CODE_DIR=$(
+  cd "$(dirname "${0}")/../"
+  pwd
+)
 
 cd ${CODE_DIR}
 
 DOCKER_PREFIX="opluss/onnxeditor-3rd"
 
-build_docker_as () {
-  if [[ -z ${1} ]]
-  then
+build_docker_as() {
+  if [[ -z ${1} ]]; then
     echo "script needed with args[1] miss"
     exit 1
   fi
-  if [[ -z ${2} ]]
-  then
+  if [[ -z ${2} ]]; then
     BASE_IMG="${DOCKER_PREFIX}:base"
   else
     BASE_IMG="${2}"
   fi
-  if [[ -z ${3} ]]
-  then
+  if [[ -z ${3} ]]; then
     DOCKER_FILE="${CODE_DIR}/docker/static/3rd.DockerFile"
   else
     DOCKER_FILE="${3}"

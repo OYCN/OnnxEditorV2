@@ -2,7 +2,10 @@
 
 set -e
 
-CODE_DIR=$(cd "$(dirname "${0}")/../"; pwd)
+CODE_DIR=$(
+  cd "$(dirname "${0}")/../"
+  pwd
+)
 
 BUILD_DIR=${BUILD_DIR:-"${CODE_DIR}/build"}
 BUILD_TYPE=${BUILD_TYPE:-"Debug"}
@@ -11,8 +14,7 @@ CCACHE_MAX_SIZE=${CCACHE_MAX_SIZE:-"2G"}
 
 cd ${CODE_DIR}
 
-if [[ -n ${CCACHE_DIR} ]]
-then
+if [[ -n ${CCACHE_DIR} ]]; then
   CCACHE_DIR=$(readlink -f ${CCACHE_DIR})
   echo "ccache dir: ${CCACHE_DIR}"
   ccache --set-config cache_dir="${CCACHE_DIR}"
@@ -38,8 +40,7 @@ cmake -GNinja -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -S . -B ${BUILD_DIR} \
 
 cmake --build ${BUILD_DIR}
 
-if [[ -n ${CCACHE_DIR} ]]
-then
+if [[ -n ${CCACHE_DIR} ]]; then
   ccache -s
   ccache -x 2>/dev/null || true
   ccache -z

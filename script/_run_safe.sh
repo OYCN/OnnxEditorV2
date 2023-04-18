@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -z "$APPDIR" ] ; then
+if [ -z "$APPDIR" ]; then
   APPDIR="$(dirname "$(readlink -f "${0}")")"
 fi
 
