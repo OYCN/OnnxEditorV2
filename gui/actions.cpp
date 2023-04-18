@@ -77,8 +77,11 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
   // Edit
   {
     auto act = addAction(menu_edit, "Find", [&]() {
-      QMessageBox::critical(parent_, tr("NotImpl Error"),
-                            tr("Find is not implemented"), QMessageBox::Ok);
+      if (parent_->find_siderbar_->isVisible()) {
+        parent_->find_siderbar_->setVisible(false);
+      } else {
+        parent_->find_siderbar_->setVisible(true);
+      }
     });
     act->setStatusTip("Find node or edge");
     act->setShortcut(QKeySequence("Ctrl+f"));
