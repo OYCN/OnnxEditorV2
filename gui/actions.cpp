@@ -77,8 +77,11 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
   // Edit
   {
     auto act = addAction(menu_edit, "Find", [&]() {
-      QMessageBox::critical(parent_, tr("NotImpl Error"),
-                            tr("Find is not implemented"), QMessageBox::Ok);
+      if (parent_->find_siderbar_->isVisible()) {
+        parent_->find_siderbar_->setVisible(false);
+      } else {
+        parent_->find_siderbar_->setVisible(true);
+      }
     });
     act->setStatusTip("Find node or edge");
     act->setShortcut(QKeySequence("Ctrl+f"));
@@ -112,6 +115,17 @@ Actions::Actions(MainWindow* parent) : parent_(parent), QObject(parent) {
             [&]() { act_node_summary_dialog_exec_callback(); });
   addAction(menu_debug_ui, "IO Summary Dialog",
             [&]() { act_io_summary_dialog_exec_callback(); });
+  addAction(menu_debug_ui, "Focus on first valid node", [&]() {
+    auto& nodes = parent_->scene_->getNodes();
+    for (const auto& n : nodes) {
+      if (n->isVisible() && !n->getDeleted()) {
+        parent_->view_->focusOn(n);
+        return;
+      }
+    }
+    QMessageBox::critical(parent_, tr("Find Error"), tr("Valid node not found"),
+                          QMessageBox::Ok);
+  });
 
   addAction(menu_debug_graph, "Random Graph",
             [&]() { act_random_graph_callback(); });

@@ -15,15 +15,28 @@
 #include "gui/mainwindow.h"
 
 #include <QCoreApplication>
+#include <QHBoxLayout>
 
 #include "gui/graph/view.h"
+#include "gui/ui/sidebar/findsidebar/findsidebar.h"
 
 namespace gui {
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), actions_(this) {
-  view_ = new graph::View(this);
+  wrapper_widget_ = new QWidget(this);
+
+  view_ = new graph::View(wrapper_widget_);
   scene_ = view_->getScene();
-  this->setCentralWidget(view_);
+  find_siderbar_ = new FindSidebar(scene_, view_, wrapper_widget_);
+
+  QHBoxLayout *layout = new QHBoxLayout(wrapper_widget_);
+  layout->addWidget(view_);
+  layout->addWidget(find_siderbar_);
+
+  wrapper_widget_->setLayout(layout);
+
+  this->setCentralWidget(wrapper_widget_);
+
   InitWindow();
 
   auto args = QCoreApplication::arguments();

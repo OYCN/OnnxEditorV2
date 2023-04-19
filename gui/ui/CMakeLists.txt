@@ -3,6 +3,8 @@ add_library(ui STATIC
     dialog/nodesummary/nodesummary.ui
     dialog/iosummary/iosummary.cpp
     dialog/iosummary/iosummary.ui
+    sidebar/findsidebar/findsidebar.cpp
+    sidebar/findsidebar/findsidebar.ui
 )
 
 target_link_libraries(ui

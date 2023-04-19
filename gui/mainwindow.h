@@ -18,6 +18,7 @@
 #include <QMainWindow>
 
 #include "gui/actions.h"
+#include "gui/ui/sidebar/findsidebar/findsidebar.h"
 
 namespace gui {
 
@@ -38,6 +39,8 @@ class MainWindow : public QMainWindow {
   void setTitleFile(QString path = "");
 
  private:
+  QWidget* wrapper_widget_ = nullptr;
+  FindSidebar* find_siderbar_ = nullptr;
   graph::View* view_ = nullptr;
   graph::Scene* scene_ = nullptr;
   Actions actions_;

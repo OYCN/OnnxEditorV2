@@ -276,5 +276,19 @@ void View::centertop() {
   update();
 }
 
+void View::focusOn(GraphItemBase *item, bool clean) {
+  if (clean) {
+    scene_->clearSelection();
+  }
+  CHECK_NOTNULL(item);
+  // now edge is not selectable
+  if (item->getItemType() != GraphItemType::kNode || item->getDeleted()) {
+    return;
+  }
+  centerOn(item);
+  item->setSelected(true);
+  scene_->setFocusItem(item, Qt::MenuBarFocusReason);
+}
+
 }  // namespace graph
 }  // namespace gui
