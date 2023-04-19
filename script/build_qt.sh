@@ -2,12 +2,15 @@
 
 set -e
 
-CODE_DIR=$(cd "$(dirname "${0}")/../"; pwd)
+CODE_DIR=$(
+    cd "$(dirname "${0}")/../"
+    pwd
+)
 
-gcc --version    | head -1
-cmake --version  | head -1
+gcc --version | head -1
+cmake --version | head -1
 echo "Ninja $(ninja --version)"
-{ ninja --help || true ; } 2>&1 | grep "run N jobs in parallel"
+{ ninja --help || true; } 2>&1 | grep "run N jobs in parallel"
 
 QT_DIR=${QT_DIR:-"${CODE_DIR}/3rd_party/qtbase"}
 QT_TMP=${QT_TMP:-"${CODE_DIR}/build_qt"}
@@ -31,16 +34,16 @@ ${QT_DIR}/configure \
     -nomake examples \
     -prefix ${QT_DST} \
     ${@}
-    # -xcb \
-    # -system-sqlite \
-    # -system-pcre \
-    # -system-zlib \
-    # -system-freetype \
-    # -system-libpng \
-    # -system-libjpeg \
-    # -system-harfbuzz \
-    # -system-libb2 \
-    # -system-doubleconversion
-    # -system-libmd4c # C markdown parser
+# -xcb \
+# -system-sqlite \
+# -system-pcre \
+# -system-zlib \
+# -system-freetype \
+# -system-libpng \
+# -system-libjpeg \
+# -system-harfbuzz \
+# -system-libb2 \
+# -system-doubleconversion
+# -system-libmd4c # C markdown parser
 
 ninja install
