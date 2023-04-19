@@ -46,8 +46,9 @@
      - [ ] Shape Inference (By ONNX)
    - [ ] Check whether the node/graph is correct
  - [ ] Functional
-   - [ ] Search Node
+   - [x] Search Node
    - [ ] Switch Node display (`name` or `op_type`)
+   - [ ] UI beautification
  
  # Build
  

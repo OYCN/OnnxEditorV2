@@ -1,0 +1,11 @@
+repos:
+-   repo: local
+    hooks:
+    -   id: check-cpplint
+        name: cpplint
+        entry: bash ./script/check.sh
+        language: system
+    -   id: check-clang-format
+        name: clang-format
+        entry: bash ./script/clang_format_change.sh
+        language: system
