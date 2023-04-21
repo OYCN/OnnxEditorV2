@@ -18,21 +18,6 @@
 #include <QPushButton>
 
 #include "gui/ui/dialog/iosummary/ui_iosummary.h"
-#include "utils/algorithm/parse.h"
-
-using DimStr = utils::algorithm::parse::DimStr;
-
-QString dim2str(QList<int64_t> dim) {
-  std::vector<int64_t> d(dim.begin(), dim.end());
-  auto str = DimStr::Array2Str(d);
-  return QString::fromStdString(str);
-}
-
-QList<int64_t> str2dim(QString str) {
-  std::string s = str.toStdString();
-  auto dim = DimStr::Str2Array(s);
-  return {dim.begin(), dim.end()};
-}
 
 bool valid(QString str) {
   std::string s = str.toStdString();
@@ -40,8 +25,8 @@ bool valid(QString str) {
 }
 
 IOSummary::IOSummary(const QString& label, QString* name, QString* type,
-                     QList<int64_t>* dim, QWidget* parent,
-                     std::function<QList<int64_t>(QString)> name2dim_callback,
+                     DimStr* dim, QWidget* parent,
+                     std::function<DimStr(QString)> name2dim_callback,
                      std::function<QString(QString)> name2type_callback)
     : QDialog(parent),
       ui(new Ui::IOSummary),
@@ -54,7 +39,7 @@ IOSummary::IOSummary(const QString& label, QString* name, QString* type,
   ui->label->setText(label);
   ui->label->adjustSize();
   ui->name_edit->setText(*name);
-  ui->dim_edit->setText(dim2str(*dim));
+  ui->dim_edit->setText(QString::fromStdString(dim->getStr()));
   ui->type_edit->clear();
   QStringList strList;
   strList << "FLOAT"
@@ -98,8 +83,8 @@ void IOSummary::name2DimSlot() {
   }
   auto n = ui->name_edit->text();
   auto dim = name2dim_callback(n);
-  if (dim.size() != 0) {
-    ui->dim_edit->setText(dim2str(dim));
+  if (dim.getArray().size() != 0) {
+    ui->dim_edit->setText(QString::fromStdString(dim.getStr()));
     LOG(INFO) << "set dim to " << ui->dim_edit->text().toStdString();
     return;
   }
@@ -133,5 +118,5 @@ void IOSummary::dimCheckSlot() {
 void IOSummary::buttonAcceptedSlot() {
   *name = ui->name_edit->text();
   *type = ui->type_edit->currentText();
-  *dim = str2dim(ui->dim_edit->text());
+  *dim = DimStr(ui->dim_edit->text().toStdString());
 }

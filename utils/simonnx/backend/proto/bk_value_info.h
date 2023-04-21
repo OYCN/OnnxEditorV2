@@ -41,8 +41,8 @@ class ProtoBackendValueInfo
   bool set_name(const std::string& name) override;
   std::string type() const override;
   bool set_type(const std::string& type) override;
-  std::vector<int64_t> dim() const override;
-  bool set_dim(const std::vector<int64_t>& dim) override;
+  std::vector<DimVal> dim() const override;
+  bool set_dim(const std::vector<DimVal>& dim) override;
 
  public:
   ValueInfoProtoPtr getHandle() { return handle_; }

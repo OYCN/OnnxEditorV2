@@ -42,8 +42,8 @@ class ProtoBackendTensor : public ::utils::simonnx::backend::IBackendTensor {
   bool set_name(const std::string& name) override;
   std::string type() const override;
   bool set_type(const std::string& type) override;
-  std::vector<int64_t> dim() const override;
-  bool set_dim(const std::vector<int64_t>& dim) override;
+  std::vector<DimVal> dim() const override;
+  bool set_dim(const std::vector<DimVal>& dim) override;
   Buff data() const override;
   bool set_data(Buff buff) override;
 
@@ -66,14 +66,14 @@ class TmpTensor : public ::utils::simonnx::backend::IBackendTensor {
   bool set_name(const std::string& name) override;
   std::string type() const override;
   bool set_type(const std::string& type) override;
-  std::vector<int64_t> dim() const override;
-  bool set_dim(const std::vector<int64_t>& dim) override;
+  std::vector<DimVal> dim() const override;
+  bool set_dim(const std::vector<DimVal>& dim) override;
   Buff data() const override;
   bool set_data(Buff buff) override;
 
  private:
   std::string name_;
-  std::vector<int64_t> dim_;
+  std::vector<DimVal> dim_;
   Buff buff_;
   std::string type_;
 };

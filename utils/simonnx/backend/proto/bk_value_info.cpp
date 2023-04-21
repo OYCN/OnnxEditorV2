@@ -83,9 +83,9 @@ bool ProtoBackendValueInfo::set_type(const std::string& type) {
   handle_->mutable_type()->mutable_tensor_type()->set_elem_type(dt);
   return true;
 }
-std::vector<int64_t> ProtoBackendValueInfo::dim() const {
+std::vector<DimVal> ProtoBackendValueInfo::dim() const {
   CHECK_HANDLE_DEL({});
-  std::vector<int64_t> ret;
+  std::vector<DimVal> ret;
   if (!handle_->has_type()) {
     return ret;
   }
@@ -100,13 +100,20 @@ std::vector<int64_t> ProtoBackendValueInfo::dim() const {
   auto& shape = tensor_type.shape();
   auto& dims = shape.dim();
   for (auto& dim : dims) {
-    CHECK_EQ(ONNX_NAMESPACE::TensorShapeProto::Dimension::kDimValue,
-             dim.value_case());
-    ret.emplace_back(dim.dim_value());
+    switch (dim.value_case()) {
+      case ONNX_NAMESPACE::TensorShapeProto::Dimension::kDimValue:
+        ret.emplace_back(dim.dim_value());
+        break;
+      case ONNX_NAMESPACE::TensorShapeProto::Dimension::kDimParam:
+        ret.emplace_back(dim.dim_param());
+        break;
+      default:
+        LOG(FATAL) << "Unsupport dim type: " << dim.value_case();
+    }
   }
   return ret;
 }
-bool ProtoBackendValueInfo::set_dim(const std::vector<int64_t>& dim) {
+bool ProtoBackendValueInfo::set_dim(const std::vector<DimVal>& dim) {
   CHECK_HANDLE_DEL(false);
   auto type = handle_->mutable_type();
   auto tensor_type = type->mutable_tensor_type();
@@ -115,7 +122,11 @@ bool ProtoBackendValueInfo::set_dim(const std::vector<int64_t>& dim) {
   auto dims = shape->mutable_dim();
   for (auto& in_dim : dim) {
     auto d = dims->Add();
-    d->set_dim_value(in_dim);
+    if (in_dim.isVal()) {
+      d->set_dim_value(in_dim);
+    } else {
+      d->set_dim_param(in_dim);
+    }
   }
   return true;
 }

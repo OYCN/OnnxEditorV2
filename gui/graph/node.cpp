@@ -103,23 +103,21 @@ bool Node::setOutputs(QList<QString> outputs) {
   return handle_->setOutputs(outs);
 }
 
-QList<int64_t> Node::getDim() const {
+DimStr Node::getDim() const {
   if (handle_->getAttr("setDim") == "true") {
     CHECK_EQ(handle_->getAttr("NodeType"), "IONode");
     auto ionode_handle = dynamic_cast<utils::simonnx::IONodeObj *>(handle_);
-    auto dim = ionode_handle->getDim().getArray();
-    return QList(dim.begin(), dim.end());
+    return ionode_handle->getDim();
   } else {
-    return {};
+    return DimStr();
   }
 }
 
-bool Node::setDim(QList<int64_t> dim) {
+bool Node::setDim(DimStr dim) {
   if (handle_->getAttr("setDim") == "true") {
     CHECK_EQ(handle_->getAttr("NodeType"), "IONode");
     auto ionode_handle = dynamic_cast<utils::simonnx::IONodeObj *>(handle_);
-    return ionode_handle->setDim(
-        utils::simonnx::DimStr(std::vector<int64_t>({dim.begin(), dim.end()})));
+    return ionode_handle->setDim(dim);
   } else {
     return false;
   }
@@ -200,7 +198,7 @@ void Node::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) {
   if (handle_->getAttr("NodeType") == "IONode") {
     QString name = getName();
     QString type = getDataType();
-    QList<int64_t> dim = getDim();
+    DimStr dim = getDim();
     IOSummary d("io node", &name, &type, &dim, ctx_.top_widget);
     auto ret = d.exec();
     if (ret == QDialog::Accepted) {
