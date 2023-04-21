@@ -150,9 +150,9 @@ QString Edge::getName() const {
   return QString::fromStdString(handle_->getName());
 }
 
-QList<int64_t> Edge::getDim() const {
-  auto dim = handle_->getDim().getArray();
-  return QList<int64_t>(dim.begin(), dim.end());
+DimStr Edge::getDim() const {
+  VLOG(1) << handle_->getDim().getStr();
+  return handle_->getDim();
 }
 QString Edge::getDataType() const {
   return QString::fromStdString(handle_->getDataType());

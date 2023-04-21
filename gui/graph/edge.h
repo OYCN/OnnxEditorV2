@@ -19,10 +19,13 @@
 
 #include "gui/graph/context.h"
 #include "gui/graph/item.h"
+#include "utils/algorithm/parse.h"
 #include "utils/simonnx/context.h"
 
 namespace gui {
 namespace graph {
+
+using DimStr = utils::algorithm::parse::DimStr;
 
 using TensorHandle = utils::simonnx::TensorHandle;
 
@@ -33,7 +36,7 @@ class Edge : public GraphItemBase {
   void bind(TensorHandle handle);
   void updateEdge(const QList<QPointF>& src, const QList<QPointF>& dst);
   QString getName() const;
-  QList<int64_t> getDim() const;
+  DimStr getDim() const;
   QString getDataType() const;
 
   void setDeleted(bool del) override;

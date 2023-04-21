@@ -24,10 +24,13 @@
 
 #include "gui/graph/context.h"
 #include "gui/graph/item.h"
+#include "utils/algorithm/parse.h"
 #include "utils/simonnx/context.h"
 
 namespace gui {
 namespace graph {
+
+using DimStr = utils::algorithm::parse::DimStr;
 
 using NodeHandle = utils::simonnx::NodeHandle;
 
@@ -47,8 +50,8 @@ class Node : public GraphItemBase {
   bool setInputs(QList<QString> inputs);
   QList<QString> getOutputs() const;
   bool setOutputs(QList<QString> outputs);
-  QList<int64_t> getDim() const;
-  bool setDim(QList<int64_t> dim);
+  DimStr getDim() const;
+  bool setDim(DimStr dim);
   QString getDataType() const;
   bool setDataType(QString type);
   QList<QList<QString>> getAttrs() const;

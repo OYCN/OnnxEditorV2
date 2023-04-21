@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 
+#include "utils/algorithm/parse.h"
+
 namespace utils {
 namespace simonnx {
 namespace backend {
@@ -33,6 +35,7 @@ class IBackendTensor;
 class IBackendAttribute;
 
 using Buff = std::vector<std::byte>;
+using DimVal = utils::algorithm::parse::DimVal;
 using SBackendCtx = std::shared_ptr<IBackendCtx>;
 using SBackendGraph = std::shared_ptr<IBackendGraph>;
 using SBackendNode = std::shared_ptr<IBackendNode>;
@@ -103,8 +106,8 @@ class IBackendValueInfo {
   virtual bool set_name(const std::string& name) = 0;
   virtual std::string type() const = 0;
   virtual bool set_type(const std::string& type) = 0;
-  virtual std::vector<int64_t> dim() const = 0;
-  virtual bool set_dim(const std::vector<int64_t>& dim) = 0;
+  virtual std::vector<DimVal> dim() const = 0;
+  virtual bool set_dim(const std::vector<DimVal>& dim) = 0;
 };
 
 class IBackendTensor {
@@ -114,8 +117,8 @@ class IBackendTensor {
   virtual bool set_name(const std::string& name) = 0;
   virtual std::string type() const = 0;
   virtual bool set_type(const std::string& type) = 0;
-  virtual std::vector<int64_t> dim() const = 0;
-  virtual bool set_dim(const std::vector<int64_t>& dim) = 0;
+  virtual std::vector<DimVal> dim() const = 0;
+  virtual bool set_dim(const std::vector<DimVal>& dim) = 0;
   virtual Buff data() const = 0;
   virtual bool set_data(Buff buff) = 0;
 };

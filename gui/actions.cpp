@@ -259,14 +259,14 @@ void Actions::act_node_summary_dialog_exec_callback() {
 void Actions::act_io_summary_dialog_exec_callback() {
   QString name = "io name";
   QString type = "????";
-  QList<int64_t> dim = {1, 2, 3};
+  DimStr dim({1, 2, 3});
   IOSummary d("io node", &name, &type, &dim, parent_);
   auto ret = d.exec();
   if (ret == QDialog::Accepted) {
     LOG(INFO) << "Accepted:";
     LOG(INFO) << name.toStdString();
     LOG(INFO) << type.toStdString();
-    for (const auto& v : dim) {
+    for (const auto& v : dim.getArray()) {
       LOG(INFO) << v;
     }
   } else {

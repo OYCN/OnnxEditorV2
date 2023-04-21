@@ -34,7 +34,7 @@ std::string getType(const TensorProtoPtr handle) {
   auto t = static_cast<ONNX_NAMESPACE::TensorProto::DataType>(data_type);
   return ONNX_NAMESPACE::TensorProto::DataType_Name(t);
 }
-std::vector<int64_t> getDim(const TensorProtoPtr handle) {
+std::vector<DimVal> getDim(const TensorProtoPtr handle) {
   // TODO(oPluss): impl
   return {};
 }
@@ -95,11 +95,11 @@ bool ProtoBackendTensor::set_type(const std::string& type) {
   handle_->set_data_type(dt);
   return true;
 }
-std::vector<int64_t> ProtoBackendTensor::dim() const {
+std::vector<DimVal> ProtoBackendTensor::dim() const {
   CHECK_HANDLE_DEL({});
   return getDim(handle_);
 }
-bool ProtoBackendTensor::set_dim(const std::vector<int64_t>& dim) {
+bool ProtoBackendTensor::set_dim(const std::vector<DimVal>& dim) {
   CHECK_HANDLE_DEL(false);
   // TODO(oPluss): impl
   return false;
@@ -132,8 +132,8 @@ bool TmpTensor::set_type(const std::string& type) {
   type_ = type;
   return true;
 }
-std::vector<int64_t> TmpTensor::dim() const { return dim_; }
-bool TmpTensor::set_dim(const std::vector<int64_t>& dim) {
+std::vector<DimVal> TmpTensor::dim() const { return dim_; }
+bool TmpTensor::set_dim(const std::vector<DimVal>& dim) {
   dim_ = dim;
   return true;
 }

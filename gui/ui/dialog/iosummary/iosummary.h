@@ -19,6 +19,10 @@
 #include <QList>
 #include <functional>
 
+#include "utils/algorithm/parse.h"
+
+using DimStr = utils::algorithm::parse::DimStr;
+
 namespace Ui {
 class IOSummary;
 }
@@ -28,9 +32,9 @@ class IOSummary : public QDialog {
 
  public:
   explicit IOSummary(
-      const QString& label, QString* name, QString* type, QList<int64_t>* dim,
+      const QString& label, QString* name, QString* type, DimStr* dim,
       QWidget* parent = nullptr,
-      std::function<QList<int64_t>(QString)> name2dim_callback = nullptr,
+      std::function<DimStr(QString)> name2dim_callback = nullptr,
       std::function<QString(QString)> name2type_callback = nullptr);
   ~IOSummary();
 
@@ -45,8 +49,8 @@ class IOSummary : public QDialog {
 
   QString* name;
   QString* type;
-  QList<int64_t>* dim;
-  std::function<QList<int64_t>(QString)> name2dim_callback;
+  DimStr* dim;
+  std::function<DimStr(QString)> name2dim_callback;
   std::function<QString(QString)> name2type_callback;
 };
 

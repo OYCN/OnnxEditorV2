@@ -77,7 +77,7 @@ void SceneMenu::slot_new_node() {
 void SceneMenu::slot_new_input() {
   QString name;
   QString type;
-  QList<int64_t> dim;
+  DimStr dim;
   IOSummary d(
       "input node", &name, &type, &dim, scene_->gui_ctx_.top_widget,
       [&](QString n) {
@@ -89,7 +89,7 @@ void SceneMenu::slot_new_input() {
           }
         }
         VLOG(1) << "Tensor dim not found: " << n.toStdString();
-        return QList<int64_t>();
+        return DimStr();
       },
       [&](QString n) {
         if (scene_->edges_.contains(n)) {
@@ -124,7 +124,7 @@ void SceneMenu::slot_new_input() {
 void SceneMenu::slot_new_output() {
   QString name;
   QString type;
-  QList<int64_t> dim;
+  DimStr dim;
   IOSummary d(
       "output node", &name, &type, &dim, scene_->gui_ctx_.top_widget,
       [&](QString n) {
@@ -136,7 +136,7 @@ void SceneMenu::slot_new_output() {
           }
         }
         VLOG(1) << "Tensor dim not found: " << n.toStdString();
-        return QList<int64_t>();
+        return DimStr();
       },
       [&](QString n) {
         if (scene_->edges_.contains(n)) {

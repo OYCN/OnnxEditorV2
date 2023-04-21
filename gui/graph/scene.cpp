@@ -57,11 +57,18 @@ Node* Scene::addNode(NodeHandle handle) {
   node_outputs_[n] = QSet<QString>(outputs.begin(), outputs.end());
   for (const auto& v : n->getInputs()) {
     edge_dst_[v].insert(n);
+    if (!edges_.contains(v)) {
+      addEdge(v);
+    }
   }
   for (const auto& v : n->getOutputs()) {
     edge_src_[v].insert(n);
+    if (!edges_.contains(v)) {
+      addEdge(v);
+    }
   }
   update();
+  nodeUpdateSlot(n);
 
   return n;
 }
@@ -317,22 +324,18 @@ SimOnnxCtx* Scene::releaseGraph() {
 void Scene::loadGraph() {
   CHECK_NOTNULL(graph_ctx_);
   clear();
-  auto node_handles = graph_ctx_->getObjVec<NodeHandle>();
-  for (auto n : node_handles) {
-    addNode(n);
-  }
 
   auto tensor_handles = graph_ctx_->getObjVec<TensorHandle>();
   for (auto t : tensor_handles) {
     addEdge(t);
   }
 
-  // auto create remainder edge
-  for (auto e_name : edge_src_.keys()) {
-    if (!edges_.contains(e_name)) {
-      CHECK_NOTNULL(addEdge(e_name));
-    }
+  auto node_handles = graph_ctx_->getObjVec<NodeHandle>();
+  for (auto n : node_handles) {
+    addNode(n);
   }
+
+  // auto create remainder edge
   for (auto e_name : edge_src_.keys()) {
     if (!edges_.contains(e_name)) {
       CHECK_NOTNULL(addEdge(e_name));
