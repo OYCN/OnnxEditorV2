@@ -237,6 +237,9 @@ bool SimOnnxCtx::saveOnnx(const std::string path, bool overwrite) {
   if (!applyDeletedObj()) {
     return false;
   }
+  if (!ctxPass(PassType::kAll)) {
+    return false;
+  }
   return bkctx_->saveFile(path, overwrite);
 }
 
