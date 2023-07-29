@@ -2,6 +2,8 @@
 
 ![main workflow](https://github.com/OYCN/OnnxEditorV2/actions/workflows/all.yml/badge.svg)
 
+# We will refactor this project by python: https://github.com/OYCN/OnnxEditorV3
+
 > Developing
 >
 > You can download runable file from release
