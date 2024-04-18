@@ -2,7 +2,7 @@
 
 ![main workflow](https://github.com/OYCN/OnnxEditorV2/actions/workflows/all.yml/badge.svg)
 
-# We will refactor this project by python: https://github.com/OYCN/OnnxEditorV3
+> We will refactor this project by python: https://github.com/OYCN/OnnxEditorV3, but the performance is soo weak
 
 > Developing
 >
